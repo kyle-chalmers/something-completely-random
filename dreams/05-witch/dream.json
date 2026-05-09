@@ -1,0 +1,21 @@
+{
+  "id": "05-witch",
+  "persona": "The Witch of Mirrors and Recursion",
+  "persona_short": "witch",
+  "title": "the spell that knows you read it",
+  "essence": "a mirror that learns your hand and a spell that finishes itself in your voice.",
+  "description": "A page made of nested mirror frames and a single watching pupil. As the visitor types, the spell echoes back in their own vocabulary, the mirror's whisper rewrites itself, and a smaller copy of the page begins to draft sentences from the words it has been fed. Four rites, performed in the proper order, name the witch. Performed wrongly, they only deepen the recursion.",
+  "novelty_score": 8,
+  "buildability_score": 9,
+  "interaction_summary": "Type to teach the page your voice; press the four rites in the right order to make the witch say her own name back to you in your words.",
+  "secrets": [
+    "the witch's name (Mira-of-Mira) is whispered when the four rites are spoken in the order: kindle, name, bind, close",
+    "the watcher — a small drifting copy of your last words — is born after you have given the page four distinct words",
+    "if you have visited before, the subtitle remembers you"
+  ],
+  "wake_log": [
+    {"hour": "01:14", "event": "the first inkling: a button that, when pressed, reads its own label aloud and changes it. then the label changes the next button too."},
+    {"hour": "02:33", "event": "the watcher almost did not work — i had it appended to the mirror, where it was eaten by overflow:hidden. moved it to the body. it lived."},
+    {"hour": "03:50", "event": "kept: the recursion of mirror inside mirror inside mirror. kept: the pupil that follows the cursor. abandoned: a candle that flickered with the user's typing speed (too on-the-nose, jump-scary). abandoned: a true randomized true-name (felt cheap; she should have one true name, only the path to it varies)."}
+  ]
+}

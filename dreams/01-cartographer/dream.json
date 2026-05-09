@@ -1,0 +1,22 @@
+{
+  "id": "01-cartographer",
+  "persona": "The Cartographer of Lost Maps",
+  "persona_short": "cartographer",
+  "title": "here be the unmappable",
+  "essence": "A blank vellum becomes a chart only where your candle has passed; the world remembers itself beneath your gaze.",
+  "description": "A dim plane of nothing. Move a candle-flame compass-rose across it and parchment bleeds into being beneath you — coastlines wobble, rivers run, mountains rise as little chevrons, sea monsters thrash in the marginalia. The blank spaces are kept blank on purpose. Stay long enough, look carefully enough, and the map will sign itself in her hand.",
+  "novelty_score": 9,
+  "buildability_score": 8,
+  "interaction_summary": "Move the cursor; the candlelight reveals a procedurally drawn medieval atlas only where your attention has been.",
+  "secrets": [
+    "Nine cities of fog — only named once revealed; the ninth whispers her aloud",
+    "The leviathan in the south-east — scale 1.8x, drawn very faintly",
+    "A drifting isle in the north that moves a degree per minute",
+    "The cartouche signs itself when ~60% of the chart has been drawn"
+  ],
+  "wake_log": [
+    {"hour": "01:14", "event": "first inkling — the cursor is the candle, the page is dark, the page is the map; revelation through navigation, not display"},
+    {"hour": "02:33", "event": "the alpha-mask reveal nearly broke me. destination-in compositing on a ImageData that I was painting per-frame, with no flicker, on a moving canvas — three dead ends before I let go of trying to do it 'efficiently' and just blitted the whole thing"},
+    {"hour": "03:50", "event": "kept: the wobbly coastline, the leviathan, the drifting isle, the signed cartouche. abandoned: a dragon-as-cursor-trail, a 'tilt the world to scroll' mechanism, parchment edges that burned. simpler is older. older is better."}
+  ]
+}

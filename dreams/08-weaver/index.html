@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>the song the loom remembers · weaver</title>
+<link rel="stylesheet" href="../../style.css" />
+<style>
+  :root {
+    --weave-bg: #1a1520;
+    --weave-bg-deep: #0e0a14;
+    --warp: #d68fb0;
+    --weft: #4a4a7a;
+    --candle: #e8c878;
+    --shadow: #2a1a30;
+    --thread-rose: #d68fb0;
+    --thread-blue: #4a4a7a;
+    --thread-gold: #e8c878;
+    --thread-moss: #7a9a78;
+    --thread-plum: #8a4a6a;
+  }
+
+  html, body {
+    background:
+      radial-gradient(ellipse at 50% 20%, rgba(232,200,120,0.06), transparent 55%),
+      radial-gradient(ellipse at 80% 110%, rgba(214,143,176,0.08), transparent 60%),
+      var(--weave-bg);
+    color: #e8d8c0;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  body {
+    background-image: none;
+    background-color: var(--weave-bg);
+  }
+
+  /* Dusk-warm grain over everything */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background:
+      radial-gradient(ellipse at 50% 30%, rgba(232,200,120,0.05), transparent 60%),
+      radial-gradient(ellipse at 80% 80%, rgba(138,74,106,0.08), transparent 50%);
+  }
+
+  .stage {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    padding: 3.5rem 1rem 1rem;
+  }
+
+  .invocation {
+    text-align: center;
+    margin-bottom: 1rem;
+    max-width: 38rem;
+    color: #b89c8c;
+  }
+  .invocation h1 {
+    font-family: var(--type-display);
+    font-weight: 300;
+    font-style: italic;
+    font-size: clamp(1.6rem, 3.6vw, 2.4rem);
+    margin: 0 0 0.4rem;
+    letter-spacing: 0.06em;
+    color: #e8d4b8;
+  }
+  .invocation p {
+    margin: 0;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: #a08878;
+    letter-spacing: 0.04em;
+  }
+
+  .loom-frame {
+    position: relative;
+    width: min(92vw, 760px);
+    aspect-ratio: 1.18 / 1;
+    margin-top: 0.6rem;
+    border: 1px solid rgba(232,200,120,0.18);
+    background:
+      linear-gradient(180deg, rgba(42,26,48,0.55), rgba(14,10,20,0.85)),
+      repeating-linear-gradient(0deg, rgba(232,200,120,0.03) 0 1px, transparent 1px 7px);
+    box-shadow:
+      0 0 0 1px rgba(214,143,176,0.06) inset,
+      0 30px 80px -30px rgba(214,143,176,0.25),
+      0 0 100px -20px rgba(232,200,120,0.08) inset;
+    overflow: hidden;
+    cursor: crosshair;
+    touch-action: none;
+  }
+
+  /* the wooden frame brace at top & bottom */
+  .loom-frame::before, .loom-frame::after {
+    content: "";
+    position: absolute;
+    left: -2px; right: -2px;
+    height: 12px;
+    background:
+      linear-gradient(180deg, rgba(120,80,50,0.5), rgba(60,40,30,0.7));
+    border-top: 1px solid rgba(232,200,120,0.25);
+    border-bottom: 1px solid rgba(0,0,0,0.5);
+    z-index: 5;
+    pointer-events: none;
+  }
+  .loom-frame::before { top: -1px; }
+  .loom-frame::after  { bottom: -1px; }
+
+  #loom {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .palette {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .thread-pick {
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid rgba(232,200,120,0.18);
+    box-shadow:
+      0 0 0 0 rgba(232,200,120,0);
+      inset 0 0 6px rgba(0,0,0,0.4);
+    transition: transform 250ms ease, box-shadow 250ms ease, border-color 250ms ease;
+    position: relative;
+  }
+  .thread-pick::after {
+    content: attr(data-note);
+    position: absolute;
+    bottom: -1.4rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--type-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    color: rgba(184,156,140,0.6);
+    white-space: nowrap;
+  }
+  .thread-pick:hover { transform: translateY(-2px) scale(1.06); }
+  .thread-pick.active {
+    border-color: var(--candle);
+    box-shadow:
+      0 0 0 2px rgba(232,200,120,0.25),
+      0 0 18px rgba(232,200,120,0.35),
+      inset 0 0 6px rgba(0,0,0,0.4);
+    transform: translateY(-2px) scale(1.08);
+  }
+
+  .controls {
+    margin-top: 1.6rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    font-family: var(--type-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    color: rgba(184,156,140,0.6);
+  }
+  .controls button {
+    background: rgba(0,0,0,0.45);
+    color: rgba(232,200,120,0.8);
+    border: 1px solid rgba(232,200,120,0.2);
+    padding: 0.5rem 0.9rem;
+    font-family: var(--type-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    transition: background 200ms ease, color 200ms ease;
+  }
+  .controls button:hover {
+    background: rgba(232,200,120,0.12);
+    color: var(--candle);
+  }
+  .controls .hint {
+    font-style: italic;
+    text-transform: lowercase;
+    letter-spacing: 0.06em;
+    font-family: var(--type-display);
+    font-size: 0.95rem;
+    color: rgba(214,143,176,0.7);
+  }
+
+  /* the candle indicator — pulses when audio context is alive */
+  .candle {
+    position: fixed;
+    bottom: 1.2rem;
+    left: 1.2rem;
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    background: #4a3a30;
+    box-shadow: 0 0 0 0 rgba(232,200,120,0);
+    transition: background 600ms ease, box-shadow 600ms ease;
+    z-index: 100;
+  }
+  .candle.lit {
+    background: var(--candle);
+    box-shadow: 0 0 12px rgba(232,200,120,0.6), 0 0 30px rgba(232,200,120,0.3);
+    animation: flicker 4s ease-in-out infinite;
+  }
+  @keyframes flicker {
+    0%, 100% { box-shadow: 0 0 12px rgba(232,200,120,0.6), 0 0 30px rgba(232,200,120,0.3); }
+    50%      { box-shadow: 0 0 8px  rgba(232,200,120,0.45), 0 0 22px rgba(232,200,120,0.22); }
+  }
+
+  /* hidden secret reveal — the song sleeve */
+  .sleeve {
+    position: fixed;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    font-family: var(--type-display);
+    font-style: italic;
+    font-size: 0.95rem;
+    color: rgba(232,200,120,0.0);
+    pointer-events: none;
+    transition: color 1800ms ease;
+    text-align: center;
+    letter-spacing: 0.04em;
+  }
+  .sleeve.show { color: rgba(232,200,120,0.8); }
+
+  .wake-log a { color: var(--candle); }
+
+  @media (max-width: 540px) {
+    .invocation h1 { font-size: 1.3rem; }
+    .invocation p  { font-size: 0.85rem; }
+    .palette { gap: 0.45rem; }
+    .thread-pick { width: 2rem; height: 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<a class="return-ribbon" href="../../">← Hall of Reverie</a>
+<button class="wake-log-toggle" onclick="document.querySelector('.wake-log').classList.toggle('open')">📜 wake log</button>
+
+<aside class="wake-log">
+  <h3>The Weaver of Half-Remembered Songs</h3>
+  <p style="font-style:italic;color:var(--hall-ink-dim)">"the pattern remembers what the mouth cannot"</p>
+  <dl>
+    <dt>title</dt><dd>the song the loom remembers</dd>
+    <dt>made</dt><dd>9 may 2026 · the small hours</dd>
+    <dt>essence</dt><dd>A loom where every thread you draw becomes a tone, and the cloth you make is a lullaby you cannot quite recall.</dd>
+    <dt>secrets</dt><dd>the candle on the floor lights when the loom hears you; weave a row of seven different threads and the loom hums back what you wove; press <em>r</em> to set the cloth ringing on its own; press <em>c</em> to fold it away.</dd>
+    <dt>seed</dt><dd>heddle, shuttle, warp, lullaby, drone, the song the loom remembers</dd>
+  </dl>
+</aside>
+
+<div class="stage">
+  <div class="invocation">
+    <h1>the song the loom remembers</h1>
+    <p>drag a thread across the warp. what you weave will sing.</p>
+  </div>
+
+  <div class="loom-frame" id="loomFrame">
+    <canvas id="loom"></canvas>
+  </div>
+
+  <div class="palette" id="palette">
+    <!-- threads injected by JS -->
+  </div>
+
+  <div class="controls">
+    <button id="ringBtn" title="let the cloth ring back what you wove (r)">ring it back</button>
+    <button id="foldBtn" title="fold the cloth away (c)">fold</button>
+    <span class="hint">— hum, don't shout —</span>
+  </div>
+</div>
+
+<div class="candle" id="candle" title="the loom is listening"></div>
+<div class="sleeve" id="sleeve"></div>
+
+<script>
+(() => {
+  // ─────────────────────────────────────────────────────────────────────
+  //  THE LOOM
+  //  threads (warp) hang vertically. the user drags wefts across them,
+  //  laying down little pinned segments. every pinning of a thread
+  //  on the warp produces a soft tone. colour ↔ pitch.
+  // ─────────────────────────────────────────────────────────────────────
+
+  // Custom scale: a hexatonic dusk scale (D minor pentatonic + flat-2 colour)
+  // (D, E♭, F, G, A, C). Soft, slightly nostalgic, a touch unresolved.
+  const SCALE = [
+    { name: "D",   freq: 146.83, color: "#d68fb0", label: "rose"  },  // rose-thread
+    { name: "E♭",  freq: 155.56, color: "#8a4a6a", label: "plum"  },  // bruised plum
+    { name: "F",   freq: 174.61, color: "#4a4a7a", label: "blue"  },  // weft-blue
+    { name: "G",   freq: 196.00, color: "#7a9a78", label: "moss"  },  // moss
+    { name: "A",   freq: 220.00, color: "#e8c878", label: "candle"},  // candlelight
+    { name: "C",   freq: 261.63, color: "#c8a8d8", label: "ash"   },  // pale wisteria
+    { name: "D-h", freq: 293.66, color: "#f0e0c0", label: "linen" },  // linen, an octave up
+  ];
+
+  const palette = document.getElementById("palette");
+  let currentThread = 0;
+
+  SCALE.forEach((t, i) => {
+    const sw = document.createElement("div");
+    sw.className = "thread-pick" + (i === 0 ? " active" : "");
+    sw.style.background = `radial-gradient(circle at 35% 30%, ${lighten(t.color, 0.25)}, ${t.color} 60%, ${darken(t.color, 0.35)} 100%)`;
+    sw.dataset.note = t.label;
+    sw.title = `${t.label} — ${t.name}`;
+    sw.addEventListener("click", () => {
+      currentThread = i;
+      [...palette.children].forEach(c => c.classList.remove("active"));
+      sw.classList.add("active");
+      // little plucked confirmation
+      pluck(t.freq, 0.08, 0.7);
+    });
+    palette.appendChild(sw);
+  });
+
+  function lighten(hex, amt) { return shade(hex, amt); }
+  function darken(hex, amt)  { return shade(hex, -amt); }
+  function shade(hex, amt) {
+    const c = hex.replace("#","");
+    const r = parseInt(c.slice(0,2),16), g = parseInt(c.slice(2,4),16), b = parseInt(c.slice(4,6),16);
+    const f = (v) => Math.max(0, Math.min(255, Math.round(v + amt*255)));
+    return `rgb(${f(r)},${f(g)},${f(b)})`;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  //  CANVAS
+  // ─────────────────────────────────────────────────────────────────────
+  const canvas = document.getElementById("loom");
+  const ctx = canvas.getContext("2d");
+  const frame = document.getElementById("loomFrame");
+
+  // Loom geometry
+  const WARP_COUNT = 28; // vertical threads
+  let W = 0, H = 0, dpr = 1;
+
+  function resize() {
+    const rect = frame.getBoundingClientRect();
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width  = Math.round(rect.width  * dpr);
+    canvas.height = Math.round(rect.height * dpr);
+    canvas.style.width  = rect.width  + "px";
+    canvas.style.height = rect.height + "px";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    W = rect.width;
+    H = rect.height;
+    drawAll();
+  }
+  window.addEventListener("resize", resize);
+
+  function warpX(i) {
+    const margin = W * 0.06;
+    return margin + (W - 2*margin) * (i / (WARP_COUNT - 1));
+  }
+
+  // Pinned wefts: each is a small horizontal segment at (xWarp, y) of color c
+  // We store {warp:i, y, color, freq, t} where t = creation time for shimmer.
+  const wefts = [];
+
+  // For continuous drag: track last warp-index visited so we don't
+  // double-pin the same thread on a single sweep.
+  let dragging = false;
+  let lastPinned = { warp: -1, side: null };
+  let strokeWarpsHit = []; // for "ring it back" memory
+
+  // The fabric memory — last 7 unique threads laid in one breath
+  let breathMemory = [];
+  let breathTimer = null;
+
+  // ─────────────────────────────────────────────────────────────────────
+  //  AUDIO
+  // ─────────────────────────────────────────────────────────────────────
+  let audio = null;
+  let drone = null;
+  let masterGain = null;
+  let convolver = null;
+
+  function ensureAudio() {
+    if (audio) return audio;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    audio = new AC();
+    masterGain = audio.createGain();
+    masterGain.gain.value = 0.55;
+
+    // Soft impulse-response style reverb (small synthesized IR)
+    convolver = audio.createConvolver();
+    convolver.buffer = makeImpulse(audio, 2.6, 2.2);
+    const wet = audio.createGain(); wet.gain.value = 0.35;
+    const dry = audio.createGain(); dry.gain.value = 0.85;
+
+    masterGain.connect(dry).connect(audio.destination);
+    masterGain.connect(convolver).connect(wet).connect(audio.destination);
+
+    // very low drone — the loom's resting hum
+    drone = makeDrone(audio, masterGain, 73.42); // D1
+    document.getElementById("candle").classList.add("lit");
+    return audio;
+  }
+
+  function makeImpulse(ac, duration, decay) {
+    const rate = ac.sampleRate;
+    const len = rate * duration;
+    const ir = ac.createBuffer(2, len, rate);
+    for (let ch = 0; ch < 2; ch++) {
+      const data = ir.getChannelData(ch);
+      for (let i = 0; i < len; i++) {
+        data[i] = (Math.random()*2 - 1) * Math.pow(1 - i/len, decay);
+      }
+    }
+    return ir;
+  }
+
+  function makeDrone(ac, dest, freq) {
+    // two slow detuned sines + LFO breathing
+    const o1 = ac.createOscillator(); o1.type="sine"; o1.frequency.value = freq;
+    const o2 = ac.createOscillator(); o2.type="sine"; o2.frequency.value = freq*1.5; // perfect 5th
+    const o3 = ac.createOscillator(); o3.type="sine"; o3.frequency.value = freq*2.005; // shimmer above
+    const g  = ac.createGain(); g.gain.value = 0.0;
+
+    const lfo = ac.createOscillator(); lfo.type="sine"; lfo.frequency.value = 0.07;
+    const lfoGain = ac.createGain(); lfoGain.gain.value = 0.025;
+    lfo.connect(lfoGain).connect(g.gain);
+
+    [o1,o2,o3].forEach(o => o.connect(g));
+    g.connect(dest);
+
+    // gentle filter
+    const f = ac.createBiquadFilter();
+    f.type = "lowpass";
+    f.frequency.value = 480;
+    f.Q.value = 0.4;
+    g.disconnect();
+    g.connect(f).connect(dest);
+
+    o1.start(); o2.start(); o3.start(); lfo.start();
+    g.gain.linearRampToValueAtTime(0.07, ac.currentTime + 6);
+    return { g, o1, o2, o3, lfo };
+  }
+
+  // pluck — a soft bell/string hybrid: sine + tiny triangle harmonic
+  function pluck(freq, gainPeak = 0.12, dur = 1.6) {
+    if (!audio) ensureAudio();
+    const t = audio.currentTime;
+
+    const osc = audio.createOscillator();
+    osc.type = "sine";
+    osc.frequency.value = freq;
+
+    const harm = audio.createOscillator();
+    harm.type = "triangle";
+    harm.frequency.value = freq * 2.001;
+
+    const harmGain = audio.createGain();
+    harmGain.gain.value = 0.18;
+
+    const g = audio.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(gainPeak, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+
+    // a soft lowpass for that "wool over the bell" quality
+    const filt = audio.createBiquadFilter();
+    filt.type = "lowpass";
+    filt.frequency.setValueAtTime(2400, t);
+    filt.frequency.exponentialRampToValueAtTime(800, t + dur);
+    filt.Q.value = 0.6;
+
+    osc.connect(g);
+    harm.connect(harmGain).connect(g);
+    g.connect(filt).connect(masterGain);
+
+    osc.start(t);
+    harm.start(t);
+    osc.stop(t + dur + 0.05);
+    harm.stop(t + dur + 0.05);
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  //  INTERACTION
+  // ─────────────────────────────────────────────────────────────────────
+
+  function pointerToLocal(e) {
+    const rect = canvas.getBoundingClientRect();
+    const cx = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const cy = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+    return { x: cx, y: cy };
+  }
+
+  function nearestWarp(x) {
+    // Returns warp index closest to x, with a tolerance check
+    let bestI = -1, bestD = Infinity;
+    for (let i = 0; i < WARP_COUNT; i++) {
+      const d = Math.abs(warpX(i) - x);
+      if (d < bestD) { bestD = d; bestI = i; }
+    }
+    // Only count as "crossed" if within half a warp-spacing
+    const spacing = (W * 0.88) / (WARP_COUNT - 1);
+    if (bestD < spacing * 0.55) return bestI;
+    return -1;
+  }
+
+  function pinWeft(warpIdx, y) {
+    const t = SCALE[currentThread];
+    wefts.push({
+      warp: warpIdx,
+      y,
+      color: t.color,
+      freq: t.freq,
+      thread: currentThread,
+      t: performance.now(),
+    });
+    // tone — pitch bent slightly by vertical position so a row sounds level
+    // and a diagonal sweeps in pitch
+    const yNorm = 1 - (y / H); // top = 1, bottom = 0
+    const detune = (yNorm - 0.5) * 80; // ±40 cents
+    const f = t.freq * Math.pow(2, detune / 1200);
+    pluck(f, 0.09 + Math.random()*0.03, 1.6 + Math.random()*0.5);
+
+    strokeWarpsHit.push({ thread: currentThread, freq: f, y });
+    rememberBreath(currentThread);
+    drawAll();
+  }
+
+  function rememberBreath(threadIdx) {
+    breathMemory.push(threadIdx);
+    if (breathMemory.length > 14) breathMemory.shift();
+    // Detect 7-unique-in-a-row
+    const last7 = breathMemory.slice(-7);
+    if (last7.length === 7 && new Set(last7).size === 7) {
+      humBack();
+      breathMemory = [];
+    }
+    clearTimeout(breathTimer);
+    breathTimer = setTimeout(() => { breathMemory = []; }, 4500);
+  }
+
+  function humBack() {
+    // The loom sings back the 7 distinct threads in a soft arpeggio
+    if (!audio) ensureAudio();
+    const order = [0,2,4,1,3,5,6]; // a little melodic shape
+    order.forEach((i, k) => {
+      setTimeout(() => pluck(SCALE[i].freq * 2, 0.12, 2.2), k * 220);
+    });
+    showSleeve("⟨ the loom hums back ⟩");
+  }
+
+  function showSleeve(text) {
+    const s = document.getElementById("sleeve");
+    s.textContent = text;
+    s.classList.add("show");
+    clearTimeout(s._t);
+    s._t = setTimeout(() => s.classList.remove("show"), 4000);
+  }
+
+  function down(e) {
+    e.preventDefault();
+    ensureAudio();
+    if (audio.state === "suspended") audio.resume();
+    dragging = true;
+    lastPinned = { warp: -1 };
+    strokeWarpsHit = [];
+
+    const { x, y } = pointerToLocal(e);
+    const w = nearestWarp(x);
+    if (w >= 0) {
+      pinWeft(w, y);
+      lastPinned.warp = w;
+    }
+  }
+
+  function move(e) {
+    if (!dragging) return;
+    e.preventDefault();
+    const { x, y } = pointerToLocal(e);
+    const w = nearestWarp(x);
+    if (w >= 0 && w !== lastPinned.warp) {
+      pinWeft(w, y);
+      lastPinned.warp = w;
+    }
+  }
+
+  function up() {
+    if (!dragging) return;
+    dragging = false;
+    // a soft "settled" exhale if the stroke had >3 pins
+    if (strokeWarpsHit.length >= 3) {
+      const last = strokeWarpsHit[strokeWarpsHit.length-1];
+      pluck(last.freq * 0.5, 0.05, 2.6); // sub-octave whisper
+    }
+  }
+
+  canvas.addEventListener("mousedown", down);
+  canvas.addEventListener("mousemove", move);
+  window.addEventListener("mouseup", up);
+
+  canvas.addEventListener("touchstart", down, { passive: false });
+  canvas.addEventListener("touchmove",  move, { passive: false });
+  window.addEventListener("touchend", up);
+
+  // Keyboard: r = ring back, c = clear
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "r" || e.key === "R") ringItBack();
+    if (e.key === "c" || e.key === "C") foldCloth();
+  });
+
+  document.getElementById("ringBtn").addEventListener("click", ringItBack);
+  document.getElementById("foldBtn").addEventListener("click", foldCloth);
+
+  function ringItBack() {
+    // Replay every weft in laid-down order, slow, shimmering.
+    if (!wefts.length) {
+      showSleeve("the loom is bare. weave first.");
+      return;
+    }
+    ensureAudio();
+    if (audio.state === "suspended") audio.resume();
+    showSleeve("⟨ the cloth rings ⟩");
+
+    // sort by creation time
+    const order = [...wefts].sort((a,b) => a.t - b.t);
+    // compress timing so a long weave plays in ~6s max
+    const total = Math.min(7000, order.length * 90);
+    const step = total / order.length;
+    order.forEach((w, k) => {
+      setTimeout(() => {
+        const yNorm = 1 - (w.y / H);
+        const detune = (yNorm - 0.5) * 80;
+        const f = w.freq * Math.pow(2, detune/1200);
+        pluck(f * 1.0, 0.07, 2.0);
+        // soft glow on the corresponding weft
+        w.glow = performance.now();
+        drawAll();
+      }, k * step);
+    });
+  }
+
+  function foldCloth() {
+    if (!wefts.length) return;
+    showSleeve("⟨ folded away ⟩");
+    // gentle exhale chord
+    [SCALE[0].freq, SCALE[2].freq, SCALE[4].freq].forEach((f,i) =>
+      setTimeout(() => pluck(f*0.5, 0.06, 3.2), i*120)
+    );
+    // animate clear
+    const start = performance.now();
+    const dur = 1400;
+    const initial = wefts.length;
+    function tick(t) {
+      const p = Math.min(1, (t - start) / dur);
+      // pop wefts off in reverse over the duration
+      const target = Math.round(initial * (1 - p));
+      while (wefts.length > target) wefts.pop();
+      drawAll();
+      if (p < 1) requestAnimationFrame(tick);
+      else wefts.length = 0;
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  //  DRAWING
+  // ─────────────────────────────────────────────────────────────────────
+  function drawAll() {
+    ctx.clearRect(0, 0, W, H);
+
+    // dusk wash — vertical
+    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, "rgba(42,26,48,0.65)");
+    grad.addColorStop(1, "rgba(14,10,20,0.95)");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,W,H);
+
+    // warp threads — vertical, faint, slightly wavering
+    for (let i = 0; i < WARP_COUNT; i++) {
+      const x = warpX(i);
+      ctx.save();
+      ctx.beginPath();
+      // thread is a slightly textured rose-thread
+      const tg = ctx.createLinearGradient(x-1, 0, x+1, 0);
+      tg.addColorStop(0, "rgba(120,80,90,0.0)");
+      tg.addColorStop(0.5, "rgba(214,143,176,0.32)");
+      tg.addColorStop(1, "rgba(120,80,90,0.0)");
+      ctx.strokeStyle = tg;
+      ctx.lineWidth = 1.2;
+      ctx.moveTo(x, 6);
+      ctx.lineTo(x, H - 6);
+      ctx.stroke();
+
+      // tiny knots at top & bottom (heddles)
+      ctx.fillStyle = "rgba(232,200,120,0.4)";
+      ctx.beginPath(); ctx.arc(x, 6, 1.4, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x, H-6, 1.4, 0, Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+
+    // pinned wefts — quilted polygons centered on warp x, at y
+    const now = performance.now();
+    const spacing = (W * 0.88) / (WARP_COUNT - 1);
+    const wWidth = spacing * 0.95;
+    const wHeight = 7;
+
+    for (const w of wefts) {
+      const x = warpX(w.warp);
+      const age = now - w.t;
+      const intro = Math.min(1, age / 320); // fade-in
+      const glow = w.glow ? Math.max(0, 1 - (now - w.glow)/900) : 0;
+
+      // quilted polygon: a hexagon-ish weft tile
+      const halfW = (wWidth * 0.5) * intro;
+      const halfH = wHeight;
+
+      ctx.save();
+      ctx.translate(x, w.y);
+
+      // soft halo
+      const halo = ctx.createRadialGradient(0,0, 0, 0,0, halfW*1.6);
+      halo.addColorStop(0, hexToRgba(w.color, 0.35*intro + glow*0.5));
+      halo.addColorStop(1, hexToRgba(w.color, 0));
+      ctx.fillStyle = halo;
+      ctx.fillRect(-halfW*1.8, -halfH*3, halfW*3.6, halfH*6);
+
+      // the tile itself
+      ctx.beginPath();
+      ctx.moveTo(-halfW, 0);
+      ctx.lineTo(-halfW*0.6, -halfH);
+      ctx.lineTo( halfW*0.6, -halfH);
+      ctx.lineTo( halfW, 0);
+      ctx.lineTo( halfW*0.6,  halfH);
+      ctx.lineTo(-halfW*0.6,  halfH);
+      ctx.closePath();
+
+      const fill = ctx.createLinearGradient(-halfW, -halfH, halfW, halfH);
+      fill.addColorStop(0, hexToRgba(lighten(w.color, 0.18), 0.95*intro));
+      fill.addColorStop(1, hexToRgba(darken(w.color, 0.20), 0.9*intro));
+      ctx.fillStyle = fill;
+      ctx.fill();
+
+      // stitch line
+      ctx.strokeStyle = hexToRgba(darken(w.color, 0.45), 0.6*intro);
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+
+      // tiny highlight stitches
+      ctx.strokeStyle = hexToRgba(lighten(w.color, 0.35), 0.5*intro);
+      ctx.lineWidth = 0.6;
+      ctx.beginPath();
+      ctx.moveTo(-halfW*0.4, -halfH*0.3);
+      ctx.lineTo( halfW*0.4, -halfH*0.3);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    // candle-glow vignette near the bottom-left
+    const vg = ctx.createRadialGradient(W*0.1, H*0.95, 0, W*0.1, H*0.95, W*0.4);
+    vg.addColorStop(0, "rgba(232,200,120,0.10)");
+    vg.addColorStop(1, "rgba(232,200,120,0)");
+    ctx.fillStyle = vg;
+    ctx.fillRect(0,0,W,H);
+
+    // request a redraw if any weft is still glowing or fading in
+    const stillAnimating = wefts.some(w =>
+      (now - w.t) < 400 || (w.glow && (now - w.glow) < 900)
+    );
+    if (stillAnimating) requestAnimationFrame(drawAll);
+  }
+
+  function hexToRgba(hex, a) {
+    if (hex.startsWith("rgb")) {
+      // rgb() → rgba()
+      const m = hex.match(/rgb\((\d+),(\d+),(\d+)\)/);
+      if (m) return `rgba(${m[1]},${m[2]},${m[3]},${a})`;
+      return hex;
+    }
+    const c = hex.replace("#","");
+    const r = parseInt(c.slice(0,2),16);
+    const g = parseInt(c.slice(2,4),16);
+    const b = parseInt(c.slice(4,6),16);
+    return `rgba(${r},${g},${b},${a})`;
+  }
+
+  resize();
+
+  // First-touch hint: a tiny breath that fades after a few seconds
+  setTimeout(() => {
+    if (!audio) {
+      showSleeve("⟨ touch the loom — it has been waiting ⟩");
+    }
+  }, 1800);
+
+})();
+</script>
+</body>
+</html>

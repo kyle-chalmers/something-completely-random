@@ -1,0 +1,10 @@
+.DS_Store
+*.pyc
+__pycache__/
+.venv/
+node_modules/
+
+# Local test artifacts
+/tmp-server.log
+/.idea/
+/.vscode/

@@ -1,0 +1,23 @@
+{
+  "id": "07-engineer",
+  "persona": "The Engineer of Impossible Machines",
+  "persona_short": "engineer",
+  "title": "the calibration engine",
+  "essence": "A hand-cranked Victorian apparatus that consumes nothing and produces certainty — its belt crosses itself but never twists, its flywheel has not stopped since 1887, and its output gear turns at the golden ratio of its input.",
+  "description": "A patent illustration come loose from its page. Take the crank in hand and turn it; the belt drives a transfer pulley and an output gear that, by the laws of cause and effect drawn here, ought to spin opposite to your intent. They do not. The shilling in the disassembly chamber breaks into eight tributary shards as you wind forward, and reassembles itself as you wind back. Reverse seven turns and the apparatus issues you a Certificate of Calibration. The mechanism is the message; the message is that the message is the mechanism.",
+  "novelty_score": 8,
+  "buildability_score": 9,
+  "interaction_summary": "Drag the brass crank handle (or scroll the page) to apply torque; the impossible belt, the φ-ratio gears, and the shilling-disassembly chamber respond accordingly while the flywheel turns regardless and the steam drifts inward toward the vent.",
+  "secrets": [
+    "crank backwards past −7 rotations to receive a Certificate of Calibration",
+    "the gear-2 ratio is irrational (1 : φ); the output phase never returns to its origin",
+    "the steam moves toward the vent, not away — the engine inhales",
+    "the flywheel reads 2.400 rad/s constant; it has not stopped since 1887",
+    "net work done goes NEGATIVE while torque applied goes positive — the engine returns work to the operator"
+  ],
+  "wake_log": [
+    {"hour": "01:14", "event": "first inkling: a belt that crosses itself once and yet drives both pulleys in the same direction. Drew it. Refused to unsee it."},
+    {"hour": "02:33", "event": "the part that almost did not work: making the impossibility feel inevitable rather than buggy. Solved it by labeling everything in the language of certainty — patents, calibration, ledger, shilling — until the eye stopped objecting."},
+    {"hour": "03:50", "event": "kept: the φ-ratio output gear, the inhaling vent, the certificate at −7. abandoned: a third gear that would have made the loop closed in a real way; the engineer of impossible machines does not draw the third gear."}
+  ]
+}

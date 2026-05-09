@@ -1,0 +1,24 @@
+{
+  "id": "08-weaver",
+  "persona": "The Weaver of Half-Remembered Songs",
+  "persona_short": "weaver",
+  "title": "the song the loom remembers",
+  "essence": "A loom whose every drawn thread is a tone; the cloth you make is a lullaby you cannot quite recall.",
+  "description": "A dusk-lit loom hangs in the dark, twenty-eight warp threads waiting. Choose a colour and drag across them — each warp you cross pins a small quilted weft and rings a soft bell-tone, the colour of the thread becoming pitch. What is woven stays woven, accumulating into a fabric of pattern-as-song. Lay seven different threads in one breath and the loom hums back what you wove. Press 'r' to set the whole cloth ringing again, like memory returning out of order.",
+  "novelty_score": 8,
+  "buildability_score": 9,
+  "interaction_summary": "Drag across vertical warp threads to weave coloured wefts; each thread crossed plays a soft pentatonic-plus tone, and the pattern persists as a visible song.",
+  "secrets": [
+    "the candle at the bottom-left lights only when the loom is listening (audio context alive)",
+    "weave seven different colours within one breath and the loom hums them back as an arpeggio",
+    "press r to ring the whole cloth back like a half-remembered melody",
+    "press c to fold the cloth away — it exhales a small farewell chord",
+    "vertical position bends pitch slightly, so a level row sounds level and a diagonal sweep glides",
+    "completing a long sweep (>3 threads) plays a sub-octave whisper as the stroke settles"
+  ],
+  "wake_log": [
+    {"hour": "01:14", "event": "the first inkling — colour as pitch, drag as breath. a pentatonic was too tidy. added a flat-2 to bruise it."},
+    {"hour": "02:33", "event": "the audio kept feeling like an alert. wrapped every pluck in a slow lowpass that sweeps from 2.4kHz down to 800 over the note's life — 'wool over the bell' — and the loom finally felt warm."},
+    {"hour": "03:50", "event": "kept: the quilted polygon weft tiles, the candle that lights when the loom hears you, the breath-of-seven hum-back. abandoned: a treadle pedal, a second loom for harmony, animated shuttles. the cloth wanted to be still between strokes."}
+  ]
+}

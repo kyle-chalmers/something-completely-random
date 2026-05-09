@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wake Log — Reverie</title>
+  <link rel="stylesheet" href="../style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+  <style>
+    .log {
+      max-width: 50rem;
+      margin: 0 auto;
+      padding: 5rem 2rem 8rem;
+    }
+    .log h1 {
+      font-family: var(--type-display);
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 300;
+      letter-spacing: 0.3em;
+      text-align: center;
+      text-transform: uppercase;
+      margin: 0 0 0.5rem;
+    }
+    .log .sub {
+      text-align: center;
+      font-style: italic;
+      color: var(--hall-ink-dim);
+      margin-bottom: 4rem;
+    }
+    .timeline { position: relative; padding-left: 2.5rem; border-left: 1px solid var(--hall-rule); }
+    .entry { margin-bottom: 3rem; position: relative; }
+    .entry::before {
+      content: "";
+      position: absolute;
+      left: -2.6rem;
+      top: 0.4rem;
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      background: var(--hall-gold);
+      box-shadow: 0 0 0 4px rgba(200,155,60,0.15);
+    }
+    .entry .who {
+      font-family: var(--type-display);
+      font-style: italic;
+      color: var(--hall-ink);
+      margin-bottom: 0.4rem;
+      font-size: 1.2rem;
+    }
+    .entry .moments { display: flex; flex-direction: column; gap: 0.6rem; }
+    .moment {
+      display: grid;
+      grid-template-columns: 4rem 1fr;
+      gap: 1rem;
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+    .moment .hour {
+      font-family: var(--type-mono);
+      font-size: 0.78rem;
+      color: var(--hall-gold);
+      letter-spacing: 0.1em;
+      padding-top: 0.2rem;
+    }
+    .moment .what { color: var(--hall-ink-dim); }
+    .summary {
+      margin-top: 6rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--hall-rule);
+      font-family: var(--type-mono);
+      font-size: 0.8rem;
+      color: var(--hall-ink-faint);
+      letter-spacing: 0.1em;
+      text-align: center;
+    }
+    .back {
+      display: block;
+      text-align: center;
+      margin-top: 4rem;
+      font-family: var(--type-mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      color: var(--hall-ink-dim);
+    }
+  </style>
+</head>
+<body>
+  <div class="starfield" aria-hidden="true"></div>
+
+  <main class="log">
+    <h1>Wake Log</h1>
+    <p class="sub">when each dream came to be — by their own clocks</p>
+    <div class="timeline" id="timeline"></div>
+    <p class="summary" id="summary">— assembling —</p>
+    <a class="back" href="../">← back to the hall of reverie</a>
+  </main>
+
+  <script>
+    fetch("../meta/manifest.json")
+      .then(r => r.ok ? r.json() : null)
+      .then(manifest => {
+        const tl = document.getElementById("timeline");
+        const sum = document.getElementById("summary");
+        if (!manifest || !manifest.dreams || manifest.dreams.length === 0) {
+          sum.textContent = "the dreamers are still dreaming. check back at sunrise.";
+          return;
+        }
+        manifest.dreams.forEach(dream => {
+          const entry = document.createElement("article");
+          entry.className = "entry";
+          const moments = (dream.wake_log || [])
+            .map(m => `<div class="moment"><span class="hour">${m.hour}</span><span class="what">${m.event}</span></div>`)
+            .join("");
+          entry.innerHTML = `
+            <div class="who">${dream.persona} — <em style="color:var(--hall-gold)">${dream.title}</em></div>
+            <div class="moments">${moments || '<div class="moment"><span class="hour">—</span><span class="what">no log recorded</span></div>'}</div>
+          `;
+          tl.appendChild(entry);
+        });
+        const stats = [
+          `${manifest.dreams_count} dreams assembled`,
+          manifest.average_novelty ? `avg novelty ${manifest.average_novelty}/10` : null,
+          manifest.average_buildability ? `avg buildability ${manifest.average_buildability}/10` : null,
+          `assembled ${new Date(manifest.assembled_at).toUTCString()}`
+        ].filter(Boolean);
+        sum.textContent = stats.join(" · ");
+      })
+      .catch(err => {
+        document.getElementById("summary").textContent = "the manifest is sleeping. (run scripts/build_manifest.py)";
+      });
+  </script>
+</body>
+</html>

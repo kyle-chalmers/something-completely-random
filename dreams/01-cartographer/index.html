@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Cartographer of Lost Maps · a chart drawn by attention</title>
+  <link rel="stylesheet" href="../../style.css" />
+  <style>
+    :root {
+      --vellum: #d8c19a;
+      --vellum-deep: #c4ad84;
+      --peat: #1d1410;
+      --ink: #2b1d10;
+      --ink-faded: rgba(43, 29, 16, 0.55);
+      --gold: #c89b3c;
+      --red: #7a2a1f;
+    }
+    html, body {
+      background: var(--peat);
+      color: var(--ink);
+      font-family: var(--type-display);
+      overflow: hidden;
+      cursor: none;
+      height: 100%;
+    }
+    body {
+      background:
+        radial-gradient(ellipse at 50% 50%, #2a1c12 0%, #120a06 75%, #08040a 100%);
+    }
+
+    /* The map field. */
+    #atlas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      z-index: 1;
+    }
+
+    /* Cursor: a candle-flame compass-rose */
+    #cursor {
+      position: fixed;
+      pointer-events: none;
+      width: 64px; height: 64px;
+      transform: translate(-50%, -50%);
+      z-index: 5;
+      mix-blend-mode: screen;
+      filter: drop-shadow(0 0 14px rgba(255, 200, 110, 0.55));
+    }
+
+    /* Cartouche — the title card. */
+    .cartouche {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 4;
+      text-align: center;
+      pointer-events: none;
+      color: var(--vellum);
+      font-family: var(--type-display);
+      letter-spacing: 0.18em;
+      text-transform: lowercase;
+      opacity: 0.78;
+    }
+    .cartouche .name {
+      font-size: 1.25rem;
+      font-style: italic;
+      letter-spacing: 0.34em;
+    }
+    .cartouche .sub {
+      font-family: var(--type-mono);
+      font-size: 0.68rem;
+      color: rgba(216, 193, 154, 0.55);
+      letter-spacing: 0.5em;
+      margin-top: 0.4rem;
+    }
+
+    /* Lat/long readout — the leagues */
+    .leagues {
+      position: fixed;
+      top: 1.2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--type-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.4em;
+      color: rgba(216, 193, 154, 0.55);
+      z-index: 4;
+      pointer-events: none;
+      text-transform: uppercase;
+    }
+
+    /* Marginalia — sea monster flickers in periphery */
+    .marginalia {
+      position: fixed;
+      pointer-events: none;
+      z-index: 3;
+      color: rgba(216, 193, 154, 0.18);
+      font-family: var(--type-display);
+      font-style: italic;
+      font-size: 0.78rem;
+      letter-spacing: 0.18em;
+      transition: opacity 1200ms ease;
+      opacity: 0;
+    }
+    .marginalia.lit { opacity: 0.55; }
+
+    /* Override wake-log to vellum aesthetic */
+    .wake-log {
+      background: rgba(29, 20, 16, 0.96);
+      border-color: rgba(200, 155, 60, 0.35);
+      color: rgba(216, 193, 154, 0.85);
+      font-family: var(--type-display);
+      font-size: 0.95rem;
+    }
+    .wake-log h3 { color: var(--gold); font-family: var(--type-display); }
+    .wake-log dt { color: rgba(216, 193, 154, 0.85); font-family: var(--type-mono); }
+    .wake-log dd { color: rgba(216, 193, 154, 0.6); }
+    .wake-log-toggle {
+      background: rgba(29, 20, 16, 0.7);
+      border-color: rgba(200, 155, 60, 0.35);
+      color: rgba(216, 193, 154, 0.75);
+    }
+    .return-ribbon {
+      background: rgba(29, 20, 16, 0.7);
+      border-color: rgba(200, 155, 60, 0.35);
+      color: rgba(216, 193, 154, 0.75);
+    }
+
+    /* Whisper — appears when something rare is discovered. */
+    .whisper {
+      position: fixed;
+      left: 50%;
+      top: 35%;
+      transform: translate(-50%, -50%);
+      z-index: 6;
+      pointer-events: none;
+      color: var(--gold);
+      font-family: var(--type-display);
+      font-style: italic;
+      font-size: 1.6rem;
+      letter-spacing: 0.12em;
+      opacity: 0;
+      text-shadow: 0 0 22px rgba(200, 155, 60, 0.6);
+      transition: opacity 1600ms ease;
+      text-align: center;
+      max-width: 80vw;
+    }
+    .whisper.show { opacity: 0.9; }
+  </style>
+</head>
+<body>
+
+  <a class="return-ribbon" href="../../">← Hall of Reverie</a>
+
+  <button class="wake-log-toggle" onclick="document.querySelector('.wake-log').classList.toggle('open')">📜 wake log</button>
+  <aside class="wake-log">
+    <h3>The Cartographer of Lost Maps</h3>
+    <p style="font-style:italic;color:var(--hall-ink-dim)">"the blank spaces are the truest part"</p>
+    <dl>
+      <dt>title</dt><dd>here be the unmappable</dd>
+      <dt>made</dt><dd>8 may 2026 · the small hours</dd>
+      <dt>essence</dt><dd>A blank vellum becomes a chart only where the candle has passed; the world remembers itself beneath your gaze.</dd>
+      <dt>secrets</dt><dd>nine cities of fog (named only when found), the leviathan in the south-east, an island that drifts a degree per minute, the cartouche that signs itself when the whole map is seen</dd>
+    </dl>
+  </aside>
+
+  <div class="leagues" id="leagues">— · — leagues from the meridian</div>
+  <canvas id="atlas"></canvas>
+  <svg id="cursor" viewBox="-32 -32 64 64" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="flame" cx="0" cy="0" r="1">
+        <stop offset="0%" stop-color="#ffe7a8" stop-opacity="1"/>
+        <stop offset="40%" stop-color="#c89b3c" stop-opacity="0.7"/>
+        <stop offset="100%" stop-color="#7a2a1f" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <circle r="22" fill="url(#flame)" opacity="0.9"/>
+    <g stroke="#1d1410" stroke-width="0.6" fill="none" opacity="0.85">
+      <path d="M 0,-12 L 2,-2 L 12,0 L 2,2 L 0,12 L -2,2 L -12,0 L -2,-2 Z" fill="#1d1410" fill-opacity="0.6"/>
+      <circle r="14" stroke-dasharray="1 3"/>
+      <text x="0" y="-16" font-family="Cormorant Garamond, serif" font-size="5" text-anchor="middle" fill="#1d1410" opacity="0.7">N</text>
+    </g>
+  </svg>
+
+  <div class="cartouche">
+    <div class="name">The Cartographer of Lost Maps</div>
+    <div class="sub">move · the world remembers</div>
+  </div>
+
+  <div class="whisper" id="whisper"></div>
+
+  <script>
+  (() => {
+    'use strict';
+
+    const cv = document.getElementById('atlas');
+    const ctx = cv.getContext('2d');
+    const cursor = document.getElementById('cursor');
+    const leagues = document.getElementById('leagues');
+    const whisperEl = document.getElementById('whisper');
+
+    let W = 0, H = 0, DPR = Math.min(window.devicePixelRatio || 1, 2);
+    function resize() {
+      W = window.innerWidth;
+      H = window.innerHeight;
+      cv.width = W * DPR;
+      cv.height = H * DPR;
+      cv.style.width = W + 'px';
+      cv.style.height = H + 'px';
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      buildAtlas();   // rebuild geometry on resize
+      drawnMask = ctx.createImageData(W, H); // reset visited
+      composite(true);
+    }
+
+    /* ---------- Seeded RNG (mulberry32) ---------- */
+    function mulberry32(a) {
+      return function() {
+        a |= 0; a = a + 0x6D2B79F5 | 0;
+        let t = Math.imul(a ^ a >>> 15, 1 | a);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+    const SEED = 1487;
+    let rand = mulberry32(SEED);
+
+    /* ---------- Geometry ---------- */
+    // We pre-render the FULL map once into an offscreen canvas (the "true map"),
+    // then reveal it only where the cursor's "candlelight" has passed.
+    // The reveal mask is a per-pixel alpha buffer (drawnMask).
+    const off = document.createElement('canvas');
+    const offctx = off.getContext('2d');
+
+    // Ink mask: only the parchment shows where the user has explored.
+    let drawnMask = null;     // ImageData of W*H, alpha channel = visited intensity
+    let visited = null;       // typed array shortcut into drawnMask.data
+    let lastDraw = 0;
+
+    /* ---------- The map ---------- */
+    let continents = [];
+    let labels = [];
+    let monsters = [];
+    let compassRose = null;
+    let nineCities = []; // hidden secret
+    let driftingIsle = null;
+    let leviathan = null;
+    let cartoucheSig = null;
+    const SECRET_FOUND = { cities:0, leviathan:false, isle:false, signed:false };
+
+    function buildAtlas() {
+      rand = mulberry32(SEED);
+      continents = [];
+      labels = [];
+      monsters = [];
+      nineCities = [];
+
+      // Sepia parchment background on offscreen
+      off.width = W * DPR;
+      off.height = H * DPR;
+      off.style && (off.style.width = W + 'px');
+      offctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+      // Parchment color & uneven mottling
+      offctx.fillStyle = '#d8c19a';
+      offctx.fillRect(0, 0, W, H);
+      // soft warm glow + age stains
+      for (let i = 0; i < 90; i++) {
+        const x = rand() * W, y = rand() * H, r = 60 + rand() * 220;
+        const g = offctx.createRadialGradient(x, y, 0, x, y, r);
+        const tint = rand();
+        if (tint < 0.4) g.addColorStop(0, 'rgba(122, 80, 40, 0.06)');
+        else if (tint < 0.8) g.addColorStop(0, 'rgba(60, 40, 20, 0.05)');
+        else g.addColorStop(0, 'rgba(200, 155, 60, 0.06)');
+        g.addColorStop(1, 'rgba(0,0,0,0)');
+        offctx.fillStyle = g;
+        offctx.fillRect(x - r, y - r, r * 2, r * 2);
+      }
+
+      // ----- Build continents (organic blobs) -----
+      const continentCount = 4 + Math.floor(rand() * 2);
+      for (let c = 0; c < continentCount; c++) {
+        const cx = (0.18 + rand() * 0.64) * W;
+        const cy = (0.22 + rand() * 0.6) * H;
+        const baseR = 90 + rand() * Math.min(W, H) * 0.18;
+        const pts = [];
+        const N = 64;
+        // Layered noise gives wobbly, hand-drawn coastlines.
+        const phase1 = rand() * 100;
+        const phase2 = rand() * 100;
+        for (let i = 0; i < N; i++) {
+          const t = (i / N) * Math.PI * 2;
+          const n =
+            Math.sin(t * 3 + phase1) * 0.18 +
+            Math.sin(t * 7 + phase2) * 0.09 +
+            Math.sin(t * 13 + phase1 * 1.7) * 0.05;
+          const r = baseR * (1 + n);
+          pts.push([cx + Math.cos(t) * r, cy + Math.sin(t) * r]);
+        }
+        continents.push({ cx, cy, baseR, pts, name: continentName() });
+
+        // Place a label
+        labels.push({ x: cx, y: cy, text: continents[c].name, scale: 1 + (baseR/200) });
+
+        // Maybe a city marker
+        const cityCount = 1 + Math.floor(rand() * 3);
+        for (let k = 0; k < cityCount; k++) {
+          const ang = rand() * Math.PI * 2;
+          const rad = rand() * baseR * 0.5;
+          labels.push({
+            x: cx + Math.cos(ang) * rad,
+            y: cy + Math.sin(ang) * rad,
+            text: '· ' + cityName(),
+            small: true
+          });
+        }
+      }
+
+      // ----- Compass rose -----
+      compassRose = {
+        x: W * (0.82 + rand() * 0.06),
+        y: H * (0.78 + rand() * 0.08),
+        r: 70 + rand() * 25
+      };
+
+      // ----- Sea monsters (marginalia) -----
+      const monsterCount = 3 + Math.floor(rand() * 3);
+      for (let m = 0; m < monsterCount; m++) {
+        // Sea-only — outside continents, biased toward edges
+        let mx, my, ok = false, tries = 0;
+        while (!ok && tries < 30) {
+          mx = (0.06 + rand() * 0.88) * W;
+          my = (0.06 + rand() * 0.88) * H;
+          ok = !insideAnyContinent(mx, my, 60);
+          tries++;
+        }
+        monsters.push({ x: mx, y: my, kind: Math.floor(rand() * 3), seed: rand() });
+      }
+
+      // ----- The leviathan (secret #1) — large, faint, far southeast -----
+      leviathan = {
+        x: W * 0.78 + rand() * W * 0.15,
+        y: H * 0.7 + rand() * H * 0.18,
+        scale: 1.8 + rand()
+      };
+
+      // ----- Nine cities of fog (secret #2) — placed in unmapped sea -----
+      const cityNamesFog = ["Aelmaris","Vhal","Korr","Sephene","Iskaril","Dunwen","Otharhal","Belisme","The Grey Vault"];
+      for (let i = 0; i < 9; i++) {
+        let fx, fy, ok=false, tries=0;
+        while (!ok && tries < 40) {
+          fx = (0.08 + rand() * 0.84) * W;
+          fy = (0.08 + rand() * 0.84) * H;
+          ok = !insideAnyContinent(fx, fy, 24);
+          tries++;
+        }
+        nineCities.push({ x: fx, y: fy, name: cityNamesFog[i], found: false });
+      }
+
+      // ----- A drifting isle (secret #3) — moves slowly -----
+      driftingIsle = {
+        x: W * 0.5,
+        y: H * 0.18,
+        r: 40 + rand() * 14,
+        phase: rand() * Math.PI * 2,
+        seen: false
+      };
+
+      // ----- Cartouche signature (secret #4) — appears when 70%+ explored -----
+      cartoucheSig = { x: W * 0.12, y: H * 0.86, drawn: false };
+
+      // ===== Render the FULL map onto offscreen =====
+      renderFullMap();
+    }
+
+    function insideAnyContinent(x, y, margin = 0) {
+      for (const c of continents) {
+        const dx = x - c.cx, dy = y - c.cy;
+        if (Math.hypot(dx, dy) < c.baseR + margin) {
+          // crude polygon check
+          if (pointInPoly(x, y, c.pts)) return true;
+        }
+      }
+      return false;
+    }
+    function pointInPoly(x, y, pts) {
+      let inside = false;
+      for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+        const xi = pts[i][0], yi = pts[i][1];
+        const xj = pts[j][0], yj = pts[j][1];
+        const intersect = ((yi > y) !== (yj > y)) &&
+          (x < (xj - xi) * (y - yi) / (yj - yi + 1e-9) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    }
+
+    function continentName() {
+      const A = ['Anther','Vell','Mor','Lir','Quen','Ostra','Hesp','Cael','Drun','Therm','Ynd','Sorr'];
+      const B = ['os','ia','arde','yn','march','amere','aris','ond','aphel','enne'];
+      return (A[Math.floor(rand()*A.length)] + B[Math.floor(rand()*B.length)]).toLowerCase();
+    }
+    function cityName() {
+      const A = ['Old','New','Saint','Port','Cape','Holm','Dun','Ash','Stone','Fogga','Marrow'];
+      const B = ['hollow','fast','keep','reach','watch','wend','quay','barrow','stair','gate','vale'];
+      return A[Math.floor(rand()*A.length)] + ' ' + A[Math.floor(rand()*A.length)].toLowerCase() + B[Math.floor(rand()*B.length)];
+    }
+
+    /* ---------- Map rendering (full truth, drawn into offscreen) ---------- */
+    function renderFullMap() {
+      // Sea — faint hatching across whole canvas (but only outside continents)
+      offctx.save();
+      offctx.strokeStyle = 'rgba(43, 29, 16, 0.10)';
+      offctx.lineWidth = 0.5;
+      // Wavy "ocean" lines
+      for (let y = 30; y < H; y += 14) {
+        offctx.beginPath();
+        for (let x = 0; x <= W; x += 6) {
+          const yy = y + Math.sin(x * 0.012 + y * 0.04) * 1.4;
+          if (x === 0) offctx.moveTo(x, yy); else offctx.lineTo(x, yy);
+        }
+        offctx.stroke();
+      }
+      offctx.restore();
+
+      // ----- Continents: ink coastlines + filled body -----
+      for (const c of continents) {
+        // Body — slightly darker parchment with ink stipple
+        offctx.save();
+        offctx.beginPath();
+        c.pts.forEach((p, i) => i === 0 ? offctx.moveTo(p[0], p[1]) : offctx.lineTo(p[0], p[1]));
+        offctx.closePath();
+        offctx.fillStyle = 'rgba(180, 145, 95, 0.55)';
+        offctx.fill();
+        offctx.clip();
+        // mountains as little chevrons
+        offctx.strokeStyle = 'rgba(43, 29, 16, 0.65)';
+        offctx.lineWidth = 0.9;
+        const mountainAttempts = Math.floor(c.baseR / 7);
+        for (let m = 0; m < mountainAttempts; m++) {
+          const ang = rand() * Math.PI * 2;
+          const rd = rand() * c.baseR * 0.5;
+          const mx = c.cx + Math.cos(ang) * rd;
+          const my = c.cy + Math.sin(ang) * rd;
+          offctx.beginPath();
+          offctx.moveTo(mx - 4 + (rand()-.5), my + 2 + (rand()-.5));
+          offctx.lineTo(mx + (rand()-.5), my - 4 + (rand()-.5));
+          offctx.lineTo(mx + 4 + (rand()-.5), my + 2 + (rand()-.5));
+          offctx.stroke();
+        }
+        // forests: little tufts
+        offctx.fillStyle = 'rgba(43, 29, 16, 0.45)';
+        const forestCount = Math.floor(c.baseR / 5);
+        for (let f = 0; f < forestCount; f++) {
+          const ang = rand() * Math.PI * 2;
+          const rd = rand() * c.baseR * 0.85;
+          const fx = c.cx + Math.cos(ang) * rd;
+          const fy = c.cy + Math.sin(ang) * rd;
+          offctx.beginPath();
+          offctx.arc(fx, fy, 0.9 + rand()*0.6, 0, Math.PI*2);
+          offctx.fill();
+        }
+        // a winding river — quadratic curve through interior
+        offctx.strokeStyle = 'rgba(43, 29, 16, 0.45)';
+        offctx.lineWidth = 0.7;
+        offctx.beginPath();
+        let rx = c.cx + (rand()-.5) * c.baseR;
+        let ry = c.cy + (rand()-.5) * c.baseR;
+        offctx.moveTo(rx, ry);
+        for (let s = 0; s < 10; s++) {
+          rx += (rand()-.5) * 18;
+          ry += (rand()-.5) * 18;
+          offctx.lineTo(rx, ry);
+        }
+        offctx.stroke();
+        offctx.restore();
+
+        // Coastline — wobbly double-stroke (parchment ink convention)
+        drawWobblyPath(c.pts, 'rgba(43, 29, 16, 0.95)', 1.4, true);
+        // Outer halo of small "wave" hatching just beyond coast
+        offctx.save();
+        offctx.strokeStyle = 'rgba(43, 29, 16, 0.35)';
+        offctx.lineWidth = 0.5;
+        for (let halo = 1; halo <= 2; halo++) {
+          offctx.beginPath();
+          c.pts.forEach((p, i) => {
+            const dx = p[0]-c.cx, dy = p[1]-c.cy;
+            const len = Math.hypot(dx,dy);
+            const ux = dx/len, uy = dy/len;
+            const hx = p[0] + ux * (3 + halo*3 + (rand()-.5)*1.5);
+            const hy = p[1] + uy * (3 + halo*3 + (rand()-.5)*1.5);
+            if (i === 0) offctx.moveTo(hx, hy); else offctx.lineTo(hx, hy);
+          });
+          offctx.closePath();
+          offctx.stroke();
+        }
+        offctx.restore();
+      }
+
+      // ----- Compass rose -----
+      drawCompassRose(compassRose.x, compassRose.y, compassRose.r);
+
+      // ----- Sea monsters (marginalia) -----
+      for (const m of monsters) drawSeaMonster(m);
+
+      // ----- The leviathan (huge, faint) -----
+      drawLeviathan(leviathan.x, leviathan.y, leviathan.scale);
+
+      // ----- Nine fog cities — cluster of tiny rings; only "named" once visited -----
+      for (const c of nineCities) drawFogCity(c);
+
+      // ----- Labels -----
+      offctx.save();
+      offctx.fillStyle = 'rgba(43, 29, 16, 0.95)';
+      offctx.font = 'italic 14px "Cormorant Garamond", Georgia, serif';
+      offctx.textAlign = 'center';
+      offctx.textBaseline = 'middle';
+      for (const l of labels) {
+        const fontSize = l.small ? 9 : 13 + (l.scale ? Math.min(l.scale, 1.4) * 4 : 0);
+        offctx.font = `italic ${fontSize}px "Cormorant Garamond", Georgia, serif`;
+        offctx.save();
+        // wobble each letter slightly for hand-drawn feel
+        const text = (l.text || '').toUpperCase();
+        let x = l.x - offctx.measureText(text).width / 2;
+        for (const ch of text) {
+          const dy = (Math.sin((x + l.y) * 0.5) * 0.7) + (Math.random()-.5)*0.6;
+          offctx.fillText(ch, x, l.y + dy);
+          x += offctx.measureText(ch).width;
+        }
+        offctx.restore();
+      }
+      offctx.restore();
+
+      // ----- Cartouche frame (bottom-left, signed if user explores enough) -----
+      drawCartouche(cartoucheSig.x, cartoucheSig.y);
+
+      // ----- Faint border / vignette -----
+      offctx.save();
+      offctx.strokeStyle = 'rgba(43, 29, 16, 0.6)';
+      offctx.lineWidth = 1.0;
+      offctx.strokeRect(8, 8, W - 16, H - 16);
+      offctx.strokeStyle = 'rgba(43, 29, 16, 0.25)';
+      offctx.strokeRect(14, 14, W - 28, H - 28);
+      offctx.restore();
+    }
+
+    function drawWobblyPath(pts, color, width, closed) {
+      offctx.save();
+      offctx.strokeStyle = color;
+      offctx.lineWidth = width;
+      offctx.lineJoin = 'round';
+      offctx.lineCap = 'round';
+      offctx.beginPath();
+      pts.forEach((p, i) => {
+        const w = Math.sin(i * 1.3) * 0.6 + (rand()-.5) * 0.6;
+        const x = p[0] + w, y = p[1] + Math.cos(i * 0.7) * 0.5 + (rand()-.5) * 0.6;
+        if (i === 0) offctx.moveTo(x, y); else offctx.lineTo(x, y);
+      });
+      if (closed) offctx.closePath();
+      offctx.stroke();
+      // Bleed ink where the line thickens — soft second pass
+      offctx.strokeStyle = color.replace(/0\.\d+\)/, '0.18)');
+      offctx.lineWidth = width + 1.6;
+      offctx.stroke();
+      offctx.restore();
+    }
+
+    function drawCompassRose(x, y, r) {
+      offctx.save();
+      offctx.translate(x, y);
+      offctx.strokeStyle = 'rgba(43, 29, 16, 0.85)';
+      offctx.fillStyle = 'rgba(43, 29, 16, 0.9)';
+      offctx.lineWidth = 0.9;
+      // outer rings
+      for (let i = 0; i < 3; i++) {
+        offctx.beginPath();
+        offctx.arc(0, 0, r * (0.6 + i*0.2), 0, Math.PI*2);
+        offctx.stroke();
+      }
+      // 8-point star
+      const points = 8;
+      for (let i = 0; i < points; i++) {
+        const a = (i / points) * Math.PI * 2;
+        const long = i % 2 === 0 ? r : r * 0.55;
+        const a2 = a + Math.PI / points;
+        const a3 = a - Math.PI / points;
+        offctx.beginPath();
+        offctx.moveTo(0, 0);
+        offctx.lineTo(Math.cos(a) * long, Math.sin(a) * long);
+        offctx.lineTo(Math.cos(a2) * long * 0.18, Math.sin(a2) * long * 0.18);
+        offctx.closePath();
+        if (i % 2 === 0) offctx.fill(); else offctx.stroke();
+      }
+      // gilded center
+      offctx.fillStyle = 'rgba(200, 155, 60, 0.85)';
+      offctx.beginPath(); offctx.arc(0,0, 5, 0, Math.PI*2); offctx.fill();
+      // letters
+      offctx.font = 'italic 12px "Cormorant Garamond", serif';
+      offctx.fillStyle = 'rgba(43, 29, 16, 0.9)';
+      offctx.textAlign = 'center'; offctx.textBaseline = 'middle';
+      offctx.fillText('N', 0, -r - 10);
+      offctx.fillText('S', 0, r + 10);
+      offctx.fillText('E', r + 10, 0);
+      offctx.fillText('W', -r - 10, 0);
+      offctx.restore();
+    }
+
+    function drawSeaMonster(m) {
+      offctx.save();
+      offctx.translate(m.x, m.y);
+      offctx.strokeStyle = 'rgba(43, 29, 16, 0.78)';
+      offctx.fillStyle = 'rgba(43, 29, 16, 0.78)';
+      offctx.lineWidth = 0.9;
+      const sc = 1 + m.seed * 0.7;
+      offctx.scale(sc, sc);
+      if (m.kind === 0) {
+        // Serpent humps
+        offctx.beginPath();
+        for (let i = 0; i < 4; i++) {
+          const x = -20 + i * 14;
+          offctx.moveTo(x, 0);
+          offctx.bezierCurveTo(x+3, -10, x+10, -10, x+14, 0);
+        }
+        offctx.stroke();
+        // head
+        offctx.beginPath(); offctx.arc(36, 0, 4, 0, Math.PI*2); offctx.fill();
+      } else if (m.kind === 1) {
+        // Kraken (radial tentacles)
+        offctx.beginPath(); offctx.arc(0,0, 6, 0, Math.PI*2); offctx.fill();
+        for (let i = 0; i < 7; i++) {
+          const a = (i/7) * Math.PI * 2;
+          offctx.beginPath();
+          offctx.moveTo(0,0);
+          offctx.quadraticCurveTo(Math.cos(a)*16, Math.sin(a)*16,
+            Math.cos(a + 0.3)*22, Math.sin(a + 0.3)*22);
+          offctx.stroke();
+        }
+      } else {
+        // Galleon ship in distress
+        offctx.beginPath();
+        offctx.moveTo(-14, 0); offctx.lineTo(14, 0); offctx.lineTo(10, 4); offctx.lineTo(-10, 4); offctx.closePath();
+        offctx.stroke();
+        offctx.beginPath();
+        offctx.moveTo(-2, 0); offctx.lineTo(-2, -16); offctx.moveTo(6, 0); offctx.lineTo(6, -12);
+        offctx.stroke();
+        // sail
+        offctx.beginPath(); offctx.moveTo(-2, -16); offctx.lineTo(8, -10); offctx.lineTo(-2, -8); offctx.closePath();
+        offctx.fill();
+      }
+      offctx.restore();
+    }
+
+    function drawLeviathan(x, y, scale) {
+      offctx.save();
+      offctx.translate(x, y);
+      offctx.scale(scale, scale);
+      offctx.strokeStyle = 'rgba(43, 29, 16, 0.5)';
+      offctx.fillStyle = 'rgba(43, 29, 16, 0.45)';
+      offctx.lineWidth = 1.4;
+      // Body — long arching back
+      offctx.beginPath();
+      offctx.moveTo(-80, 0);
+      offctx.bezierCurveTo(-50, -50, 30, -50, 60, -10);
+      offctx.bezierCurveTo(80, 0, 80, 10, 50, 14);
+      offctx.bezierCurveTo(0, 18, -50, 16, -80, 0);
+      offctx.closePath();
+      offctx.fill();
+      offctx.stroke();
+      // eye
+      offctx.fillStyle = 'rgba(122, 42, 31, 0.9)';
+      offctx.beginPath(); offctx.arc(40, -16, 3, 0, Math.PI*2); offctx.fill();
+      // teeth / mouth
+      offctx.strokeStyle = 'rgba(43, 29, 16, 0.85)';
+      offctx.beginPath();
+      offctx.moveTo(50, -2); offctx.lineTo(56, -6); offctx.lineTo(60, -2);
+      offctx.lineTo(64, -6); offctx.lineTo(68, -2);
+      offctx.stroke();
+      // spume
+      offctx.font = 'italic 10px "Cormorant Garamond", serif';
+      offctx.fillStyle = 'rgba(122, 42, 31, 0.85)';
+      offctx.textAlign = 'center';
+      offctx.fillText('hic sunt leviathæ', 0, 36);
+      offctx.restore();
+    }
+
+    function drawFogCity(c) {
+      offctx.save();
+      offctx.translate(c.x, c.y);
+      // ring of dotted cloud
+      offctx.strokeStyle = 'rgba(43, 29, 16, 0.42)';
+      offctx.lineWidth = 0.6;
+      offctx.setLineDash([2, 3]);
+      offctx.beginPath();
+      offctx.arc(0, 0, 14, 0, Math.PI*2);
+      offctx.stroke();
+      offctx.setLineDash([]);
+      // tiny tower
+      offctx.fillStyle = 'rgba(43, 29, 16, 0.7)';
+      offctx.beginPath();
+      offctx.moveTo(-2, 4); offctx.lineTo(-2, -5); offctx.lineTo(0, -8); offctx.lineTo(2, -5); offctx.lineTo(2, 4);
+      offctx.closePath();
+      offctx.fill();
+      offctx.restore();
+    }
+
+    function drawCartouche(x, y) {
+      offctx.save();
+      offctx.translate(x, y);
+      offctx.strokeStyle = 'rgba(43, 29, 16, 0.85)';
+      offctx.lineWidth = 1.1;
+      // ornate rectangle
+      offctx.beginPath();
+      offctx.moveTo(-90, -30);
+      offctx.bezierCurveTo(-100, -30, -100, 30, -90, 30);
+      offctx.lineTo(90, 30);
+      offctx.bezierCurveTo(100, 30, 100, -30, 90, -30);
+      offctx.closePath();
+      offctx.stroke();
+      // inner line
+      offctx.strokeStyle = 'rgba(200, 155, 60, 0.55)';
+      offctx.lineWidth = 0.6;
+      offctx.beginPath();
+      offctx.moveTo(-84, -24); offctx.lineTo(84, -24);
+      offctx.lineTo(84, 24); offctx.lineTo(-84, 24); offctx.closePath();
+      offctx.stroke();
+      offctx.fillStyle = 'rgba(43, 29, 16, 0.9)';
+      offctx.font = 'italic 13px "Cormorant Garamond", serif';
+      offctx.textAlign = 'center';
+      offctx.fillText('drawn by Her Hand', 0, -4);
+      offctx.font = 'italic 10px "Cormorant Garamond", serif';
+      offctx.fillStyle = 'rgba(122, 42, 31, 0.7)';
+      offctx.fillText('the Cartographer of Lost Maps', 0, 12);
+      offctx.restore();
+    }
+
+    /* ---------- The reveal mask ---------- */
+    // When the cursor moves we paint a soft alpha into drawnMask. Each frame
+    // we composite: (parchment of full map) * alpha, over peat background.
+    let mouse = { x: -9999, y: -9999, lastX: -9999, lastY: -9999, moved: false };
+    const visitedPoints = []; // sample points for total exploration ratio
+
+    function paintReveal(x, y, radius = 70, strength = 0.85) {
+      if (!drawnMask) return;
+      const data = drawnMask.data;
+      const r2 = radius * radius;
+      const x0 = Math.max(0, Math.floor(x - radius));
+      const x1 = Math.min(W, Math.ceil(x + radius));
+      const y0 = Math.max(0, Math.floor(y - radius));
+      const y1 = Math.min(H, Math.ceil(y + radius));
+      for (let py = y0; py < y1; py++) {
+        for (let px = x0; px < x1; px++) {
+          const dx = px - x, dy = py - y;
+          const d2 = dx*dx + dy*dy;
+          if (d2 > r2) continue;
+          const t = 1 - Math.sqrt(d2) / radius;
+          const add = Math.floor(t * t * 255 * strength);
+          const idx = (py * W + px) * 4 + 3;
+          if (data[idx] < add) data[idx] = Math.min(255, add + Math.floor(data[idx] * 0.4));
+          else data[idx] = Math.min(255, data[idx] + Math.floor(add * 0.06));
+        }
+      }
+    }
+
+    function strokeBetween(x0, y0, x1, y1, radius = 70) {
+      const dx = x1 - x0, dy = y1 - y0;
+      const d = Math.hypot(dx, dy);
+      const steps = Math.max(1, Math.floor(d / 6));
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        paintReveal(x0 + dx * t, y0 + dy * t, radius);
+      }
+    }
+
+    /* ---------- Composite each frame ---------- */
+    function composite(force = false) {
+      // Background — peat
+      ctx.fillStyle = '#120a06';
+      ctx.fillRect(0, 0, W, H);
+
+      // Apply alpha mask onto the full-map offscreen
+      // Step 1: paint the full map onto a scratch using globalAlpha=1
+      // Step 2: punch through with a destination-in pass against the mask
+      // To avoid an extra canvas, we write the mask directly into a tmp ImageData each frame
+      // and then drawImage(off) with destination-in via an alpha map.
+
+      // Strategy: blit offscreen, then multiply by mask via globalCompositeOperation = 'destination-in'
+      ctx.save();
+      // Draw the parchment map (full)
+      ctx.drawImage(off, 0, 0, off.width, off.height, 0, 0, W, H);
+      // Apply mask
+      ctx.globalCompositeOperation = 'destination-in';
+      ctx.putImageData(drawnMask, 0, 0);
+      ctx.restore();
+
+      // Soft warm halo at cursor — the candle.
+      if (mouse.x > -9000) {
+        const grd = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 110);
+        grd.addColorStop(0, 'rgba(255, 220, 140, 0.18)');
+        grd.addColorStop(0.5, 'rgba(200, 155, 60, 0.07)');
+        grd.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = grd;
+        ctx.fillRect(mouse.x - 110, mouse.y - 110, 220, 220);
+      }
+
+      // A faint slow-drifting fog overlay only on UNREVEALED (still dark) regions
+      // We just add a subtle vignette to push attention inward.
+      const vg = ctx.createRadialGradient(W/2, H/2, Math.min(W,H)*0.2, W/2, H/2, Math.max(W,H)*0.7);
+      vg.addColorStop(0, 'rgba(0,0,0,0)');
+      vg.addColorStop(1, 'rgba(0,0,0,0.55)');
+      ctx.fillStyle = vg;
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    /* ---------- Cursor follow & reveal ---------- */
+    let cursorX = window.innerWidth/2, cursorY = window.innerHeight/2;
+    function setCursor(x, y) {
+      cursorX = x; cursorY = y;
+      cursor.style.left = x + 'px';
+      cursor.style.top = y + 'px';
+    }
+
+    window.addEventListener('mousemove', (e) => {
+      const x = e.clientX, y = e.clientY;
+      if (mouse.x < -9000) { mouse.x = x; mouse.y = y; }
+      mouse.lastX = mouse.x; mouse.lastY = mouse.y;
+      mouse.x = x; mouse.y = y;
+      mouse.moved = true;
+      setCursor(x, y);
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      const t = e.touches[0]; if (!t) return;
+      mouse.lastX = mouse.x; mouse.lastY = mouse.y;
+      mouse.x = t.clientX; mouse.y = t.clientY; mouse.moved = true;
+      setCursor(t.clientX, t.clientY);
+    }, { passive: true });
+
+    /* ---------- Marginalia text whispers ---------- */
+    const whispers = [
+      "here be the unmappable —",
+      "leagues uncounted",
+      "the coastline forgets itself",
+      "fog · in nine names",
+      "ad terras incognitas",
+      "the chart is what is missed",
+      "draw not the world, but the desire of it"
+    ];
+    function whisper(text, ms = 4200) {
+      whisperEl.textContent = text;
+      whisperEl.classList.add('show');
+      clearTimeout(whisper._t);
+      whisper._t = setTimeout(() => whisperEl.classList.remove('show'), ms);
+    }
+
+    /* ---------- Secrets check ---------- */
+    function checkSecrets() {
+      // Nine cities — are they revealed?
+      let cityHits = 0;
+      for (const c of nineCities) {
+        if (!c.found) {
+          const idx = ((c.y | 0) * W + (c.x | 0)) * 4 + 3;
+          if (drawnMask.data[idx] > 90) {
+            c.found = true;
+            cityHits++;
+            // re-stamp city name onto the offscreen so it appears with the reveal
+            offctx.save();
+            offctx.fillStyle = 'rgba(122, 42, 31, 0.88)';
+            offctx.font = 'italic 11px "Cormorant Garamond", serif';
+            offctx.textAlign = 'center';
+            offctx.fillText('· ' + c.name, c.x, c.y - 18);
+            offctx.restore();
+            SECRET_FOUND.cities++;
+            if (SECRET_FOUND.cities === 1) whisper("a city of fog · " + c.name);
+            else if (SECRET_FOUND.cities === 9) whisper("all nine cities · the fog has names again");
+            else if (SECRET_FOUND.cities % 3 === 0) whisper("another · " + c.name);
+          }
+        }
+      }
+
+      // Leviathan
+      if (!SECRET_FOUND.leviathan) {
+        const lx = leviathan.x | 0, ly = leviathan.y | 0;
+        const idx = (ly * W + lx) * 4 + 3;
+        if (drawnMask.data[idx] > 110) {
+          SECRET_FOUND.leviathan = true;
+          whisper("hic sunt leviathæ · here be a thing too old for ink", 5200);
+        }
+      }
+
+      // Drifting isle: when the user touches near it
+      if (!SECRET_FOUND.isle) {
+        const dx = mouse.x - driftingIsle.x, dy = mouse.y - driftingIsle.y;
+        if (Math.hypot(dx,dy) < driftingIsle.r + 20) {
+          SECRET_FOUND.isle = true;
+          whisper("an isle that drifts · she will not be at this latitude tomorrow");
+        }
+      }
+
+      // Cartouche signs itself when ~70% explored
+      if (!SECRET_FOUND.signed) {
+        // sample 256 random pixels for fast estimate
+        let total = 0, lit = 0;
+        for (let s = 0; s < 256; s++) {
+          const sx = (Math.random() * W) | 0;
+          const sy = (Math.random() * H) | 0;
+          const idx = (sy * W + sx) * 4 + 3;
+          total++;
+          if (drawnMask.data[idx] > 80) lit++;
+        }
+        if (lit / total > 0.6) {
+          SECRET_FOUND.signed = true;
+          // sign the cartouche
+          offctx.save();
+          offctx.translate(cartoucheSig.x, cartoucheSig.y);
+          offctx.fillStyle = 'rgba(122, 42, 31, 0.9)';
+          offctx.font = 'italic 14px "Cormorant Garamond", serif';
+          offctx.textAlign = 'center';
+          offctx.fillText('— signed —', 0, 30);
+          offctx.fillText('K. of the Lost', 0, 46);
+          offctx.restore();
+          whisper("she signs the chart · for you, who looked", 6000);
+        }
+      }
+    }
+
+    /* ---------- Drifting isle motion: continually rebake to off canvas ---------- */
+    let lastIsleX = -1, lastIsleY = -1;
+    function updateDriftingIsle(t) {
+      // very slow drift
+      driftingIsle.x = W * 0.5 + Math.cos(t * 0.00007 + driftingIsle.phase) * W * 0.32;
+      driftingIsle.y = H * 0.18 + Math.sin(t * 0.00009 + driftingIsle.phase) * H * 0.10;
+      // erase last
+      if (lastIsleX > -1) {
+        offctx.save();
+        offctx.fillStyle = '#d8c19a';
+        offctx.beginPath();
+        offctx.arc(lastIsleX, lastIsleY, driftingIsle.r + 10, 0, Math.PI*2);
+        offctx.fill();
+        offctx.restore();
+      }
+      // draw new
+      offctx.save();
+      offctx.translate(driftingIsle.x, driftingIsle.y);
+      // small jagged isle
+      offctx.fillStyle = 'rgba(180, 145, 95, 0.7)';
+      offctx.strokeStyle = 'rgba(43, 29, 16, 0.9)';
+      offctx.lineWidth = 1.2;
+      offctx.beginPath();
+      const N = 14;
+      for (let i = 0; i < N; i++) {
+        const a = (i/N) * Math.PI*2;
+        const r = driftingIsle.r * (0.85 + Math.sin(a*4 + driftingIsle.phase) * 0.18);
+        const xx = Math.cos(a) * r;
+        const yy = Math.sin(a) * r;
+        if (i === 0) offctx.moveTo(xx, yy); else offctx.lineTo(xx, yy);
+      }
+      offctx.closePath();
+      offctx.fill();
+      offctx.stroke();
+      // marker
+      offctx.fillStyle = 'rgba(43, 29, 16, 0.95)';
+      offctx.font = 'italic 10px "Cormorant Garamond", serif';
+      offctx.textAlign = 'center';
+      offctx.fillText('the drifting isle', 0, driftingIsle.r + 14);
+      offctx.restore();
+      lastIsleX = driftingIsle.x; lastIsleY = driftingIsle.y;
+    }
+
+    /* ---------- Coordinate readout ---------- */
+    function fmtLeagues() {
+      const cx = W/2, cy = H/2;
+      const lonDeg = (mouse.x - cx) / W * 80;
+      const latDeg = -(mouse.y - cy) / H * 60;
+      const lon = (Math.abs(lonDeg)).toFixed(1) + '° ' + (lonDeg >= 0 ? 'E' : 'W');
+      const lat = (Math.abs(latDeg)).toFixed(1) + '° ' + (latDeg >= 0 ? 'N' : 'S');
+      const leagueDist = Math.hypot(mouse.x - cx, mouse.y - cy) / 6 | 0;
+      return `${lat}  ·  ${lon}  ·  ${leagueDist} leagues from the meridian`;
+    }
+
+    /* ---------- The animation loop ---------- */
+    let lastT = performance.now();
+    function tick(now) {
+      const dt = now - lastT;
+      lastT = now;
+
+      // Reveal where the candle has been
+      if (mouse.moved && mouse.x > -9000) {
+        if (mouse.lastX < -9000) { mouse.lastX = mouse.x; mouse.lastY = mouse.y; }
+        strokeBetween(mouse.lastX, mouse.lastY, mouse.x, mouse.y, 64);
+        mouse.moved = false;
+      }
+
+      // Slow drift of isle
+      if (now % 1 === 0) updateDriftingIsle(now);
+
+      // Recompose
+      composite();
+
+      // Secrets every ~250ms
+      if (!tick._lastSec || now - tick._lastSec > 250) {
+        checkSecrets();
+        tick._lastSec = now;
+      }
+
+      // Update leagues readout
+      if (mouse.x > -9000) leagues.textContent = fmtLeagues();
+
+      requestAnimationFrame(tick);
+    }
+
+    /* ---------- Idle whispering ---------- */
+    let idleTimer = 0;
+    setInterval(() => {
+      if (!mouse.moved) {
+        idleTimer++;
+        if (idleTimer === 4) whisper("move · the world is shy", 4000);
+        if (idleTimer === 12) whisper("a candle finds the coast — slowly", 4000);
+        if (idleTimer === 30) whisper("the unmappable knows you are watching", 5000);
+      } else {
+        idleTimer = 0;
+        mouse.moved = false;
+      }
+    }, 1000);
+
+    /* ---------- Onset whisper ---------- */
+    setTimeout(() => whisper("draw with your candle. the world remembers itself.", 5800), 800);
+    setTimeout(() => whisper(whispers[Math.floor(Math.random()*whispers.length)], 4000), 18000);
+
+    window.addEventListener('resize', resize);
+    resize();
+    requestAnimationFrame(tick);
+  })();
+  </script>
+</body>
+</html>

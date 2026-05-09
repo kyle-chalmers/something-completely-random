@@ -1,0 +1,22 @@
+{
+  "id": "06-astronomer",
+  "persona": "The Astronomer of Silent Stars",
+  "persona_short": "astronomer",
+  "title": "between the pulses",
+  "essence": "A procedural night sky that develops only for those who remain still — constellations form, name themselves, and a transit traces a poem for the patient witness.",
+  "description": "An eyepiece, not a screen. The viewer is given a deep-field void seeded with hundreds of stars whose light has not yet arrived. Stillness draws them out; constant motion fogs the optic and resets the field. After ninety seconds of patience a constellation names itself, and at one hundred fifty seconds a transit scrolls a four-line poem in the shadow of a passing world.",
+  "novelty_score": 8,
+  "buildability_score": 9,
+  "interaction_summary": "Remain still and watch — the more patiently you witness, the deeper the sky develops; move continuously and the eyepiece fogs and the field resets.",
+  "secrets": [
+    "After 90 seconds of cumulative witnessing (and a few seconds of held stillness), a brightened constellation labels itself: 'the listener'.",
+    "After 150 seconds, a planet transits horizontally and its shadow trails a four-line poem about parsecs and patience.",
+    "The starfield is generated from a fixed seed for tonight — every still witness sees the same sky, like a real constellation.",
+    "Bright stars carry a faint radial halo whose intensity scales with their inferred magnitude — only visible when the optic is unfogged."
+  ],
+  "wake_log": [
+    {"hour": "01:14", "event": "First inkling: a star map should not greet you. It should make you earn arrival. The eyepiece as a contract of stillness."},
+    {"hour": "02:33", "event": "The reset nearly killed it. Hard cuts felt punitive. Replaced with a slow fog and a phrase — 'the field has clouded' — and the field pulses back as soon as the witness settles."},
+    {"hour": "03:50", "event": "Kept: the seeded sky, the transit poem, the named constellation, the red flashlight. Abandoned: a soundtrack of pulsar clicks (too loud, too literal); and a 'name your own constellation' input (too participatory — this is a meditation, not a craft)."}
+  ]
+}

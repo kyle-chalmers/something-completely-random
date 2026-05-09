@@ -1,0 +1,23 @@
+{
+  "id": "02-surgeon",
+  "persona": "The Surgeon of Wasted Hours",
+  "persona_short": "surgeon",
+  "title": "the hour without pulse",
+  "essence": "drag a scalpel across the body of a single day and excise the moments that were never yours.",
+  "description": "An operating theatre rendered in clinical white. The patient on the table is one Tuesday — diagrammed as an hourglass body, its interior sown with nineteen moments classified as tumor, tendon, or bone. The user takes the scalpel-cursor and drags. Each cut leaves a permanent suture, a faint bleed, and a lighter day. The pulse line of the body responds to what is removed. There is no clean undo; sutures restore tendons but the scar remains.",
+  "novelty_score": 9,
+  "buildability_score": 8,
+  "interaction_summary": "Drag the scalpel-cursor across the body to excise moments — tumors are wasted hours, tendons are load-bearing time; every cut leaves a permanent scar.",
+  "secrets": [
+    "excise the noon tendon (10:45) to release a faint blue ghost — a tendon's hollow filled with weather",
+    "excise the moment at 23:58, 'the hour without pulse', and the patient's pulse line flatlines",
+    "excise two or more 'meeting' moments to surface the hidden sentence about scheduled hours",
+    "press R after cutting a tendon to suture it back — the moment returns, but the scar does not",
+    "press F to file the chart and read the post-operative verdict"
+  ],
+  "wake_log": [
+    {"hour": "01:14", "event": "first sketch — a literal body on a table felt gory; pivoted to an hourglass form whose interior is the day."},
+    {"hour": "02:33", "event": "the cut nearly didn't read as surgery — added cross-hatched sutures perpendicular to the path, then tiny blood-bead deposits along the seam, and the metaphor finally landed."},
+    {"hour": "03:50", "event": "kept the irreversible scar (sutures restore the moment but never the wound), abandoned an early gore-meter, replaced it with 'integrity %' as the body's verdict on the surgeon."}
+  ]
+}

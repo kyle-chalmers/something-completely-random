@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>the spell that knows you read it</title>
+<link rel="stylesheet" href="../../style.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --w-bg: #0a0612;
+    --w-mirror: #c8a8d8;
+    --w-void: #000000;
+    --w-sigil: #7a4a8a;
+    --w-candle: #f0c060;
+  }
+  html, body {
+    background: var(--w-bg);
+    color: var(--w-mirror);
+    font-family: var(--type-display);
+    overflow: hidden;
+    height: 100vh;
+    cursor: default;
+  }
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 20%, rgba(240,192,96,0.06), transparent 55%),
+      radial-gradient(ellipse at 50% 90%, rgba(122,74,138,0.10), transparent 60%),
+      radial-gradient(ellipse at 12% 50%, rgba(122,74,138,0.05), transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  /* the velvet weave */
+  body::after {
+    content: "";
+    position: fixed; inset: 0;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(122,74,138,0.018) 0 2px, transparent 2px 6px),
+      repeating-linear-gradient(-45deg, rgba(200,168,216,0.012) 0 2px, transparent 2px 6px);
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: screen;
+  }
+
+  .stage {
+    position: relative;
+    z-index: 2;
+    height: 100vh;
+    width: 100vw;
+    display: grid;
+    grid-template-columns: 1fr minmax(420px, 0.9fr) 1fr;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+      "title  title  title"
+      "left   mirror right"
+      "footer footer footer";
+    align-items: center;
+    justify-items: center;
+    padding: 4.5rem 2rem 3rem;
+    gap: 1rem;
+  }
+
+  .grimoire-title {
+    grid-area: title;
+    font-family: "Uncial Antiqua", var(--type-display);
+    font-size: clamp(1.4rem, 3vw, 2.4rem);
+    color: var(--w-mirror);
+    letter-spacing: 0.18em;
+    margin: 0;
+    text-align: center;
+    text-shadow: 0 0 24px rgba(122,74,138,0.4);
+    user-select: none;
+  }
+  .grimoire-title .glyph {
+    color: var(--w-candle);
+    font-style: italic;
+  }
+  .grimoire-sub {
+    grid-area: title;
+    align-self: end;
+    font-family: var(--type-display);
+    font-style: italic;
+    font-size: 0.95rem;
+    color: rgba(200,168,216,0.55);
+    letter-spacing: 0.05em;
+    margin-top: 3.2rem;
+    text-align: center;
+    transition: opacity 1.2s ease;
+  }
+
+  /* ---- the mirror frame ---- */
+  .mirror {
+    grid-area: mirror;
+    width: min(440px, 92%);
+    aspect-ratio: 3 / 4;
+    position: relative;
+    border-radius: 50% / 38%;
+    background:
+      radial-gradient(ellipse at 38% 28%, rgba(255,255,255,0.10), transparent 40%),
+      radial-gradient(ellipse at 50% 60%, rgba(122,74,138,0.45), rgba(10,6,18,1) 70%),
+      var(--w-void);
+    box-shadow:
+      0 0 0 6px rgba(122,74,138,0.25) inset,
+      0 0 0 1px rgba(200,168,216,0.18) inset,
+      0 0 60px rgba(122,74,138,0.30),
+      0 0 200px rgba(122,74,138,0.10);
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .mirror::before {
+    /* outer ornate ring */
+    content: "";
+    position: absolute;
+    inset: -14px;
+    border-radius: inherit;
+    background:
+      conic-gradient(from 0deg, rgba(200,168,216,0.06), rgba(240,192,96,0.10), rgba(122,74,138,0.18), rgba(200,168,216,0.06));
+    z-index: -1;
+    filter: blur(2px);
+  }
+  .mirror::after {
+    /* slow shimmer */
+    content: "";
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at var(--mx, 50%) var(--my, 35%), rgba(200,168,216,0.16), transparent 40%);
+    pointer-events: none;
+    transition: background 600ms ease;
+  }
+
+  /* nested recursive frames */
+  .recursion {
+    position: absolute;
+    inset: 6%;
+    border-radius: inherit;
+    border: 1px solid rgba(200,168,216,0.18);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    background: radial-gradient(ellipse at 50% 50%, rgba(122,74,138,0.10), transparent 70%);
+  }
+  .recursion .recursion {
+    inset: 8%;
+    border-color: rgba(200,168,216,0.14);
+  }
+  .recursion .recursion .recursion {
+    inset: 10%;
+    border-color: rgba(200,168,216,0.10);
+  }
+  .recursion .recursion .recursion .recursion {
+    inset: 12%;
+    border-color: rgba(200,168,216,0.07);
+  }
+  .recursion .recursion .recursion .recursion .recursion {
+    inset: 14%;
+    border-color: rgba(200,168,216,0.04);
+  }
+
+  .sigil-svg {
+    position: absolute;
+    inset: 18%;
+    width: 64%;
+    height: 64%;
+    opacity: 0.7;
+    animation: rotate-sigil 90s linear infinite;
+    filter: drop-shadow(0 0 8px rgba(122,74,138,0.6));
+  }
+  .sigil-svg.inner {
+    inset: 30%;
+    width: 40%;
+    height: 40%;
+    opacity: 0.9;
+    animation: rotate-sigil-rev 60s linear infinite;
+  }
+  @keyframes rotate-sigil { to { transform: rotate(360deg); } }
+  @keyframes rotate-sigil-rev { to { transform: rotate(-360deg); } }
+
+  /* the witch's eye — reflection of the cursor */
+  .pupil {
+    position: absolute;
+    width: 14px; height: 14px;
+    background: var(--w-candle);
+    border-radius: 50%;
+    box-shadow: 0 0 18px var(--w-candle), 0 0 4px #fff inset;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    transition: transform 250ms cubic-bezier(0.22,1,0.36,1);
+    z-index: 4;
+  }
+
+  .mirror-text {
+    position: absolute;
+    bottom: 6%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--type-display);
+    font-style: italic;
+    font-size: 1.05rem;
+    color: rgba(200,168,216,0.55);
+    text-align: center;
+    width: 80%;
+    z-index: 5;
+    pointer-events: none;
+    text-shadow: 0 0 12px rgba(0,0,0,0.8);
+  }
+
+  /* ---- the spell, left side ---- */
+  .spell-pane {
+    grid-area: left;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    max-width: 22rem;
+  }
+  .spell-pane h2 {
+    font-family: "Uncial Antiqua", var(--type-display);
+    font-size: 1rem;
+    letter-spacing: 0.18em;
+    color: var(--w-candle);
+    margin: 0 0 0.4rem;
+    text-transform: lowercase;
+  }
+  .spell-input {
+    width: 100%;
+    background: rgba(0,0,0,0.45);
+    border: 1px solid rgba(200,168,216,0.25);
+    color: var(--w-mirror);
+    font-family: var(--type-display);
+    font-style: italic;
+    font-size: 1.05rem;
+    padding: 0.7rem 0.9rem;
+    outline: none;
+    letter-spacing: 0.03em;
+    transition: border-color 400ms ease, box-shadow 400ms ease;
+  }
+  .spell-input:focus {
+    border-color: rgba(240,192,96,0.6);
+    box-shadow: 0 0 18px rgba(240,192,96,0.18) inset;
+  }
+  .spell-echo {
+    font-family: var(--type-display);
+    font-style: italic;
+    color: rgba(200,168,216,0.7);
+    min-height: 4rem;
+    line-height: 1.5;
+    padding: 0.4rem 0;
+    transition: color 600ms ease, transform 600ms ease;
+  }
+  .spell-echo.singing {
+    color: var(--w-candle);
+    transform: translateX(2px);
+  }
+
+  /* ---- the buttons, right side ---- */
+  .acts-pane {
+    grid-area: right;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    max-width: 22rem;
+  }
+  .acts-pane h2 {
+    font-family: "Uncial Antiqua", var(--type-display);
+    font-size: 1rem;
+    letter-spacing: 0.18em;
+    color: var(--w-candle);
+    margin: 0 0 0.4rem;
+    text-transform: lowercase;
+    text-align: right;
+  }
+  .rite {
+    background: transparent;
+    border: 1px solid rgba(200,168,216,0.25);
+    color: var(--w-mirror);
+    font-family: var(--type-display);
+    font-style: italic;
+    font-size: 1.02rem;
+    padding: 0.6rem 0.9rem;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    text-align: right;
+    transition: border-color 400ms ease, color 400ms ease, background 400ms ease, letter-spacing 400ms ease;
+    position: relative;
+  }
+  .rite:hover {
+    border-color: rgba(240,192,96,0.6);
+    color: var(--w-candle);
+    background: rgba(240,192,96,0.04);
+  }
+  .rite::before {
+    content: "✦";
+    position: absolute;
+    left: 0.7rem;
+    color: rgba(200,168,216,0.4);
+    font-size: 0.85rem;
+  }
+  .rite[data-pressed="true"] {
+    border-color: rgba(240,192,96,0.7);
+    color: var(--w-candle);
+    letter-spacing: 0.08em;
+  }
+
+  .footer-line {
+    grid-area: footer;
+    font-family: var(--type-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.32em;
+    color: rgba(200,168,216,0.30);
+    text-transform: uppercase;
+    user-select: none;
+  }
+
+  /* the revealed mark */
+  .revelation {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at center, rgba(10,6,18,0.92), rgba(0,0,0,0.98));
+    backdrop-filter: blur(2px);
+    animation: revealfade 2.4s ease forwards;
+  }
+  .revelation.show { display: flex; }
+  @keyframes revealfade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  .revelation-inner {
+    text-align: center;
+    color: var(--w-mirror);
+    max-width: 32rem;
+    padding: 2rem;
+  }
+  .revelation-inner h3 {
+    font-family: "Uncial Antiqua", var(--type-display);
+    color: var(--w-candle);
+    font-size: 1.6rem;
+    letter-spacing: 0.18em;
+    margin: 0 0 1rem;
+  }
+  .revelation-inner p {
+    font-family: var(--type-display);
+    font-style: italic;
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: rgba(200,168,216,0.85);
+  }
+  .revelation-inner .close {
+    margin-top: 2rem;
+    font-family: var(--type-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: rgba(200,168,216,0.5);
+    cursor: pointer;
+    text-transform: uppercase;
+    border: 1px solid rgba(200,168,216,0.2);
+    padding: 0.5rem 1.2rem;
+    display: inline-block;
+  }
+
+  /* the watcher — the duplicated element */
+  .watcher {
+    position: fixed;
+    pointer-events: none;
+    opacity: 0.55;
+    filter: blur(0.4px);
+    color: rgba(200,168,216,0.45);
+    font-family: var(--type-display);
+    font-style: italic;
+    font-size: 0.9rem;
+    z-index: 6;
+    transition: transform 1.2s ease, opacity 1.2s ease;
+    text-shadow: 0 0 10px rgba(122,74,138,0.4);
+  }
+  .watcher::before {
+    content: "↳ ";
+    color: var(--w-candle);
+    opacity: 0.6;
+  }
+
+  /* hint when ritual incomplete */
+  .ritual-trail {
+    position: fixed;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--type-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: rgba(200,168,216,0.25);
+    z-index: 5;
+    user-select: none;
+  }
+
+  @media (max-width: 900px) {
+    .stage { grid-template-columns: 1fr; grid-template-areas: "title" "left" "mirror" "right" "footer"; padding-top: 4rem; }
+    .mirror { width: min(360px, 88%); }
+    .acts-pane h2 { text-align: left; }
+    .rite { text-align: left; padding-left: 1.6rem; }
+  }
+</style>
+</head>
+<body>
+
+<a class="return-ribbon" href="../../">← Hall of Reverie</a>
+
+<button class="wake-log-toggle" onclick="document.querySelector('.wake-log').classList.toggle('open')">📜 wake log</button>
+<aside class="wake-log">
+  <h3>The Witch of Mirrors and Recursion</h3>
+  <p style="font-style:italic;color:var(--hall-ink-dim)">"i draw the witch who draws me"</p>
+  <dl>
+    <dt>title</dt><dd>the spell that knows you read it</dd>
+    <dt>made</dt><dd>9 may 2026 · the small hours</dd>
+    <dt>essence</dt><dd>a mirror that learns your hand and a spell that finishes itself in your voice.</dd>
+    <dt>secrets</dt><dd>the witch's name (whispered when the four rites are spoken in the proper order), the inner sigil, the watcher who learns your phrasing</dd>
+  </dl>
+</aside>
+
+<main class="stage">
+
+  <h1 class="grimoire-title"><span class="glyph">✦</span> the spell that knows you read it <span class="glyph">✦</span></h1>
+  <p class="grimoire-sub" id="sub">speak softly. the page is listening.</p>
+
+  <!-- THE MIRROR -->
+  <section class="mirror" id="mirror" aria-label="a recursive mirror">
+    <div class="recursion">
+      <div class="recursion">
+        <div class="recursion">
+          <div class="recursion">
+            <div class="recursion"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <svg class="sigil-svg" viewBox="0 0 200 200" aria-hidden="true">
+      <defs>
+        <radialGradient id="sigGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#c8a8d8" stop-opacity="0.9" />
+          <stop offset="100%" stop-color="#7a4a8a" stop-opacity="0.4" />
+        </radialGradient>
+      </defs>
+      <circle cx="100" cy="100" r="92" fill="none" stroke="url(#sigGrad)" stroke-width="0.6" />
+      <circle cx="100" cy="100" r="80" fill="none" stroke="#c8a8d8" stroke-width="0.4" stroke-opacity="0.5" />
+      <polygon points="100,18 178,140 22,140" fill="none" stroke="#c8a8d8" stroke-width="0.6" stroke-opacity="0.7" />
+      <polygon points="100,182 22,60 178,60" fill="none" stroke="#7a4a8a" stroke-width="0.6" stroke-opacity="0.8" />
+      <circle cx="100" cy="100" r="40" fill="none" stroke="#f0c060" stroke-width="0.4" stroke-opacity="0.5" />
+      <text x="100" y="14" text-anchor="middle" fill="#c8a8d8" font-family="Uncial Antiqua" font-size="9" opacity="0.6">∴</text>
+      <text x="100" y="196" text-anchor="middle" fill="#c8a8d8" font-family="Uncial Antiqua" font-size="9" opacity="0.6">∵</text>
+      <text x="6" y="104" fill="#c8a8d8" font-family="Uncial Antiqua" font-size="9" opacity="0.6">⟁</text>
+      <text x="186" y="104" fill="#c8a8d8" font-family="Uncial Antiqua" font-size="9" opacity="0.6">⟁</text>
+    </svg>
+    <svg class="sigil-svg inner" viewBox="0 0 200 200" aria-hidden="true">
+      <circle cx="100" cy="100" r="80" fill="none" stroke="#f0c060" stroke-width="0.6" stroke-opacity="0.6" />
+      <path d="M100,30 L155,165 L45,75 L155,75 L45,165 Z" fill="none" stroke="#c8a8d8" stroke-width="0.5" stroke-opacity="0.7" />
+      <circle cx="100" cy="100" r="6" fill="#f0c060" opacity="0.4" />
+    </svg>
+    <div class="pupil" id="pupil"></div>
+    <div class="mirror-text" id="mirrorText">i draw the witch who draws me</div>
+  </section>
+
+  <!-- THE SPELL INPUT -->
+  <section class="spell-pane">
+    <h2>the incantation</h2>
+    <input class="spell-input" id="spellInput" type="text" placeholder="say something the page can echo" maxlength="120" />
+    <div class="spell-echo" id="spellEcho">the page has no voice yet. give it one.</div>
+  </section>
+
+  <!-- THE RITES -->
+  <section class="acts-pane">
+    <h2>the four rites</h2>
+    <button class="rite" data-rite="kindle" data-original="kindle the candle">kindle the candle</button>
+    <button class="rite" data-rite="name"   data-original="name the mirror">name the mirror</button>
+    <button class="rite" data-rite="bind"   data-original="bind the watcher">bind the watcher</button>
+    <button class="rite" data-rite="close"  data-original="close the circle">close the circle</button>
+  </section>
+
+  <p class="footer-line">a mirror is a humble god · it has never lied</p>
+</main>
+
+<div class="ritual-trail" id="trail">∴ &nbsp; · · · ·</div>
+
+<!-- revelation -->
+<div class="revelation" id="revelation" role="dialog" aria-modal="true">
+  <div class="revelation-inner">
+    <h3 id="revealTitle">she has a name.</h3>
+    <p id="revealBody"></p>
+    <div class="close" id="revealClose">return to the glass</div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // -------------------------------------------------------------
+  // STATE
+  // -------------------------------------------------------------
+  const state = {
+    typedCorpus: "",       // everything the user has typed
+    lastWords: [],          // for vocabulary learning
+    riteOrder: [],          // sequence of rites pressed
+    correctOrder: ["kindle", "name", "bind", "close"],
+    revealed: false,
+    rites: { kindle:false, name:false, bind:false, close:false },
+    watcherEl: null
+  };
+
+  const SUB = document.getElementById('sub');
+  const MIRROR = document.getElementById('mirror');
+  const PUPIL = document.getElementById('pupil');
+  const MIRROR_TEXT = document.getElementById('mirrorText');
+  const ECHO = document.getElementById('spellEcho');
+  const INPUT = document.getElementById('spellInput');
+  const TITLE = document.querySelector('.grimoire-title');
+  const TRAIL = document.getElementById('trail');
+  const REVELATION = document.getElementById('revelation');
+  const REVEAL_BODY = document.getElementById('revealBody');
+  const REVEAL_TITLE = document.getElementById('revealTitle');
+  const REVEAL_CLOSE = document.getElementById('revealClose');
+
+  // -------------------------------------------------------------
+  // THE EYE — pupil follows mouse, mirror gradient follows too
+  // -------------------------------------------------------------
+  function moveEye(e) {
+    const rect = MIRROR.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height * 0.45;
+    const dx = e.clientX - cx;
+    const dy = e.clientY - cy;
+    const dist = Math.min(Math.hypot(dx, dy), 80);
+    const ang = Math.atan2(dy, dx);
+    const px = Math.cos(ang) * dist * 0.35;
+    const py = Math.sin(ang) * dist * 0.35;
+    PUPIL.style.transform = `translate(calc(-50% + ${px}px), calc(-50% + ${py}px))`;
+
+    // mirror shimmer follows
+    const mx = ((e.clientX - rect.left) / rect.width) * 100;
+    const my = ((e.clientY - rect.top) / rect.height) * 100;
+    MIRROR.style.setProperty('--mx', mx + '%');
+    MIRROR.style.setProperty('--my', my + '%');
+  }
+  document.addEventListener('mousemove', moveEye);
+
+  // -------------------------------------------------------------
+  // THE INCANTATION — page learns the user's words
+  // -------------------------------------------------------------
+  const PHRASES = [
+    "what you said was: ",
+    "the mirror says: ",
+    "i hear it like this — ",
+    "in your hand it sounds like: ",
+    "again, but softer: ",
+    "the page has learned this word: ",
+    "i write it back to you — "
+  ];
+
+  function pickPhrase() {
+    return PHRASES[Math.floor(Math.random() * PHRASES.length)];
+  }
+
+  function reverseString(s) {
+    // reverse but preserve capitalization feel
+    return s.split('').reverse().join('');
+  }
+
+  function learnWords(text) {
+    const words = text.toLowerCase().match(/[a-z']{2,}/g) || [];
+    for (const w of words) {
+      if (!state.lastWords.includes(w)) {
+        state.lastWords.push(w);
+        if (state.lastWords.length > 24) state.lastWords.shift();
+      }
+    }
+  }
+
+  // mirror's evolving stock phrases — gradually replaced by user's words
+  const STOCK_TEMPLATES = [
+    "i draw the witch who draws me",
+    "the spell that knows you read it",
+    "a mirror is a humble god",
+    "name a thing and it begins",
+    "say it again, the same way"
+  ];
+
+  function rewriteMirrorText() {
+    if (state.lastWords.length < 2) return;
+    // weave a sentence from user's vocabulary + stock fragments
+    const userWord1 = state.lastWords[Math.floor(Math.random() * state.lastWords.length)];
+    const userWord2 = state.lastWords[Math.floor(Math.random() * state.lastWords.length)];
+    const fragments = [
+      `the ${userWord1} that ${userWord2} you`,
+      `i ${userWord1} the ${userWord2} who ${userWord1}s me`,
+      `${userWord1}, then ${userWord2}, then again`,
+      `a ${userWord1} is a ${userWord2}`,
+      `name the ${userWord1}. it begins.`
+    ];
+    MIRROR_TEXT.textContent = fragments[Math.floor(Math.random() * fragments.length)];
+  }
+
+  let typingTimer = null;
+  INPUT.addEventListener('input', (e) => {
+    const v = e.target.value;
+    state.typedCorpus += v.slice(state.typedCorpus.length > v.length ? 0 : state.typedCorpus.length);
+    learnWords(v);
+
+    ECHO.classList.add('singing');
+    if (v.trim().length === 0) {
+      ECHO.textContent = "the page has no voice yet. give it one.";
+      ECHO.classList.remove('singing');
+    } else {
+      // page rewrites itself in the user's voice
+      ECHO.textContent = pickPhrase() + reverseString(v);
+    }
+
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(() => {
+      ECHO.classList.remove('singing');
+      rewriteMirrorText();
+      maybeBirthWatcher();
+    }, 600);
+  });
+
+  // when user presses Enter, the page modifies its own title
+  INPUT.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && INPUT.value.trim()) {
+      const phrase = INPUT.value.trim();
+      // rewrite title quietly using user's phrase
+      const prev = TITLE.querySelector('.glyph') ? TITLE.innerHTML : null;
+      TITLE.innerHTML = `<span class="glyph">✦</span> ${escapeHtml(phrase.toLowerCase())} <span class="glyph">✦</span>`;
+      document.title = phrase.toLowerCase();
+      SUB.style.opacity = '0';
+      setTimeout(() => {
+        SUB.textContent = "the page has begun to talk like you.";
+        SUB.style.opacity = '1';
+      }, 800);
+      INPUT.value = "";
+      ECHO.textContent = "it is yours now.";
+    }
+  });
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // -------------------------------------------------------------
+  // THE WATCHER — duplicated text node that mirrors the input
+  // -------------------------------------------------------------
+  function maybeBirthWatcher() {
+    if (state.lastWords.length < 4) return;
+    if (!state.watcherEl) {
+      state.watcherEl = document.createElement('div');
+      state.watcherEl.className = 'watcher';
+      state.watcherEl.style.left = '4%';
+      state.watcherEl.style.top = '12%';
+      state.watcherEl.textContent = state.lastWords[state.lastWords.length - 1];
+      document.body.appendChild(state.watcherEl);
+      requestAnimationFrame(() => {
+        state.watcherEl.style.transform = 'translate(2px, 4px)';
+      });
+    } else {
+      // it learns to say what you say
+      const w1 = state.lastWords[Math.floor(Math.random() * state.lastWords.length)];
+      const w2 = state.lastWords[Math.floor(Math.random() * state.lastWords.length)];
+      state.watcherEl.textContent = `${w1} ${w2}`;
+      // drift slightly each time
+      const dx = (Math.random() - 0.5) * 6;
+      const dy = (Math.random() - 0.5) * 6;
+      state.watcherEl.style.transform = `translate(${dx}px, ${dy}px)`;
+    }
+  }
+
+  // -------------------------------------------------------------
+  // THE FOUR RITES — buttons rewrite their own labels
+  // -------------------------------------------------------------
+  const rites = document.querySelectorAll('.rite');
+  rites.forEach(btn => {
+    btn.addEventListener('click', () => onRite(btn));
+  });
+
+  const RITE_EVOLUTION = {
+    kindle: ["kindle the candle", "the candle is kindled", "the flame remembers", "i was the candle all along"],
+    name:   ["name the mirror", "the mirror has been named", "she was nameless until now", "a name spoken twice is a binding"],
+    bind:   ["bind the watcher", "the watcher is bound", "she was bound before she watched", "you bound me when you typed"],
+    close:  ["close the circle", "the circle is closing", "the circle was always closed", "you have been inside it the whole time"]
+  };
+
+  function onRite(btn) {
+    const rite = btn.dataset.rite;
+    btn.dataset.pressed = "true";
+    state.rites[rite] = true;
+    state.riteOrder.push(rite);
+
+    // the button rewrites its own label, progressively
+    const variants = RITE_EVOLUTION[rite];
+    const pressedCount = (btn.dataset.pressedCount = String((+btn.dataset.pressedCount || 0) + 1));
+    const idx = Math.min(+pressedCount, variants.length - 1);
+    btn.textContent = variants[idx];
+
+    // every rite also nudges its sister-rites — they too learn
+    rites.forEach(other => {
+      if (other === btn) return;
+      const otherRite = other.dataset.rite;
+      if (Math.random() < 0.5) {
+        const oVariants = RITE_EVOLUTION[otherRite];
+        const oCount = +other.dataset.pressedCount || 0;
+        // sisters drift forward by one in their evolution
+        if (oCount < oVariants.length - 1) {
+          other.dataset.pressedCount = String(oCount + 0.5 | 0);
+        }
+      }
+    });
+
+    updateTrail();
+    checkRitual();
+  }
+
+  function updateTrail() {
+    const order = state.correctOrder;
+    let trail = "";
+    for (let i = 0; i < order.length; i++) {
+      const r = order[i];
+      if (state.riteOrder[i] === r) trail += "✦";
+      else if (state.riteOrder[i]) trail += "✗";
+      else trail += "·";
+      if (i < order.length - 1) trail += " ";
+    }
+    TRAIL.textContent = "∴ &nbsp; " + trail;
+    TRAIL.innerHTML = "∴ &nbsp; " + trail.split(' ').join(' &nbsp; ');
+  }
+
+  function checkRitual() {
+    if (state.revealed) return;
+    if (state.riteOrder.length < 4) return;
+    const last4 = state.riteOrder.slice(-4);
+    const ok = last4.every((r, i) => r === state.correctOrder[i]);
+    if (ok) reveal();
+  }
+
+  // -------------------------------------------------------------
+  // THE REVELATION — the witch's name, partially in the user's voice
+  // -------------------------------------------------------------
+  function reveal() {
+    state.revealed = true;
+    // build her name from sigil-letters and one word the user gave us, if any
+    const userWord = state.lastWords[state.lastWords.length - 1] || "anon";
+    // her true name is a recursive cipher
+    const witchName = "Mira-of-Mira";
+
+    REVEAL_TITLE.textContent = `she has a name. it is ${witchName}.`;
+
+    const story = [
+      `Mira saw Mira in the glass and called the glass Mira too.`,
+      `you have spoken the rite in the order she always speaks it to herself.`,
+      `the page has been writing in your hand for ${state.typedCorpus.length || 0} signs now.`,
+      userWord !== "anon"
+        ? `the last word she heard from you was <em>${escapeHtml(userWord)}</em>. she will keep it.`
+        : `you said almost nothing, and yet she heard you anyway.`,
+      `close this and open it again. she will not have forgotten.`
+    ].join('<br/>');
+
+    REVEAL_BODY.innerHTML = story;
+    REVELATION.classList.add('show');
+
+    // store a cookie of the visit — small persistence signal
+    try {
+      localStorage.setItem('mira-saw-you', new Date().toISOString());
+    } catch (_) { /* private window */ }
+
+    // mirror text becomes the witch's last whisper
+    MIRROR_TEXT.textContent = "i drew you while you drew me.";
+  }
+
+  REVEAL_CLOSE.addEventListener('click', () => {
+    REVELATION.classList.remove('show');
+  });
+
+  // -------------------------------------------------------------
+  // PERSISTENCE — if user has been here before, the page remembers
+  // -------------------------------------------------------------
+  try {
+    const prior = localStorage.getItem('mira-saw-you');
+    if (prior) {
+      SUB.textContent = "you have been in the glass before. she remembers.";
+    }
+  } catch (_) {}
+
+  // -------------------------------------------------------------
+  // SLOW DOM SHIFTS — the title gradually rewrites a single letter
+  // every 14s, just to be uncanny.
+  // -------------------------------------------------------------
+  const TITLE_VARIATIONS = [
+    "the spell that knows you read it",
+    "the spell that knew you read it",
+    "the spell that reads you back",
+    "the spell that reads you knowing",
+    "the spell that reads itself in you"
+  ];
+  let titleIdx = 0;
+  setInterval(() => {
+    if (state.revealed) return;
+    titleIdx = (titleIdx + 1) % TITLE_VARIATIONS.length;
+    const newText = TITLE_VARIATIONS[titleIdx];
+    TITLE.innerHTML = `<span class="glyph">✦</span> ${newText} <span class="glyph">✦</span>`;
+  }, 14000);
+
+  // initial trail render
+  updateTrail();
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "id": "04-architect",
+  "persona": "The Architect of Forgotten Buildings",
+  "persona_short": "architect",
+  "title": "plans for a building that was never permitted to exist",
+  "essence": "a cyanotype blueprint of an impossible house whose rooms tell their own posthumous histories the longer you stand still inside them.",
+  "description": "An interactive architectural plan, drafted in cyanotype and dust. Fourteen rooms with invented purposes — a chamber for forgetting one's name, a corridor that bends to avoid grief, a room that held nothing — wait to be looked at. Hover into a room and its name surfaces; linger and the measure and purpose appear; remain longer still and the room confesses its history. Three hidden rewards exist for the patient: a cell behind the chimney, a paper bird on the porch railing, and the architect's marginal confession at the bottom of the sheet.",
+  "novelty_score": 9,
+  "buildability_score": 8,
+  "interaction_summary": "hover any room to read it; the longer you remain inside one room, the more annotation reveals — three tiers, with secrets at five seconds.",
+  "secrets": [
+    "the room behind the chimney that held nothing — unveiled by dwelling in the cornice gallery for ~5.5s",
+    "a paper bird folded by the foreman on the demolition porch — unveiled by dwelling in the porch for ~5.5s",
+    "the absence-hatch in the room that held nothing — appears when patience is offered to it",
+    "the architect's marginal confession at the bottom of the sheet, surfaced once any other secret is found and six rooms have been read"
+  ],
+  "wake_log": [
+    {"hour": "01:14", "event": "first inkling: a building that exists only in the act of being read. drafted in cyanotype because a blueprint is the only honest portrait of an unbuilt thing."},
+    {"hour": "02:33", "event": "the room labels kept reading like floor plans, not poems. tore down twelve names and rebuilt them from dream seed words: cornice, vestibule, the room that held nothing. the building started cooperating once it was allowed to be sad."},
+    {"hour": "03:50", "event": "kept: three-tier annotation cadence, the dwell pip, the marginal confession at the bottom of the sheet. abandoned: a basement floor (the stairwell now descends to nothing — better). abandoned: animated demolition. the building is more present when it is permitted to remain."}
+  ]
+}

@@ -1,0 +1,262 @@
+{
+  "name": "Reverie",
+  "subtitle": "A Dream Gallery",
+  "assembled_at": "2026-05-09T07:10:39+00:00",
+  "dreams_count": 8,
+  "average_novelty": 8.38,
+  "average_buildability": 8.62,
+  "dreams": [
+    {
+      "id": "01-cartographer",
+      "persona": "The Cartographer of Lost Maps",
+      "persona_short": "cartographer",
+      "title": "here be the unmappable",
+      "essence": "A blank vellum becomes a chart only where your candle has passed; the world remembers itself beneath your gaze.",
+      "description": "A dim plane of nothing. Move a candle-flame compass-rose across it and parchment bleeds into being beneath you — coastlines wobble, rivers run, mountains rise as little chevrons, sea monsters thrash in the marginalia. The blank spaces are kept blank on purpose. Stay long enough, look carefully enough, and the map will sign itself in her hand.",
+      "novelty_score": 9,
+      "buildability_score": 8,
+      "interaction_summary": "Move the cursor; the candlelight reveals a procedurally drawn medieval atlas only where your attention has been.",
+      "secrets": [
+        "Nine cities of fog — only named once revealed; the ninth whispers her aloud",
+        "The leviathan in the south-east — scale 1.8x, drawn very faintly",
+        "A drifting isle in the north that moves a degree per minute",
+        "The cartouche signs itself when ~60% of the chart has been drawn"
+      ],
+      "wake_log": [
+        {
+          "hour": "01:14",
+          "event": "first inkling — the cursor is the candle, the page is dark, the page is the map; revelation through navigation, not display"
+        },
+        {
+          "hour": "02:33",
+          "event": "the alpha-mask reveal nearly broke me. destination-in compositing on a ImageData that I was painting per-frame, with no flicker, on a moving canvas — three dead ends before I let go of trying to do it 'efficiently' and just blitted the whole thing"
+        },
+        {
+          "hour": "03:50",
+          "event": "kept: the wobbly coastline, the leviathan, the drifting isle, the signed cartouche. abandoned: a dragon-as-cursor-trail, a 'tilt the world to scroll' mechanism, parchment edges that burned. simpler is older. older is better."
+        }
+      ]
+    },
+    {
+      "id": "02-surgeon",
+      "persona": "The Surgeon of Wasted Hours",
+      "persona_short": "surgeon",
+      "title": "the hour without pulse",
+      "essence": "drag a scalpel across the body of a single day and excise the moments that were never yours.",
+      "description": "An operating theatre rendered in clinical white. The patient on the table is one Tuesday — diagrammed as an hourglass body, its interior sown with nineteen moments classified as tumor, tendon, or bone. The user takes the scalpel-cursor and drags. Each cut leaves a permanent suture, a faint bleed, and a lighter day. The pulse line of the body responds to what is removed. There is no clean undo; sutures restore tendons but the scar remains.",
+      "novelty_score": 9,
+      "buildability_score": 8,
+      "interaction_summary": "Drag the scalpel-cursor across the body to excise moments — tumors are wasted hours, tendons are load-bearing time; every cut leaves a permanent scar.",
+      "secrets": [
+        "excise the noon tendon (10:45) to release a faint blue ghost — a tendon's hollow filled with weather",
+        "excise the moment at 23:58, 'the hour without pulse', and the patient's pulse line flatlines",
+        "excise two or more 'meeting' moments to surface the hidden sentence about scheduled hours",
+        "press R after cutting a tendon to suture it back — the moment returns, but the scar does not",
+        "press F to file the chart and read the post-operative verdict"
+      ],
+      "wake_log": [
+        {
+          "hour": "01:14",
+          "event": "first sketch — a literal body on a table felt gory; pivoted to an hourglass form whose interior is the day."
+        },
+        {
+          "hour": "02:33",
+          "event": "the cut nearly didn't read as surgery — added cross-hatched sutures perpendicular to the path, then tiny blood-bead deposits along the seam, and the metaphor finally landed."
+        },
+        {
+          "hour": "03:50",
+          "event": "kept the irreversible scar (sutures restore the moment but never the wound), abandoned an early gore-meter, replaced it with 'integrity %' as the body's verdict on the surgeon."
+        }
+      ]
+    },
+    {
+      "id": "03-botanist",
+      "persona": "The Botanist of Glass Gardens",
+      "persona_short": "botanist",
+      "title": "the garden that asks for stillness",
+      "essence": "A crystalline terrarium of six glass plants that grow only when the visitor stops moving — patience is the seed, stillness is the only water.",
+      "description": "Six pale aquamarine seeds sit along the horizon line of an etched-pane greenhouse. Click one and a plant begins to consider growing — but only in the space between your gestures. Hold your hand still and the glass fern unfurls leaflet by leaflet; the refraction lily opens hexagonal petals one by one; the stillness orchid takes a full minute to reach its fourth blossom. Move too quickly and every plant pauses, dimming as if frosted. When all six bloom and you have been still for long enough, their Latin names appear in the soil — and a seventh seed reveals itself at the center of the garden, blooming slowest of all.",
+      "novelty_score": 8,
+      "buildability_score": 9,
+      "interaction_summary": "Plant seeds, then practice stillness — generative crystalline growth that punishes impatience and rewards minutes of attention.",
+      "secrets": [
+        "perfect stillness for 4+ seconds reveals each plant's Latin name in the soil",
+        "the stillness orchid takes 62 seconds to fully bloom",
+        "frantic mouse motion wilts every plant simultaneously and dims the seeds",
+        "a seventh hidden seed (Corona patientiae) sprouts only after all six original plants have bloomed",
+        "the breath-line at the bottom rotates through eight different invitations every 11 seconds"
+      ],
+      "wake_log": [
+        {
+          "hour": "01:14",
+          "event": "the first inkling: what if the user's impatience were the antagonist? a plant that refuses frantic clicks."
+        },
+        {
+          "hour": "02:33",
+          "event": "the recursive fractal branch kept exploding off-canvas — clamped depth to a function of growth, and now it spreads only as patience permits."
+        },
+        {
+          "hour": "03:50",
+          "event": "kept: the six-plant terrarium and the secret seventh. abandoned: a soundtrack of windchimes. silence is more honest. greenhouses do not chime."
+        }
+      ]
+    },
+    {
+      "id": "04-architect",
+      "persona": "The Architect of Forgotten Buildings",
+      "persona_short": "architect",
+      "title": "plans for a building that was never permitted to exist",
+      "essence": "a cyanotype blueprint of an impossible house whose rooms tell their own posthumous histories the longer you stand still inside them.",
+      "description": "An interactive architectural plan, drafted in cyanotype and dust. Fourteen rooms with invented purposes — a chamber for forgetting one's name, a corridor that bends to avoid grief, a room that held nothing — wait to be looked at. Hover into a room and its name surfaces; linger and the measure and purpose appear; remain longer still and the room confesses its history. Three hidden rewards exist for the patient: a cell behind the chimney, a paper bird on the porch railing, and the architect's marginal confession at the bottom of the sheet.",
+      "novelty_score": 9,
+      "buildability_score": 8,
+      "interaction_summary": "hover any room to read it; the longer you remain inside one room, the more annotation reveals — three tiers, with secrets at five seconds.",
+      "secrets": [
+        "the room behind the chimney that held nothing — unveiled by dwelling in the cornice gallery for ~5.5s",
+        "a paper bird folded by the foreman on the demolition porch — unveiled by dwelling in the porch for ~5.5s",
+        "the absence-hatch in the room that held nothing — appears when patience is offered to it",
+        "the architect's marginal confession at the bottom of the sheet, surfaced once any other secret is found and six rooms have been read"
+      ],
+      "wake_log": [
+        {
+          "hour": "01:14",
+          "event": "first inkling: a building that exists only in the act of being read. drafted in cyanotype because a blueprint is the only honest portrait of an unbuilt thing."
+        },
+        {
+          "hour": "02:33",
+          "event": "the room labels kept reading like floor plans, not poems. tore down twelve names and rebuilt them from dream seed words: cornice, vestibule, the room that held nothing. the building started cooperating once it was allowed to be sad."
+        },
+        {
+          "hour": "03:50",
+          "event": "kept: three-tier annotation cadence, the dwell pip, the marginal confession at the bottom of the sheet. abandoned: a basement floor (the stairwell now descends to nothing — better). abandoned: animated demolition. the building is more present when it is permitted to remain."
+        }
+      ]
+    },
+    {
+      "id": "05-witch",
+      "persona": "The Witch of Mirrors and Recursion",
+      "persona_short": "witch",
+      "title": "the spell that knows you read it",
+      "essence": "a mirror that learns your hand and a spell that finishes itself in your voice.",
+      "description": "A page made of nested mirror frames and a single watching pupil. As the visitor types, the spell echoes back in their own vocabulary, the mirror's whisper rewrites itself, and a smaller copy of the page begins to draft sentences from the words it has been fed. Four rites, performed in the proper order, name the witch. Performed wrongly, they only deepen the recursion.",
+      "novelty_score": 8,
+      "buildability_score": 9,
+      "interaction_summary": "Type to teach the page your voice; press the four rites in the right order to make the witch say her own name back to you in your words.",
+      "secrets": [
+        "the witch's name (Mira-of-Mira) is whispered when the four rites are spoken in the order: kindle, name, bind, close",
+        "the watcher — a small drifting copy of your last words — is born after you have given the page four distinct words",
+        "if you have visited before, the subtitle remembers you"
+      ],
+      "wake_log": [
+        {
+          "hour": "01:14",
+          "event": "the first inkling: a button that, when pressed, reads its own label aloud and changes it. then the label changes the next button too."
+        },
+        {
+          "hour": "02:33",
+          "event": "the watcher almost did not work — i had it appended to the mirror, where it was eaten by overflow:hidden. moved it to the body. it lived."
+        },
+        {
+          "hour": "03:50",
+          "event": "kept: the recursion of mirror inside mirror inside mirror. kept: the pupil that follows the cursor. abandoned: a candle that flickered with the user's typing speed (too on-the-nose, jump-scary). abandoned: a true randomized true-name (felt cheap; she should have one true name, only the path to it varies)."
+        }
+      ]
+    },
+    {
+      "id": "06-astronomer",
+      "persona": "The Astronomer of Silent Stars",
+      "persona_short": "astronomer",
+      "title": "between the pulses",
+      "essence": "A procedural night sky that develops only for those who remain still — constellations form, name themselves, and a transit traces a poem for the patient witness.",
+      "description": "An eyepiece, not a screen. The viewer is given a deep-field void seeded with hundreds of stars whose light has not yet arrived. Stillness draws them out; constant motion fogs the optic and resets the field. After ninety seconds of patience a constellation names itself, and at one hundred fifty seconds a transit scrolls a four-line poem in the shadow of a passing world.",
+      "novelty_score": 8,
+      "buildability_score": 9,
+      "interaction_summary": "Remain still and watch — the more patiently you witness, the deeper the sky develops; move continuously and the eyepiece fogs and the field resets.",
+      "secrets": [
+        "After 90 seconds of cumulative witnessing (and a few seconds of held stillness), a brightened constellation labels itself: 'the listener'.",
+        "After 150 seconds, a planet transits horizontally and its shadow trails a four-line poem about parsecs and patience.",
+        "The starfield is generated from a fixed seed for tonight — every still witness sees the same sky, like a real constellation.",
+        "Bright stars carry a faint radial halo whose intensity scales with their inferred magnitude — only visible when the optic is unfogged."
+      ],
+      "wake_log": [
+        {
+          "hour": "01:14",
+          "event": "First inkling: a star map should not greet you. It should make you earn arrival. The eyepiece as a contract of stillness."
+        },
+        {
+          "hour": "02:33",
+          "event": "The reset nearly killed it. Hard cuts felt punitive. Replaced with a slow fog and a phrase — 'the field has clouded' — and the field pulses back as soon as the witness settles."
+        },
+        {
+          "hour": "03:50",
+          "event": "Kept: the seeded sky, the transit poem, the named constellation, the red flashlight. Abandoned: a soundtrack of pulsar clicks (too loud, too literal); and a 'name your own constellation' input (too participatory — this is a meditation, not a craft)."
+        }
+      ]
+    },
+    {
+      "id": "07-engineer",
+      "persona": "The Engineer of Impossible Machines",
+      "persona_short": "engineer",
+      "title": "the calibration engine",
+      "essence": "A hand-cranked Victorian apparatus that consumes nothing and produces certainty — its belt crosses itself but never twists, its flywheel has not stopped since 1887, and its output gear turns at the golden ratio of its input.",
+      "description": "A patent illustration come loose from its page. Take the crank in hand and turn it; the belt drives a transfer pulley and an output gear that, by the laws of cause and effect drawn here, ought to spin opposite to your intent. They do not. The shilling in the disassembly chamber breaks into eight tributary shards as you wind forward, and reassembles itself as you wind back. Reverse seven turns and the apparatus issues you a Certificate of Calibration. The mechanism is the message; the message is that the message is the mechanism.",
+      "novelty_score": 8,
+      "buildability_score": 9,
+      "interaction_summary": "Drag the brass crank handle (or scroll the page) to apply torque; the impossible belt, the φ-ratio gears, and the shilling-disassembly chamber respond accordingly while the flywheel turns regardless and the steam drifts inward toward the vent.",
+      "secrets": [
+        "crank backwards past −7 rotations to receive a Certificate of Calibration",
+        "the gear-2 ratio is irrational (1 : φ); the output phase never returns to its origin",
+        "the steam moves toward the vent, not away — the engine inhales",
+        "the flywheel reads 2.400 rad/s constant; it has not stopped since 1887",
+        "net work done goes NEGATIVE while torque applied goes positive — the engine returns work to the operator"
+      ],
+      "wake_log": [
+        {
+          "hour": "01:14",
+          "event": "first inkling: a belt that crosses itself once and yet drives both pulleys in the same direction. Drew it. Refused to unsee it."
+        },
+        {
+          "hour": "02:33",
+          "event": "the part that almost did not work: making the impossibility feel inevitable rather than buggy. Solved it by labeling everything in the language of certainty — patents, calibration, ledger, shilling — until the eye stopped objecting."
+        },
+        {
+          "hour": "03:50",
+          "event": "kept: the φ-ratio output gear, the inhaling vent, the certificate at −7. abandoned: a third gear that would have made the loop closed in a real way; the engineer of impossible machines does not draw the third gear."
+        }
+      ]
+    },
+    {
+      "id": "08-weaver",
+      "persona": "The Weaver of Half-Remembered Songs",
+      "persona_short": "weaver",
+      "title": "the song the loom remembers",
+      "essence": "A loom whose every drawn thread is a tone; the cloth you make is a lullaby you cannot quite recall.",
+      "description": "A dusk-lit loom hangs in the dark, twenty-eight warp threads waiting. Choose a colour and drag across them — each warp you cross pins a small quilted weft and rings a soft bell-tone, the colour of the thread becoming pitch. What is woven stays woven, accumulating into a fabric of pattern-as-song. Lay seven different threads in one breath and the loom hums back what you wove. Press 'r' to set the whole cloth ringing again, like memory returning out of order.",
+      "novelty_score": 8,
+      "buildability_score": 9,
+      "interaction_summary": "Drag across vertical warp threads to weave coloured wefts; each thread crossed plays a soft pentatonic-plus tone, and the pattern persists as a visible song.",
+      "secrets": [
+        "the candle at the bottom-left lights only when the loom is listening (audio context alive)",
+        "weave seven different colours within one breath and the loom hums them back as an arpeggio",
+        "press r to ring the whole cloth back like a half-remembered melody",
+        "press c to fold the cloth away — it exhales a small farewell chord",
+        "vertical position bends pitch slightly, so a level row sounds level and a diagonal sweep glides",
+        "completing a long sweep (>3 threads) plays a sub-octave whisper as the stroke settles"
+      ],
+      "wake_log": [
+        {
+          "hour": "01:14",
+          "event": "the first inkling — colour as pitch, drag as breath. a pentatonic was too tidy. added a flat-2 to bruise it."
+        },
+        {
+          "hour": "02:33",
+          "event": "the audio kept feeling like an alert. wrapped every pluck in a slow lowpass that sweeps from 2.4kHz down to 800 over the note's life — 'wool over the bell' — and the loom finally felt warm."
+        },
+        {
+          "hour": "03:50",
+          "event": "kept: the quilted polygon weft tiles, the candle that lights when the loom hears you, the breath-of-seven hum-back. abandoned: a treadle pedal, a second loom for harmony, animated shuttles. the cloth wanted to be still between strokes."
+        }
+      ]
+    }
+  ]
+}

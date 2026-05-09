@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Eight — Reverie</title>
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    .personas {
+      max-width: 50rem;
+      margin: 0 auto;
+      padding: 5rem 2rem 8rem;
+    }
+    .personas-title {
+      font-family: var(--type-display);
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 300;
+      letter-spacing: 0.3em;
+      text-align: center;
+      text-transform: uppercase;
+      margin: 0 0 0.5rem;
+    }
+    .personas-sub {
+      text-align: center;
+      font-style: italic;
+      color: var(--hall-ink-dim);
+      margin-bottom: 4rem;
+    }
+    .persona {
+      border: 1px solid var(--hall-rule);
+      padding: 2rem 2rem 2rem 3.5rem;
+      margin-bottom: 2rem;
+      position: relative;
+      background: rgba(255,255,255,0.01);
+    }
+    .persona::before {
+      content: attr(data-roman);
+      position: absolute;
+      top: 1.2rem;
+      left: 1rem;
+      font-family: var(--type-mono);
+      font-size: 0.85rem;
+      letter-spacing: 0.2em;
+      color: var(--hall-ink-faint);
+      writing-mode: vertical-lr;
+    }
+    .persona h2 {
+      font-family: var(--type-display);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 1.6rem;
+      margin: 0 0 0.3rem;
+      color: var(--hall-ink);
+    }
+    .persona .title {
+      font-family: var(--type-mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.18em;
+      text-transform: lowercase;
+      color: var(--hall-gold);
+      margin-bottom: 1rem;
+    }
+    .persona .quote {
+      font-style: italic;
+      color: var(--hall-ink-dim);
+      border-left: 2px solid var(--hall-ink-faint);
+      padding-left: 1rem;
+      margin: 1rem 0;
+    }
+    .persona .meta {
+      display: grid;
+      grid-template-columns: 6rem 1fr;
+      gap: 0.5rem 1.5rem;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+    }
+    .persona .meta dt { color: var(--hall-ink-faint); font-family: var(--type-mono); font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; align-self: center; }
+    .persona .meta dd { margin: 0; color: var(--hall-ink-dim); }
+    .persona .palette {
+      display: flex; gap: 0.4rem; flex-wrap: wrap;
+    }
+    .swatch {
+      width: 1.4rem; height: 1.4rem; display: inline-block; border: 1px solid rgba(255,255,255,0.1);
+    }
+    .persona a.enter {
+      display: inline-block;
+      margin-top: 1rem;
+      font-family: var(--type-mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--hall-gold);
+      border: none;
+      border-bottom: 1px solid currentColor;
+    }
+    .back {
+      display: block;
+      text-align: center;
+      margin-top: 4rem;
+      font-family: var(--type-mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      color: var(--hall-ink-dim);
+    }
+  </style>
+</head>
+<body>
+  <div class="starfield" aria-hidden="true"></div>
+
+  <main class="personas">
+    <h1 class="personas-title">The Eight</h1>
+    <p class="personas-sub">Each dreamer was given a name, a palette, and a single instruction.</p>
+    <div id="personas-list"></div>
+    <a class="back" href="../">← back to the hall of reverie</a>
+  </main>
+
+  <script>
+    const ROMANS = ["I","II","III","IV","V","VI","VII","VIII"];
+    fetch("../meta/personas.json")
+      .then(r => r.json())
+      .then(({ personas }) => {
+        const list = document.getElementById("personas-list");
+        personas.forEach((p, i) => {
+          const el = document.createElement("article");
+          el.className = "persona";
+          el.dataset.roman = ROMANS[i] || (i+1);
+          const palette = Object.entries(p.palette || {}).filter(([k,v]) => typeof v === "string" && v.startsWith("#"));
+          el.innerHTML = `
+            <h2>${p.name}</h2>
+            <div class="title">${p.title}</div>
+            <p class="quote">${p.philosophy}</p>
+            <dl class="meta">
+              <dt>aesthetic</dt><dd>${p.aesthetic}</dd>
+              <dt>signature</dt><dd>${p.signature_interaction}</dd>
+              <dt>palette</dt><dd class="palette">${palette.map(([k,v]) => `<span class="swatch" style="background:${v}" title="${k}: ${v}"></span>`).join("")}</dd>
+              <dt>seeds</dt><dd>${(p.dream_seed_words || []).join(" · ")}</dd>
+            </dl>
+            <a class="enter" href="../dreams/${p.id}/">enter the ${p.persona_short || p.name.split(" ").slice(-1)[0].toLowerCase()}'s dream →</a>
+          `;
+          list.appendChild(el);
+        });
+      });
+  </script>
+</body>
+</html>

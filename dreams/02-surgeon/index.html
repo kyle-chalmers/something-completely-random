@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Hour Without Pulse — A Surgery on Time</title>
+<link rel="stylesheet" href="../../style.css" />
+<style>
+  /* ============================================================
+     persona signature override — clinical inversion of the hall
+     ============================================================ */
+  :root {
+    --bg:       #f4f5f7;   /* clinical white     */
+    --bg-deep: #e9ebee;    /* tray steel         */
+    --steel:   #1c2733;    /* instruments        */
+    --steel-2: #2c3645;
+    --ink:     #0a0e14;
+    --ink-dim: #6a7384;
+    --ink-faint:#aab2bf;
+    --rule:    #c9cdd3;
+    --blood:   #a02c2c;
+    --vein:    #3a72a8;
+    --incision:#000000;
+    --gauze:   #faf9f4;
+
+    --type-clinical: "Helvetica Neue", "Inter", system-ui, sans-serif;
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--type-clinical);
+    font-weight: 300;
+    overflow: hidden;
+    height: 100%;
+    cursor: none;
+  }
+  body {
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(255,255,255,1), transparent 60%),
+      radial-gradient(ellipse at 50% 100%, rgba(58,114,168,0.05), transparent 60%),
+      var(--bg);
+  }
+
+  /* override shared classes for the clinical theme */
+  .return-ribbon {
+    background: rgba(255,255,255,0.85);
+    color: var(--steel);
+    border: 1px solid var(--rule);
+    backdrop-filter: blur(6px);
+    cursor: none;
+  }
+  .return-ribbon:hover { color: var(--blood); }
+
+  .wake-log-toggle {
+    background: rgba(255,255,255,0.85);
+    color: var(--steel);
+    border: 1px solid var(--rule);
+    backdrop-filter: blur(6px);
+    cursor: none;
+  }
+  .wake-log {
+    background: rgba(255,255,255,0.97);
+    border: 1px solid var(--rule);
+    color: var(--ink-dim);
+    font-family: var(--type-mono);
+    box-shadow: 0 30px 80px -30px rgba(28,39,51,0.25);
+  }
+  .wake-log h3 { color: var(--steel); font-family: var(--type-clinical); font-style: normal; letter-spacing: 0.2em; text-transform: uppercase; font-size: 0.8rem; }
+  .wake-log dt { color: var(--steel); }
+
+  /* -------- the operating theatre -------- */
+
+  .theatre {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    padding: 4.5rem 3rem 3rem;
+  }
+
+  /* chart header */
+  .chart {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: end;
+    gap: 2rem;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 1rem;
+    font-family: var(--type-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+  .chart .left  { text-align: left;   line-height: 1.7; }
+  .chart .right { text-align: right;  line-height: 1.7; }
+  .chart .title-block {
+    text-align: center;
+    border-left: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+    padding: 0 2rem;
+  }
+  .chart h1 {
+    font-family: var(--type-clinical);
+    font-weight: 200;
+    font-size: 1.4rem;
+    letter-spacing: 0.4em;
+    margin: 0 0 .3rem;
+    color: var(--steel);
+    text-transform: uppercase;
+  }
+  .chart .subtitle {
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: 0.05em;
+    color: var(--ink-dim);
+  }
+  .chart .vital {
+    color: var(--steel);
+    font-weight: 500;
+  }
+  .pulse-dot {
+    display:inline-block;
+    width:6px;height:6px;
+    background:var(--blood);
+    border-radius:50%;
+    margin-right:.4rem;
+    transform:translateY(-1px);
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform:translateY(-1px) scale(1); }
+    50%     { opacity: 0.3; transform:translateY(-1px) scale(0.6); }
+  }
+
+  /* operating table */
+  .table-wrap {
+    position: relative;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+  svg.body {
+    width: min(100%, 60rem);
+    height: 100%;
+    max-height: 70vh;
+    overflow: visible;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* heart monitor strip */
+  .ekg {
+    position: relative;
+    height: 3rem;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    margin-top: 1rem;
+    overflow: hidden;
+    background:
+      linear-gradient(0deg, transparent 49%, rgba(28,39,51,0.06) 50%, transparent 51%);
+  }
+  .ekg svg { position:absolute; inset:0; width:100%; height:100%; }
+
+  /* footer instruments tray */
+  .tray {
+    margin-top: 1rem;
+    padding-top: .8rem;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--type-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+  .tray-instructions {
+    color: var(--steel);
+  }
+  .tray-instructions kbd {
+    font-family: var(--type-mono);
+    font-size: 0.65rem;
+    border: 1px solid var(--rule);
+    background: var(--gauze);
+    padding: 1px 6px;
+    color: var(--steel);
+    margin: 0 .2rem;
+  }
+  .tally {
+    display: flex;
+    gap: 2rem;
+  }
+  .tally span b {
+    color: var(--steel);
+    font-weight: 500;
+    margin-left: .3rem;
+  }
+  .tally .blood-tally b { color: var(--blood); }
+
+  /* the cursor — a scalpel that follows the pointer */
+  .scalpel {
+    position: fixed;
+    top: 0; left: 0;
+    width: 56px; height: 56px;
+    pointer-events: none;
+    z-index: 9000;
+    transform: translate(-12px, -12px);
+    will-change: transform;
+  }
+  .scalpel.cutting { filter: drop-shadow(0 0 4px rgba(160,44,44,0.55)); }
+
+  /* legend / dossier in corner */
+  .dossier {
+    position: absolute;
+    left: 2.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--type-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    line-height: 2;
+    pointer-events: none;
+    border-left: 1px solid var(--rule);
+    padding-left: 1rem;
+  }
+  .dossier .swatch {
+    display: inline-block;
+    width: 10px; height: 10px;
+    margin-right: .5rem;
+    transform: translateY(1px);
+  }
+  .dossier .swatch.tumor  { background: var(--blood); }
+  .dossier .swatch.tendon { background: var(--vein); }
+  .dossier .swatch.scar   { background: var(--ink); }
+
+  /* the floating verdict */
+  .verdict {
+    position: absolute;
+    right: 2.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16rem;
+    font-family: var(--type-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    color: var(--ink-dim);
+    text-align: right;
+    border-right: 1px solid var(--rule);
+    padding-right: 1rem;
+    pointer-events: none;
+  }
+  .verdict .label {
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--steel);
+    margin-bottom: .4rem;
+    font-size: .65rem;
+  }
+  .verdict .quote {
+    font-family: var(--type-clinical);
+    font-style: italic;
+    color: var(--steel);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    min-height: 5em;
+  }
+
+  /* hover tooltip on a moment */
+  .moment-label {
+    position: absolute;
+    transform: translate(-50%, -120%);
+    background: var(--gauze);
+    border: 1px solid var(--rule);
+    padding: .35rem .6rem;
+    font-family: var(--type-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--steel);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 120ms ease;
+    z-index: 50;
+  }
+  .moment-label.show { opacity: 1; }
+  .moment-label::after {
+    content:"";
+    position:absolute;
+    left:50%; bottom:-4px;
+    width:6px; height:6px;
+    background: var(--gauze);
+    border-right:1px solid var(--rule);
+    border-bottom:1px solid var(--rule);
+    transform: translateX(-50%) rotate(45deg);
+  }
+
+  /* anesthesia overlay (intro) */
+  .anesthesia {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    z-index: 11000;
+    display: grid;
+    place-items: center;
+    transition: opacity 1.6s ease;
+    cursor: none;
+  }
+  .anesthesia.fade { opacity: 0; pointer-events: none; }
+  .anesthesia .panel {
+    text-align: center;
+    max-width: 30rem;
+    padding: 2rem;
+  }
+  .anesthesia h2 {
+    font-family: var(--type-clinical);
+    font-weight: 200;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    font-size: 1.1rem;
+    color: var(--steel);
+    margin: 0 0 1rem;
+  }
+  .anesthesia p {
+    font-family: var(--type-mono);
+    font-size: .8rem;
+    line-height: 1.7;
+    color: var(--ink-dim);
+    margin: 0 0 1.5rem;
+  }
+  .anesthesia button {
+    background: transparent;
+    border: 1px solid var(--steel);
+    color: var(--steel);
+    padding: .7rem 1.4rem;
+    font-family: var(--type-mono);
+    font-size: .7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    cursor: none;
+    transition: background 200ms ease, color 200ms ease;
+  }
+  .anesthesia button:hover {
+    background: var(--steel);
+    color: var(--bg);
+  }
+  .anesthesia .seed {
+    font-family: var(--type-mono);
+    font-size: .65rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-top: 2.5rem;
+  }
+
+  /* the closing dialog when surgery completes */
+  .post-op {
+    position: fixed; inset: 0;
+    background: rgba(244,245,247,0.92);
+    backdrop-filter: blur(4px);
+    z-index: 10500;
+    display: none;
+    place-items: center;
+  }
+  .post-op.show { display: grid; }
+  .post-op .panel {
+    background: var(--gauze);
+    border: 1px solid var(--rule);
+    padding: 2.5rem 3rem;
+    max-width: 32rem;
+    box-shadow: 0 30px 80px -30px rgba(28,39,51,0.25);
+    text-align: center;
+  }
+  .post-op h2 {
+    font-family: var(--type-clinical);
+    font-weight: 200;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    font-size: 1rem;
+    color: var(--steel);
+    margin: 0 0 1.2rem;
+  }
+  .post-op .summary {
+    font-family: var(--type-mono);
+    font-size: .75rem;
+    color: var(--ink-dim);
+    line-height: 1.8;
+    text-align: left;
+    border: 1px solid var(--rule);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .post-op .summary b { color: var(--steel); }
+  .post-op .epigraph {
+    font-family: var(--type-clinical);
+    font-style: italic;
+    color: var(--steel);
+    font-size: .95rem;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+  }
+  .post-op button {
+    background: var(--steel);
+    color: var(--bg);
+    border: none;
+    padding: .7rem 1.4rem;
+    font-family: var(--type-mono);
+    font-size: .7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    cursor: none;
+  }
+
+  @media (max-width: 760px) {
+    .theatre { padding: 4rem 1rem 1.5rem; }
+    .chart { grid-template-columns: 1fr; }
+    .chart .title-block { border: none; padding: 0; }
+    .dossier, .verdict { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pulse-dot { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<a class="return-ribbon" href="../../">← Hall of Reverie</a>
+
+<button class="wake-log-toggle" onclick="document.querySelector('.wake-log').classList.toggle('open')">📜 wake log</button>
+<aside class="wake-log">
+  <h3>The Surgeon of Wasted Hours</h3>
+  <p style="font-style:italic;color:var(--ink-dim)">"the trick is knowing which scar makes the body more itself"</p>
+  <dl>
+    <dt>title</dt><dd>the hour without pulse</dd>
+    <dt>made</dt><dd>9 may 2026 · the small hours</dd>
+    <dt>essence</dt><dd>drag a scalpel across the body of a single day and excise the moments that were never yours.</dd>
+    <dt>secrets</dt><dd>excise the noon tendon to reveal the blue ghost; remove every scheduled hour to surface the hidden sentence; press <b>R</b> to listen to the room.</dd>
+  </dl>
+</aside>
+
+<!-- anesthesia intro -->
+<div class="anesthesia" id="anesthesia">
+  <div class="panel">
+    <h2>Anesthesia</h2>
+    <p>
+      The patient on the table is a single day.<br/>
+      Take the scalpel. Drag across the moments<br/>
+      that did not belong to you.<br/><br/>
+      What you remove will not return.<br/>
+      Each cut leaves a scar.
+    </p>
+    <button id="begin-btn">Begin the operation</button>
+    <div class="seed">incision · suture · tendon · the hour without pulse</div>
+  </div>
+</div>
+
+<!-- post-op dialog -->
+<div class="post-op" id="postop">
+  <div class="panel">
+    <h2>Post-Operative Notes</h2>
+    <div class="epigraph" id="epigraph">"The body is more itself."</div>
+    <div class="summary" id="summary"></div>
+    <button id="close-btn">Close the chart</button>
+  </div>
+</div>
+
+<!-- the theatre -->
+<main class="theatre" id="theatre" aria-hidden="false">
+  <header class="chart">
+    <div class="left">
+      <div>Patient · <span class="vital">Tuesday, the 9th of May</span></div>
+      <div>Admitted · <span class="vital" id="admitTime">03:14</span></div>
+      <div>Diagnosis · <span class="vital">surplus of allotted hours</span></div>
+    </div>
+    <div class="title-block">
+      <h1>The Hour Without Pulse</h1>
+      <div class="subtitle">a surgery on a single day</div>
+    </div>
+    <div class="right">
+      <div><span class="pulse-dot"></span><span class="vital" id="vitalTime">24:00:00 remaining</span></div>
+      <div>Surgeon · <span class="vital">K.D.C., M.D. (of hours)</span></div>
+      <div>Theater · <span class="vital">02 of 08</span></div>
+    </div>
+  </header>
+
+  <section class="table-wrap" id="tableWrap">
+
+    <div class="dossier">
+      <div><span class="swatch tumor"></span>tumor — to be excised</div>
+      <div><span class="swatch tendon"></span>tendon — load-bearing</div>
+      <div><span class="swatch scar"></span>scar — the absence remains</div>
+    </div>
+
+    <div class="verdict">
+      <div class="label">Surgical Note</div>
+      <div class="quote" id="quote">"The body is patient. Begin where it hurts least."</div>
+    </div>
+
+    <svg class="body" id="body" viewBox="0 0 1000 560" preserveAspectRatio="xMidYMid meet">
+      <!-- decorative grid -->
+      <defs>
+        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(28,39,51,0.05)" stroke-width="1"/>
+        </pattern>
+        <linearGradient id="hourglassFill" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="100%" stop-color="#e9ebee"/>
+        </linearGradient>
+        <filter id="bleed" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="0.6"/>
+        </filter>
+      </defs>
+
+      <rect x="0" y="0" width="1000" height="560" fill="url(#grid)"/>
+
+      <!-- table edge -->
+      <line x1="60" y1="510" x2="940" y2="510" stroke="#1c2733" stroke-width="1.5"/>
+      <line x1="60" y1="514" x2="940" y2="514" stroke="rgba(28,39,51,0.2)" stroke-width="0.5"/>
+
+      <!-- the body of time: an hourglass-shaped form -->
+      <g id="bodyShape">
+        <!-- outer outline -->
+        <path id="outline"
+              d="M 220,80 L 780,80 L 560,280 L 780,480 L 220,480 L 440,280 Z"
+              fill="url(#hourglassFill)"
+              stroke="#1c2733"
+              stroke-width="1.5"/>
+        <!-- midline incision guide (faint) -->
+        <line x1="500" y1="80" x2="500" y2="480" stroke="rgba(28,39,51,0.15)" stroke-width="0.5" stroke-dasharray="2 4"/>
+        <!-- subtle pulse line through the body, like an EKG -->
+        <path id="pulseLine"
+              d="M 220,280 L 380,280 L 400,260 L 420,300 L 440,200 L 460,280 L 560,280 L 580,260 L 600,300 L 620,200 L 640,280 L 780,280"
+              fill="none"
+              stroke="#a02c2c"
+              stroke-width="0.8"
+              opacity="0.35"/>
+      </g>
+
+      <!-- moments group, populated by JS -->
+      <g id="moments"></g>
+
+      <!-- scars group, populated by JS -->
+      <g id="scars"></g>
+
+      <!-- live cut path while dragging -->
+      <path id="liveCut" fill="none" stroke="var(--blood)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+
+      <!-- hour labels -->
+      <g font-family="ui-monospace, Menlo, monospace" font-size="9" fill="#6a7384" letter-spacing="2">
+        <text x="220" y="72" text-anchor="middle">00:00</text>
+        <text x="500" y="72" text-anchor="middle">06:00</text>
+        <text x="780" y="72" text-anchor="middle">12:00</text>
+        <text x="220" y="498" text-anchor="middle">18:00</text>
+        <text x="500" y="498" text-anchor="middle">23:59</text>
+        <text x="780" y="498" text-anchor="middle">12:00</text>
+      </g>
+    </svg>
+
+    <div class="moment-label" id="momentLabel"></div>
+  </section>
+
+  <div class="ekg">
+    <svg viewBox="0 0 1000 60" preserveAspectRatio="none">
+      <path id="ekgPath" d="M 0 30 L 1000 30" fill="none" stroke="#a02c2c" stroke-width="1.2" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <footer class="tray">
+    <div class="tray-instructions">
+      <kbd>drag</kbd> to incise · <kbd>R</kbd> to suture (only what insists on staying) · <kbd>F</kbd> file the chart
+    </div>
+    <div class="tally">
+      <span>excised <b id="cutCount">0</b></span>
+      <span class="blood-tally">minutes lost <b id="minLost">000</b></span>
+      <span>integrity <b id="integrity">100%</b></span>
+    </div>
+  </footer>
+</main>
+
+<!-- scalpel cursor -->
+<svg class="scalpel" id="scalpel" viewBox="0 0 56 56" aria-hidden="true">
+  <!-- handle -->
+  <rect x="6" y="36" width="22" height="4" rx="1" fill="#1c2733"/>
+  <rect x="6" y="40" width="22" height="2" fill="#2c3645"/>
+  <!-- ferrule -->
+  <rect x="26" y="34" width="4" height="8" fill="#0a0e14"/>
+  <!-- blade -->
+  <path d="M 30 34 L 50 28 L 52 36 L 30 42 Z" fill="#e2e6ec" stroke="#1c2733" stroke-width="0.8"/>
+  <!-- tip glint -->
+  <circle cx="50" cy="30" r="0.8" fill="#fff"/>
+  <!-- a single bead at the tip -->
+  <circle id="bead" cx="50" cy="30" r="0" fill="#a02c2c"/>
+</svg>
+
+<script>
+/* ============================================================
+   The Surgeon of Wasted Hours
+   He who operates on the body of time.
+   ============================================================ */
+(() => {
+  const svg        = document.getElementById('body');
+  const momentsG   = document.getElementById('moments');
+  const scarsG     = document.getElementById('scars');
+  const liveCut    = document.getElementById('liveCut');
+  const scalpel    = document.getElementById('scalpel');
+  const bead       = document.getElementById('bead');
+  const ekgPath    = document.getElementById('ekgPath');
+  const quoteEl    = document.getElementById('quote');
+  const vitalTime  = document.getElementById('vitalTime');
+  const cutCountEl = document.getElementById('cutCount');
+  const minLostEl  = document.getElementById('minLost');
+  const integrityEl= document.getElementById('integrity');
+  const momentLabel= document.getElementById('momentLabel');
+  const tableWrap  = document.getElementById('tableWrap');
+  const anesthesia = document.getElementById('anesthesia');
+  const beginBtn   = document.getElementById('begin-btn');
+  const postop     = document.getElementById('postop');
+  const epigraph   = document.getElementById('epigraph');
+  const summaryEl  = document.getElementById('summary');
+  const closeBtn   = document.getElementById('close-btn');
+
+  /* ---------- the day's moments, distributed along the hourglass body ---------- */
+  /* Each moment lives at a (relative) point on the timeline, classified as
+     tumor (waste — color blood), tendon (load-bearing — color vein), or
+     bone (neutral — color steel). The hourglass body is two triangles:
+     top   apex at (500,280),  base from (220,80)→(780,80)
+     bottom apex at (500,280), base from (220,480)→(780,480)
+     We map hours 0..24 along this perimeter.                           */
+
+  // perimeter sample helper: build a list of points along the outline at hour
+  // intervals so each moment sits on the body's surface.
+  function pointForHour(h) {
+    // 0..6 across top edge: (220..780, 80)
+    if (h <= 6)  return { x: 220 + (h/6)*560, y: 80 };
+    // 6..12 down right diagonal to apex: (780,80)→(560,280)
+    if (h <= 12) return { x: 780 - ((h-6)/6)*220, y: 80 + ((h-6)/6)*200 };
+    // 12..18 down right of bottom triangle: (560,280)→(780,480)
+    if (h <= 18) return { x: 560 + ((h-12)/6)*220, y: 280 + ((h-12)/6)*200 };
+    // 18..24 across bottom edge backwards: (780,480)→(220,480) — but typed forward
+    // We instead want hours 18..24 to wrap; let's continue along a logical loop:
+    return { x: 780 - ((h-18)/6)*560, y: 480 };
+  }
+
+  // We'll embed moments INSIDE the body instead — points distributed
+  // through the interior, each labeled with an hour and a kind.
+  const moments = [
+    { id:'m1',  hour:'01:14', label:'a thought you did not finish',                kind:'tumor',  x:280, y:130 },
+    { id:'m2',  hour:'02:33', label:'the hour you scrolled to forget',             kind:'tumor',  x:380, y:170 },
+    { id:'m3',  hour:'03:50', label:'a sentence written, then deleted',            kind:'tumor',  x:600, y:130 },
+    { id:'m4',  hour:'05:00', label:'the dawn — load-bearing',                     kind:'tendon', x:480, y:200 },
+    { id:'m5',  hour:'06:42', label:'coffee — keep',                                kind:'tendon', x:530, y:230 },
+    { id:'m6',  hour:'08:11', label:'a meeting that should have been a memo',      kind:'tumor',  x:430, y:215 },
+    { id:'m7',  hour:'09:30', label:'a meeting about the meeting',                  kind:'tumor',  x:560, y:240 },
+    { id:'m8',  hour:'10:45', label:'the noon tendon — careful',                   kind:'tendon', x:500, y:275 },
+    { id:'m9',  hour:'12:00', label:'lunch alone, in your car',                    kind:'tumor',  x:500, y:300 },
+    { id:'m10', hour:'13:20', label:'an apology you owed yourself',                kind:'tendon', x:445, y:325 },
+    { id:'m11', hour:'14:55', label:'an argument relived',                          kind:'tumor',  x:600, y:340 },
+    { id:'m12', hour:'15:30', label:'fifteen minutes you cannot account for',      kind:'tumor',  x:380, y:360 },
+    { id:'m13', hour:'16:18', label:'a song that found you',                       kind:'tendon', x:520, y:380 },
+    { id:'m14', hour:'17:45', label:'a regret you rehearsed',                      kind:'tumor',  x:300, y:430 },
+    { id:'m15', hour:'19:02', label:'the walk you almost did not take',            kind:'tendon', x:460, y:445 },
+    { id:'m16', hour:'20:30', label:'an hour at the table, fed',                   kind:'tendon', x:580, y:430 },
+    { id:'m17', hour:'21:45', label:'doomscroll, second pass',                     kind:'tumor',  x:660, y:445 },
+    { id:'m18', hour:'22:33', label:'the page you read twice',                     kind:'tendon', x:720, y:430 },
+    { id:'m19', hour:'23:58', label:'the hour without pulse',                      kind:'tumor',  x:520, y:135, secret:'pulseless' },
+  ];
+
+  // moment kind palette
+  const KIND = {
+    tumor:  { fill:'#a02c2c', stroke:'#7a1f1f', r:6 },
+    tendon: { fill:'#3a72a8', stroke:'#26527e', r:5 },
+    bone:   { fill:'#1c2733', stroke:'#0a0e14', r:4 },
+  };
+
+  // render moments
+  for (const m of moments) {
+    const k = KIND[m.kind];
+    const ns = 'http://www.w3.org/2000/svg';
+    const g = document.createElementNS(ns, 'g');
+    g.setAttribute('class', 'moment');
+    g.setAttribute('data-id', m.id);
+    g.setAttribute('data-kind', m.kind);
+    g.setAttribute('data-hour', m.hour);
+    g.setAttribute('data-label', m.label);
+    g.setAttribute('transform', `translate(${m.x},${m.y})`);
+
+    // halo (faint)
+    const halo = document.createElementNS(ns,'circle');
+    halo.setAttribute('r', k.r + 4);
+    halo.setAttribute('fill','none');
+    halo.setAttribute('stroke', k.fill);
+    halo.setAttribute('stroke-width','0.6');
+    halo.setAttribute('opacity','0.18');
+    g.appendChild(halo);
+
+    // dot
+    const c = document.createElementNS(ns,'circle');
+    c.setAttribute('r', k.r);
+    c.setAttribute('fill', k.fill);
+    c.setAttribute('stroke', k.stroke);
+    c.setAttribute('stroke-width','0.8');
+    g.appendChild(c);
+
+    // hour text (only on hover via JS)
+    momentsG.appendChild(g);
+  }
+
+  /* ---------- pointer-following scalpel ---------- */
+  let pointer = { x: window.innerWidth/2, y: window.innerHeight/2 };
+  document.addEventListener('pointermove', (e) => {
+    pointer.x = e.clientX; pointer.y = e.clientY;
+    scalpel.style.transform = `translate(${e.clientX - 12}px, ${e.clientY - 12}px)`;
+    if (cutting) onCutMove(e);
+    else        onHoverMoments(e);
+  });
+
+  /* ---------- hover detection on moments ---------- */
+  function onHoverMoments(e) {
+    const sp = svgPoint(e.clientX, e.clientY);
+    let hit = null;
+    for (const g of momentsG.querySelectorAll('.moment')) {
+      if (g.classList.contains('excised')) continue;
+      const t = g.getAttribute('transform');
+      const m = /translate\(([\-\d.]+),([\-\d.]+)\)/.exec(t);
+      const cx = +m[1], cy = +m[2];
+      const r = +KIND[g.getAttribute('data-kind')].r + 8;
+      if ((sp.x-cx)**2 + (sp.y-cy)**2 < r*r) { hit = { g, cx, cy }; break; }
+    }
+    if (hit) {
+      const rect = svg.getBoundingClientRect();
+      const sx = rect.left + (hit.cx / 1000) * rect.width;
+      const sy = rect.top  + (hit.cy / 560)  * rect.height;
+      momentLabel.textContent = hit.g.getAttribute('data-hour') + ' · ' + hit.g.getAttribute('data-label');
+      momentLabel.style.left = sx + 'px';
+      momentLabel.style.top  = sy + 'px';
+      momentLabel.classList.add('show');
+    } else {
+      momentLabel.classList.remove('show');
+    }
+  }
+
+  /* ---------- screen→svg mapping ---------- */
+  function svgPoint(clientX, clientY) {
+    const pt = svg.createSVGPoint();
+    pt.x = clientX; pt.y = clientY;
+    const ctm = svg.getScreenCTM().inverse();
+    return pt.matrixTransform(ctm);
+  }
+
+  /* ---------- cutting state ---------- */
+  let cutting = false;
+  let cutPath = [];
+  let totalCuts = 0;
+  let totalMinutesLost = 0;
+  let excisedKinds = { tumor:0, tendon:0, bone:0 };
+  let lastCutWasTendon = false;
+  let pulselessRevealed = false;
+  let totalScheduledRemoved = 0;
+  let secretMessageShown = false;
+
+  // start cutting on pointerdown anywhere over the table
+  tableWrap.addEventListener('pointerdown', (e) => {
+    if (anesthesia.classList.contains('fade') === false) return;
+    cutting = true;
+    cutPath = [svgPoint(e.clientX, e.clientY)];
+    redrawLiveCut();
+    scalpel.classList.add('cutting');
+    bead.setAttribute('r','1.6');
+    momentLabel.classList.remove('show');
+  });
+
+  function onCutMove(e) {
+    const p = svgPoint(e.clientX, e.clientY);
+    const last = cutPath[cutPath.length - 1];
+    if (last && (p.x-last.x)**2 + (p.y-last.y)**2 < 4) return;
+    cutPath.push(p);
+    redrawLiveCut();
+    bead.setAttribute('cy', 30 + Math.min(8, cutPath.length * 0.03));
+  }
+
+  document.addEventListener('pointerup', () => {
+    if (!cutting) return;
+    cutting = false;
+    scalpel.classList.remove('cutting');
+    bead.setAttribute('r','0');
+    finalizeCut();
+    liveCut.setAttribute('d','');
+    cutPath = [];
+  });
+
+  function redrawLiveCut() {
+    if (cutPath.length < 1) { liveCut.setAttribute('d',''); return; }
+    let d = `M ${cutPath[0].x.toFixed(1)} ${cutPath[0].y.toFixed(1)}`;
+    for (let i = 1; i < cutPath.length; i++) {
+      d += ` L ${cutPath[i].x.toFixed(1)} ${cutPath[i].y.toFixed(1)}`;
+    }
+    liveCut.setAttribute('d', d);
+  }
+
+  /* ---------- finalize a cut: mark intersected moments excised, leave a scar ---------- */
+  function finalizeCut() {
+    if (cutPath.length < 2) return;
+
+    // find moments along the cut
+    const hits = [];
+    for (const g of momentsG.querySelectorAll('.moment')) {
+      if (g.classList.contains('excised')) continue;
+      const t = g.getAttribute('transform');
+      const m = /translate\(([\-\d.]+),([\-\d.]+)\)/.exec(t);
+      const cx = +m[1], cy = +m[2];
+      const r = +KIND[g.getAttribute('data-kind')].r + 7;
+      if (segmentNearPoint(cutPath, cx, cy, r)) hits.push(g);
+    }
+
+    if (hits.length === 0 && pathLength(cutPath) < 30) return;
+
+    // emit a permanent scar along the cut
+    drawScar(cutPath);
+    pulse();
+
+    // excise the hits
+    for (const g of hits) {
+      g.classList.add('excised');
+      const kind = g.getAttribute('data-kind');
+      const hour = g.getAttribute('data-hour');
+      const label = g.getAttribute('data-label');
+      excisedKinds[kind] = (excisedKinds[kind]||0) + 1;
+      // a moment carries weight in minutes: tumor 25, tendon 60, bone 15
+      const minutes = (kind === 'tumor') ? 25 + Math.floor(Math.random()*40)
+                    : (kind === 'tendon') ? 55 + Math.floor(Math.random()*30)
+                    : 12 + Math.floor(Math.random()*15);
+      totalMinutesLost += minutes;
+      // fade and shrink
+      g.querySelector('circle:nth-child(2)').setAttribute('opacity','0.15');
+      g.querySelectorAll('circle')[0].setAttribute('opacity','0.05');
+      // leave a small "x" mark where it was
+      const ns = 'http://www.w3.org/2000/svg';
+      const x1 = document.createElementNS(ns,'line');
+      const x2 = document.createElementNS(ns,'line');
+      x1.setAttribute('x1','-3'); x1.setAttribute('y1','-3');
+      x1.setAttribute('x2','3');  x1.setAttribute('y2','3');
+      x2.setAttribute('x1','3');  x2.setAttribute('y1','-3');
+      x2.setAttribute('x2','-3'); x2.setAttribute('y2','3');
+      for (const e of [x1,x2]) {
+        e.setAttribute('stroke','#0a0e14');
+        e.setAttribute('stroke-width','1.1');
+        e.setAttribute('opacity','0.7');
+      }
+      g.appendChild(x1); g.appendChild(x2);
+
+      // narration
+      narrate(kind, hour, label, g);
+
+      // SECRET 1: m19 = the hour without pulse
+      const id = g.getAttribute('data-id');
+      if (id === 'm19') revealPulseless();
+
+      // SECRET 2: noon tendon excised → blue ghost
+      if (id === 'm8') revealNoonGhost();
+
+      // SECRET 3: track scheduled hours (tumors with 'meeting' in label)
+      if (/meeting|scheduled|memo/i.test(label)) {
+        totalScheduledRemoved++;
+        if (totalScheduledRemoved >= 2) revealHiddenSentence();
+      }
+    }
+
+    totalCuts++;
+    lastCutWasTendon = hits.some(h => h.getAttribute('data-kind') === 'tendon');
+    updateTally();
+  }
+
+  /* ---------- distance helpers ---------- */
+  function segmentNearPoint(path, px, py, r) {
+    for (let i = 0; i < path.length - 1; i++) {
+      if (distPointSeg(px, py, path[i], path[i+1]) <= r) return true;
+    }
+    return false;
+  }
+  function distPointSeg(px, py, a, b) {
+    const vx = b.x - a.x, vy = b.y - a.y;
+    const wx = px - a.x, wy = py - a.y;
+    const c1 = vx*wx + vy*wy;
+    if (c1 <= 0) return Math.hypot(px - a.x, py - a.y);
+    const c2 = vx*vx + vy*vy;
+    if (c2 <= c1) return Math.hypot(px - b.x, py - b.y);
+    const t = c1 / c2;
+    const bx = a.x + t*vx, by = a.y + t*vy;
+    return Math.hypot(px - bx, py - by);
+  }
+  function pathLength(p) {
+    let L = 0;
+    for (let i = 1; i < p.length; i++) L += Math.hypot(p[i].x-p[i-1].x, p[i].y-p[i-1].y);
+    return L;
+  }
+
+  /* ---------- a permanent scar ---------- */
+  function drawScar(path) {
+    if (path.length < 2) return;
+    const ns = 'http://www.w3.org/2000/svg';
+    const g = document.createElementNS(ns, 'g');
+
+    // primary incision (black)
+    const inc = document.createElementNS(ns,'path');
+    let d = `M ${path[0].x.toFixed(1)} ${path[0].y.toFixed(1)}`;
+    for (let i = 1; i < path.length; i++) d += ` L ${path[i].x.toFixed(1)} ${path[i].y.toFixed(1)}`;
+    inc.setAttribute('d', d);
+    inc.setAttribute('fill','none');
+    inc.setAttribute('stroke','#0a0e14');
+    inc.setAttribute('stroke-width','1.2');
+    inc.setAttribute('stroke-linecap','round');
+    inc.setAttribute('stroke-linejoin','round');
+    inc.setAttribute('opacity','0');
+    g.appendChild(inc);
+
+    // sutures (cross-hatch perpendicular to the path)
+    const sutures = makeSutures(path);
+    for (const s of sutures) {
+      const ln = document.createElementNS(ns,'line');
+      ln.setAttribute('x1', s.x1); ln.setAttribute('y1', s.y1);
+      ln.setAttribute('x2', s.x2); ln.setAttribute('y2', s.y2);
+      ln.setAttribute('stroke','#0a0e14');
+      ln.setAttribute('stroke-width','0.7');
+      ln.setAttribute('opacity','0');
+      g.appendChild(ln);
+    }
+
+    // bleed: small blood beads along the path (subtle, never gory)
+    const beads = makeBleed(path);
+    for (const b of beads) {
+      const dot = document.createElementNS(ns,'circle');
+      dot.setAttribute('cx', b.x); dot.setAttribute('cy', b.y);
+      dot.setAttribute('r', b.r);
+      dot.setAttribute('fill', '#a02c2c');
+      dot.setAttribute('opacity','0');
+      g.appendChild(dot);
+    }
+
+    scarsG.appendChild(g);
+
+    // animate ink in
+    const all = g.querySelectorAll('*');
+    all.forEach((el, idx) => {
+      el.animate(
+        [{ opacity: 0 }, { opacity: el.tagName === 'circle' ? 0.55 : 0.85 }],
+        { duration: 380, delay: idx * 6, fill: 'forwards', easing: 'ease-out' }
+      );
+    });
+  }
+
+  function makeSutures(path) {
+    const out = [];
+    let total = 0;
+    for (let i = 1; i < path.length; i++) {
+      const dx = path[i].x - path[i-1].x;
+      const dy = path[i].y - path[i-1].y;
+      const len = Math.hypot(dx, dy);
+      total += len;
+      if (total >= 14) {
+        total = 0;
+        const nx = -dy/len, ny = dx/len;
+        out.push({
+          x1: (path[i].x + nx*4).toFixed(1),
+          y1: (path[i].y + ny*4).toFixed(1),
+          x2: (path[i].x - nx*4).toFixed(1),
+          y2: (path[i].y - ny*4).toFixed(1),
+        });
+      }
+    }
+    return out;
+  }
+  function makeBleed(path) {
+    const out = [];
+    let total = 0;
+    for (let i = 1; i < path.length; i++) {
+      const dx = path[i].x - path[i-1].x;
+      const dy = path[i].y - path[i-1].y;
+      const len = Math.hypot(dx, dy);
+      total += len;
+      if (total >= 22) {
+        total = 0;
+        out.push({ x: path[i].x + (Math.random()-0.5)*2, y: path[i].y + (Math.random()-0.5)*2, r: 0.7 + Math.random()*0.9 });
+      }
+    }
+    return out;
+  }
+
+  /* ---------- vital signs / pulse ---------- */
+  function pulse() {
+    // a one-shot beat in the EKG
+    const w = 1000, h = 60;
+    const start = Math.random() * 800;
+    let d = `M 0 ${h/2} L ${start} ${h/2}`;
+    d += ` L ${start+10} ${h/2 - 4}`;
+    d += ` L ${start+18} ${h/2 + 16}`;
+    d += ` L ${start+26} ${h/2 - 22}`;
+    d += ` L ${start+34} ${h/2 + 4}`;
+    d += ` L ${start+44} ${h/2}`;
+    d += ` L ${w} ${h/2}`;
+    ekgPath.setAttribute('d', d);
+    ekgPath.animate([{ opacity: 1 }, { opacity: 0.2 }], { duration: 1400, fill:'forwards', easing:'ease-out' });
+  }
+
+  /* ---------- narration ---------- */
+  const narrationsByKind = {
+    tumor: [
+      "Excised. The body releases what it never asked to hold.",
+      "A clean cut. The hour goes quietly.",
+      "Removed without complication. It will not be missed.",
+      "Tumor — benign in tone, malignant in time.",
+      "The flesh closes. The day is lighter."
+    ],
+    tendon: [
+      "Tendon. You will feel this absence in the morning.",
+      "Load-bearing. The day will limp.",
+      "I would not have chosen this — but the patient chose.",
+      "A scar that the body will keep asking about.",
+      "Bone shows where the tendon was."
+    ],
+    bone: [
+      "Bone. Hard to remove. Harder to forget.",
+      "The skeleton remembers what the skin forgets.",
+    ],
+  };
+  function narrate(kind, hour, label, g) {
+    const choices = narrationsByKind[kind] || narrationsByKind.tumor;
+    const pick = choices[Math.floor(Math.random()*choices.length)];
+    quoteEl.textContent = `"${pick}"`;
+  }
+
+  /* ---------- tally ---------- */
+  function updateTally() {
+    cutCountEl.textContent = String(totalCuts).padStart(2,'0');
+    minLostEl.textContent  = String(totalMinutesLost).padStart(3,'0');
+    // integrity penalty: tendons cost more than tumors
+    const penalty = excisedKinds.tendon * 9 + excisedKinds.tumor * 2 + excisedKinds.bone * 5;
+    const integrity = Math.max(0, 100 - penalty);
+    integrityEl.textContent = integrity + '%';
+    integrityEl.style.color = integrity < 50 ? 'var(--blood)' : 'var(--steel)';
+
+    // patient time remaining
+    const totalMin = 24*60 - totalMinutesLost;
+    const hh = Math.max(0, Math.floor(totalMin/60));
+    const mm = Math.max(0, totalMin%60);
+    vitalTime.textContent = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:00 remaining`;
+  }
+
+  /* ---------- secrets ---------- */
+  function revealPulseless() {
+    if (pulselessRevealed) return;
+    pulselessRevealed = true;
+    // the pulse line in the body fades to flatline
+    const pl = document.getElementById('pulseLine');
+    pl.animate(
+      [{ d: pl.getAttribute('d') }, { d: 'M 220,280 L 780,280' }],
+      { duration: 1800, fill:'forwards', easing:'ease-in-out' }
+    );
+    pl.setAttribute('d', 'M 220,280 L 780,280');
+    pl.setAttribute('opacity','0.55');
+    quoteEl.textContent = '"You found it. The hour without pulse. The day flatlines, and is somehow more honest."';
+  }
+  function revealNoonGhost() {
+    // a faint blue ghost where m8 was
+    const ns = 'http://www.w3.org/2000/svg';
+    const g = document.createElementNS(ns,'g');
+    g.setAttribute('transform','translate(500,275)');
+    const c = document.createElementNS(ns,'circle');
+    c.setAttribute('r','60');
+    c.setAttribute('fill','none');
+    c.setAttribute('stroke','#3a72a8');
+    c.setAttribute('stroke-width','0.6');
+    c.setAttribute('opacity','0');
+    g.appendChild(c);
+    scarsG.appendChild(g);
+    c.animate([{opacity:0, r:10},{opacity:0.55, r:60},{opacity:0.2, r:90}],{duration:2400, fill:'forwards'});
+    quoteEl.textContent = '"The blue ghost. A tendon excised leaves a hollow the body fills with weather."';
+  }
+  function revealHiddenSentence() {
+    if (secretMessageShown) return;
+    secretMessageShown = true;
+    quoteEl.textContent = '"Most of what you call ‘scheduled’ was a stranger\'s hand on your day."';
+  }
+
+  /* ---------- keyboard: R = suture, F = file chart ---------- */
+  document.addEventListener('keydown', (e) => {
+    if (anesthesia.classList.contains('fade') === false) return;
+    if (e.key === 'r' || e.key === 'R') {
+      // suture: only the very last cut, and only of tendons that "insist on staying"
+      if (!lastCutWasTendon) {
+        quoteEl.textContent = '"Sutures are reserved for tendons that insist on staying. Nothing here insists."';
+        return;
+      }
+      // pick last excised tendon and restore cosmetically — the scar remains
+      const tends = momentsG.querySelectorAll('.moment.excised[data-kind="tendon"]');
+      const last = tends[tends.length - 1];
+      if (last) {
+        last.classList.remove('excised');
+        last.querySelectorAll('line').forEach(ln => ln.remove());
+        last.querySelector('circle:nth-child(2)').setAttribute('opacity','1');
+        last.querySelectorAll('circle')[0].setAttribute('opacity','1');
+        // the scar is left in place — never a clean undo
+        quoteEl.textContent = '"Sutured. The tendon returns. The scar does not."';
+        excisedKinds.tendon = Math.max(0, excisedKinds.tendon - 1);
+        totalMinutesLost = Math.max(0, totalMinutesLost - 60);
+        updateTally();
+      }
+      lastCutWasTendon = false;
+    }
+    if (e.key === 'f' || e.key === 'F') {
+      fileTheChart();
+    }
+  });
+
+  /* ---------- intro / outro flow ---------- */
+  beginBtn.addEventListener('click', () => {
+    anesthesia.classList.add('fade');
+    setTimeout(() => { anesthesia.style.display = 'none'; }, 1700);
+    quoteEl.textContent = '"Begin where it hurts least. Then deeper."';
+  });
+  // tap-to-dismiss anesthesia on first interaction in case button missed
+  anesthesia.addEventListener('pointerdown', (e) => {
+    if (e.target === anesthesia) beginBtn.click();
+  });
+
+  closeBtn.addEventListener('click', () => {
+    postop.classList.remove('show');
+  });
+
+  function fileTheChart() {
+    const integrity = integrityEl.textContent;
+    const tone =
+      excisedKinds.tendon > excisedKinds.tumor
+        ? '"You did not operate. You amputated. The day will limp, and remember."'
+      : excisedKinds.tumor > 4
+        ? '"A clean surgery. The body is more itself."'
+      : excisedKinds.tumor + excisedKinds.tendon === 0
+        ? '"You held the scalpel and chose mercy. Sometimes that is the surgery."'
+      : '"A measured operation. The patient sleeps."';
+    epigraph.textContent = tone;
+    summaryEl.innerHTML = `
+      <div>incisions made &middot; <b>${totalCuts}</b></div>
+      <div>moments excised &middot; <b>${excisedKinds.tumor + excisedKinds.tendon + excisedKinds.bone}</b></div>
+      <div>tumors &middot; <b>${excisedKinds.tumor}</b></div>
+      <div>tendons &middot; <b>${excisedKinds.tendon}</b></div>
+      <div>minutes lost &middot; <b>${totalMinutesLost}</b></div>
+      <div>integrity at close &middot; <b>${integrity}</b></div>
+      <div style="margin-top:.6rem;border-top:1px solid var(--rule);padding-top:.6rem;color:var(--steel)">
+        the scars remain on the chart. they are a kind of signature.
+      </div>`;
+    postop.classList.add('show');
+  }
+
+  /* ---------- ambient pulse on the EKG ---------- */
+  let t = 0;
+  function ambient() {
+    if (cutting) { requestAnimationFrame(ambient); return; }
+    t += 0.018;
+    // gentle baseline; only redraw periodically to stay cheap
+    if (Math.floor(t*60) % 4 === 0) {
+      const w = 1000, h = 60;
+      let d = `M 0 ${h/2}`;
+      const beat = Math.sin(t) * 0.5 + 0.5;
+      const sx = (t * 200) % w;
+      d += ` L ${sx-12} ${h/2}`;
+      d += ` L ${sx-8}  ${h/2 - 2 - beat*1.5}`;
+      d += ` L ${sx-2}  ${h/2 + 4 + beat*2}`;
+      d += ` L ${sx+2}  ${h/2 - 4 - beat*4}`;
+      d += ` L ${sx+8}  ${h/2 + 1}`;
+      d += ` L ${w} ${h/2}`;
+      ekgPath.setAttribute('d', d);
+      ekgPath.setAttribute('opacity', pulselessRevealed ? '0.18' : '0.55');
+    }
+    requestAnimationFrame(ambient);
+  }
+  ambient();
+
+  /* ---------- subtle hover lift on moments via mouseover bubbling ---------- */
+  momentsG.addEventListener('pointerover', (e) => {
+    const g = e.target.closest('.moment');
+    if (!g || g.classList.contains('excised')) return;
+    g.querySelector('circle:first-of-type').setAttribute('opacity','0.45');
+  });
+  momentsG.addEventListener('pointerout', (e) => {
+    const g = e.target.closest('.moment');
+    if (!g) return;
+    g.querySelector('circle:first-of-type').setAttribute('opacity','0.18');
+  });
+
+  /* ---------- defensive: prevent text selection during cut ---------- */
+  document.addEventListener('selectstart', (e) => { if (cutting) e.preventDefault(); });
+
+  /* ---------- a tiny rotating bouquet of surgical aphorisms while idle ---------- */
+  const aphorisms = [
+    '"Every hour has a tendon and a tumor. The work is to know which is which."',
+    '"The scalpel is a question. The scar is the answer."',
+    '"Anesthesia: the lie we tell the day so it will lie still."',
+    '"What stays is not what you saved. What stays is what would not be cut."',
+    '"The body forgives. The chart does not."',
+    '"A clean undo would not be surgery. It would be denial."',
+  ];
+  let api = 0;
+  setInterval(() => {
+    if (cutting) return;
+    if (totalCuts === 0) {
+      quoteEl.textContent = aphorisms[api++ % aphorisms.length];
+    }
+  }, 5200);
+
+  // initial tally render
+  updateTally();
+})();
+</script>
+</body>
+</html>

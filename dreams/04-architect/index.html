@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>plans for a building that was never permitted to exist · the architect of forgotten buildings</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="stylesheet" href="../../style.css" />
+<style>
+  :root {
+    --bg:        #0c1a2c;
+    --bg-deep:   #061020;
+    --blue:      #2c4a72;
+    --line:      #a8c8e8;
+    --line-dim:  #5a7ba0;
+    --weather:   #c89870;
+    --dust:      #e0c8a0;
+    --paper:     #14283f;
+  }
+  html, body { background: var(--bg); color: var(--line); }
+  body {
+    font-family: "Helvetica Neue", "Arial", sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    overflow: hidden;
+    height: 100vh;
+    background:
+      radial-gradient(ellipse at 30% 20%, rgba(168,200,232,0.04), transparent 50%),
+      radial-gradient(ellipse at 80% 90%, rgba(200,152,112,0.03), transparent 50%),
+      var(--bg);
+  }
+
+  /* dust motes */
+  .dust {
+    position: fixed; inset: 0; pointer-events: none; z-index: 1;
+    background-image:
+      radial-gradient(1px 1px at 12% 24%, rgba(224,200,160,0.5), transparent),
+      radial-gradient(1px 1px at 47% 71%, rgba(224,200,160,0.4), transparent),
+      radial-gradient(1px 1px at 78% 18%, rgba(224,200,160,0.5), transparent),
+      radial-gradient(1.5px 1.5px at 33% 88%, rgba(224,200,160,0.6), transparent),
+      radial-gradient(1px 1px at 88% 55%, rgba(224,200,160,0.4), transparent),
+      radial-gradient(1px 1px at 22% 62%, rgba(224,200,160,0.45), transparent),
+      radial-gradient(1px 1px at 64% 33%, rgba(224,200,160,0.4), transparent);
+    background-size: 600px 600px, 800px 800px, 500px 500px, 700px 700px, 900px 900px, 650px 650px, 550px 550px;
+    animation: float 180s linear infinite;
+    opacity: 0.7;
+  }
+  @keyframes float {
+    from { background-position: 0 0, 100px 50px, 200px 200px, 50px 300px, 400px 100px, 150px 400px, 350px 250px; }
+    to   { background-position: 600px 700px, 850px 900px, 700px 600px, 800px 1000px, 1100px 800px, 700px 1100px, 900px 950px; }
+  }
+
+  /* shaft of light from the absent roof */
+  .light-shaft {
+    position: fixed; top: -10vh; left: 60%; width: 25vw; height: 120vh;
+    background: linear-gradient(180deg,
+      rgba(224,200,160,0.10) 0%,
+      rgba(224,200,160,0.04) 40%,
+      transparent 100%);
+    transform: skewX(-8deg);
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(8px);
+  }
+
+  .frame {
+    position: fixed; inset: 0;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    z-index: 2;
+  }
+
+  /* drafting cartouche */
+  .titleblock {
+    padding: 1rem 6rem 0.6rem 6rem;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 2rem;
+    align-items: end;
+    border-bottom: 1px solid var(--line-dim);
+    margin: 0 2.5rem;
+    font-family: "Courier New", monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--line-dim);
+  }
+  .titleblock .center {
+    text-align: center;
+    color: var(--line);
+    font-family: "Helvetica Neue", sans-serif;
+    font-size: 1.05rem;
+    letter-spacing: 0.32em;
+    font-weight: 300;
+    text-transform: uppercase;
+    padding-bottom: 0.2rem;
+  }
+  .titleblock .center small {
+    display: block;
+    font-family: "Courier New", monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--weather);
+    margin-top: 0.4rem;
+    font-style: italic;
+    text-transform: lowercase;
+    font-weight: 400;
+  }
+  .titleblock .right { text-align: right; }
+
+  /* main canvas */
+  .canvas-wrap {
+    position: relative;
+    margin: 0 2.5rem;
+    border: 1px solid var(--line-dim);
+    border-top: none;
+    overflow: hidden;
+  }
+  svg.blueprint {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: crosshair;
+  }
+
+  /* ruler marks along the edges */
+  .ruler {
+    position: absolute; pointer-events: none;
+    color: var(--line-dim);
+    font-family: "Courier New", monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+  }
+  .ruler-top    { top: 0; left: 0; right: 0; height: 14px; border-bottom: 1px solid rgba(168,200,232,0.15); }
+  .ruler-left   { top: 0; bottom: 0; left: 0; width: 14px; border-right: 1px solid rgba(168,200,232,0.15); }
+  .ruler-top span, .ruler-left span {
+    position: absolute;
+    color: var(--line-dim);
+  }
+
+  /* the bottom drafting strip */
+  .legend {
+    margin: 0 2.5rem;
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--line-dim);
+    border-top: none;
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 2rem;
+    font-family: "Courier New", monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.18em;
+    color: var(--line-dim);
+    text-transform: uppercase;
+    align-items: center;
+  }
+  .legend .reading {
+    text-align: center;
+    color: var(--dust);
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: 0.05em;
+    font-family: "Helvetica Neue", sans-serif;
+    font-size: 0.85rem;
+    min-height: 1.2em;
+    transition: opacity 600ms ease;
+  }
+  .legend .reading.fading { opacity: 0; }
+
+  /* hovered region styles */
+  .room {
+    fill: transparent;
+    stroke: var(--line);
+    stroke-width: 1.4;
+    cursor: crosshair;
+    transition: fill 800ms ease, stroke 400ms ease;
+  }
+  .room:hover {
+    fill: rgba(168,200,232,0.05);
+    stroke: var(--dust);
+  }
+  .room.dwelling { fill: rgba(168,200,232,0.10); stroke: var(--dust); }
+  .room.revealed { fill: rgba(200,152,112,0.06); }
+
+  .wall { stroke: var(--line); stroke-width: 2.6; fill: none; stroke-linecap: square; }
+  .wall-inner { stroke: var(--line); stroke-width: 1.4; fill: none; stroke-linecap: square; }
+  .hatch { stroke: var(--line-dim); stroke-width: 0.6; }
+  .door { stroke: var(--line); stroke-width: 1.2; fill: none; }
+  .door-arc { stroke: var(--line-dim); stroke-width: 0.6; fill: none; stroke-dasharray: 2 3; }
+
+  /* annotation label boxes */
+  .annot {
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 600ms ease;
+  }
+  .annot.visible { opacity: 1; }
+  .annot text {
+    fill: var(--line);
+    font-family: "Courier New", monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+  }
+  .annot text.poetic {
+    fill: var(--dust);
+    font-family: "Helvetica Neue", sans-serif;
+    font-style: italic;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+  .annot text.tier-2 { fill: var(--dust); }
+  .annot text.tier-3 { fill: var(--weather); }
+  .annot line, .annot path { stroke: var(--line-dim); stroke-width: 0.6; fill: none; }
+
+  /* the hidden room reveal */
+  .secret {
+    opacity: 0;
+    transition: opacity 1500ms ease;
+  }
+  .secret.unveiled { opacity: 1; }
+  .secret .room-secret {
+    fill: rgba(200,152,112,0.12);
+    stroke: var(--weather);
+    stroke-width: 1.2;
+    stroke-dasharray: 4 3;
+  }
+  .secret text {
+    fill: var(--weather);
+    font-family: "Helvetica Neue", sans-serif;
+    font-style: italic;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+  .secret text.label {
+    font-family: "Courier New", monospace;
+    font-size: 8px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    fill: var(--line-dim);
+    font-style: normal;
+  }
+
+  /* dwell timer pip */
+  .dwell-pip {
+    position: absolute;
+    pointer-events: none;
+    width: 26px; height: 26px;
+    border: 1px solid var(--dust);
+    border-radius: 50%;
+    transform: translate(-50%,-50%);
+    opacity: 0;
+    transition: opacity 250ms ease;
+  }
+  .dwell-pip.on { opacity: 0.7; }
+  .dwell-pip::before {
+    content: "";
+    position: absolute; inset: 4px;
+    border-radius: 50%;
+    background: conic-gradient(var(--dust) calc(var(--p,0) * 1%), transparent 0);
+    opacity: 0.8;
+  }
+
+  /* compass / north arrow */
+  .compass {
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    width: 70px; height: 70px;
+    color: var(--line-dim);
+    pointer-events: none;
+    opacity: 0.7;
+  }
+
+  /* footer of marginalia */
+  .marginalia {
+    position: absolute;
+    bottom: 14px;
+    left: 22px;
+    color: var(--line-dim);
+    font-family: "Courier New", monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    pointer-events: none;
+    line-height: 1.6;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+  .marginalia em {
+    font-style: italic;
+    color: var(--dust);
+    text-transform: none;
+    letter-spacing: 0.04em;
+    font-family: "Helvetica Neue", sans-serif;
+  }
+
+  /* the wake-log dressing */
+  .wake-log h3 { color: var(--line); }
+  .wake-log dt { color: var(--dust); }
+  .wake-log { font-family: "Courier New", monospace; }
+
+  @media (max-width: 720px) {
+    .titleblock, .canvas-wrap, .legend { margin: 0 0.5rem; }
+    .titleblock { padding: 0.6rem 1rem 0.4rem; grid-template-columns: 1fr; gap: 0.3rem; }
+    .legend { grid-template-columns: 1fr; gap: 0.5rem; padding: 0.6rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="dust"></div>
+<div class="light-shaft"></div>
+
+<a class="return-ribbon" href="../../">← Hall of Reverie</a>
+<button class="wake-log-toggle" onclick="document.querySelector('.wake-log').classList.toggle('open')">📜 wake log</button>
+<aside class="wake-log">
+  <h3>The Architect of Forgotten Buildings</h3>
+  <p style="font-style:italic;color:var(--hall-ink-dim)">"a building is an argument with gravity"</p>
+  <dl>
+    <dt>title</dt><dd>plans for a building that was never permitted to exist</dd>
+    <dt>made</dt><dd>9 may 2026 · the small hours</dd>
+    <dt>essence</dt><dd>a blueprint of an impossible house that reveals more of its history the longer you stay still inside any one of its rooms.</dd>
+    <dt>secrets</dt><dd>the room behind the chimney that holds nothing, the corridor that bends to avoid grief, the weather inside the vestibule, the architect's marginal confession</dd>
+  </dl>
+  <dt>note</dt><dd>dwell. patience is a key. each room rewards stillness in three tiers — purpose, history, secret. the building has waited a long time to be looked at.</dd>
+</aside>
+
+<div class="frame">
+
+  <!-- drafting title block -->
+  <header class="titleblock">
+    <div class="left">
+      drawing no. iv-of-viii<br>
+      sheet 01 / 01<br>
+      scale: 1 : the patience of the looker
+    </div>
+    <div class="center">
+      Plans for a Building<br>
+      that was Never Permitted to Exist
+      <small>posthumous draft · the architect of forgotten buildings</small>
+    </div>
+    <div class="right">
+      lot: unrecorded<br>
+      condition: demolished prior to construction<br>
+      revisions: thirteen, all unconfirmed
+    </div>
+  </header>
+
+  <!-- the blueprint canvas -->
+  <div class="canvas-wrap" id="canvas">
+    <div class="ruler ruler-top" id="ruler-top"></div>
+    <div class="ruler ruler-left" id="ruler-left"></div>
+    <div class="dwell-pip" id="pip"></div>
+
+    <svg class="blueprint" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" id="bp">
+
+      <!-- subtle grid -->
+      <defs>
+        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(168,200,232,0.07)" stroke-width="0.5"/>
+        </pattern>
+        <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="6" stroke="var(--line-dim)" stroke-width="0.6"/>
+        </pattern>
+      </defs>
+      <rect x="0" y="0" width="1200" height="700" fill="url(#grid)"/>
+
+      <!-- compass -->
+      <g class="compass" transform="translate(1110, 30)">
+        <circle cx="0" cy="0" r="28" fill="none" stroke="currentColor" stroke-width="0.6"/>
+        <line x1="0" y1="-32" x2="0" y2="32" stroke="currentColor" stroke-width="0.6"/>
+        <line x1="-32" y1="0" x2="32" y2="0" stroke="currentColor" stroke-width="0.6"/>
+        <polygon points="0,-26 -4,0 0,-12 4,0" fill="var(--line)"/>
+        <text x="0" y="-34" text-anchor="middle" font-family="Courier New" font-size="9" fill="var(--line)">N*</text>
+        <text x="36" y="3" font-family="Courier New" font-size="6" fill="currentColor">east of memory</text>
+      </g>
+
+      <!-- exterior wall, irregular shape -->
+      <path class="wall" d="
+        M 120 140
+        L 720 140
+        L 720 100
+        L 980 100
+        L 980 240
+        L 1080 240
+        L 1080 480
+        L 920 480
+        L 920 580
+        L 540 580
+        L 540 520
+        L 380 520
+        L 380 580
+        L 120 580
+        Z
+      "/>
+
+      <!-- foundation hatching strip outside the wall -->
+      <g opacity="0.4">
+        <path d="M 120 580 L 120 600 L 920 600 L 920 580" stroke="var(--line-dim)" stroke-width="0.6" fill="none"/>
+        <path d="M 120 600 L 920 600" stroke="var(--line-dim)" stroke-width="0.6" stroke-dasharray="3 4" fill="none"/>
+      </g>
+
+      <!-- internal walls -->
+      <g class="wall-inner-group">
+        <line class="wall-inner" x1="380" y1="140" x2="380" y2="380"/>
+        <line class="wall-inner" x1="380" y1="380" x2="540" y2="380"/>
+        <line class="wall-inner" x1="540" y1="380" x2="540" y2="520"/>
+        <line class="wall-inner" x1="540" y1="380" x2="540" y2="140"/>
+        <line class="wall-inner" x1="540" y1="240" x2="720" y2="240"/>
+        <line class="wall-inner" x1="720" y1="240" x2="720" y2="380"/>
+        <line class="wall-inner" x1="540" y1="380" x2="720" y2="380"/>
+        <line class="wall-inner" x1="720" y1="380" x2="980" y2="380"/>
+        <line class="wall-inner" x1="980" y1="380" x2="980" y2="240"/>
+        <line class="wall-inner" x1="120" y1="380" x2="380" y2="380"/>
+        <line class="wall-inner" x1="240" y1="380" x2="240" y2="580"/>
+        <line class="wall-inner" x1="720" y1="380" x2="720" y2="480"/>
+        <line class="wall-inner" x1="720" y1="480" x2="920" y2="480"/>
+      </g>
+
+      <!-- door openings (visual breaks via small white lines and arcs) -->
+      <g>
+        <line x1="240" y1="140" x2="280" y2="140" stroke="var(--bg)" stroke-width="3"/>
+        <path class="door-arc" d="M 240 140 A 40 40 0 0 1 280 180"/>
+        <line x1="380" y1="240" x2="380" y2="280" stroke="var(--bg)" stroke-width="3"/>
+        <path class="door-arc" d="M 380 240 A 40 40 0 0 1 420 280"/>
+        <line x1="540" y1="300" x2="540" y2="340" stroke="var(--bg)" stroke-width="3"/>
+        <path class="door-arc" d="M 540 300 A 40 40 0 0 1 580 340"/>
+        <line x1="780" y1="380" x2="820" y2="380" stroke="var(--bg)" stroke-width="3"/>
+        <path class="door-arc" d="M 780 380 A 40 40 0 0 1 820 420"/>
+        <line x1="160" y1="380" x2="200" y2="380" stroke="var(--bg)" stroke-width="3"/>
+        <path class="door-arc" d="M 160 380 A 40 40 0 0 1 200 420"/>
+        <line x1="600" y1="240" x2="640" y2="240" stroke="var(--bg)" stroke-width="3"/>
+        <path class="door-arc" d="M 600 240 A 40 40 0 0 1 640 280"/>
+      </g>
+
+      <!-- the rooms (interactive zones) -->
+      <!-- 1: vestibule -->
+      <rect class="room" data-key="vestibule" x="120" y="140" width="260" height="240"/>
+      <!-- 2: chamber for forgetting one's name -->
+      <rect class="room" data-key="forgetting" x="380" y="140" width="160" height="240"/>
+      <!-- 3: corridor that bends to avoid grief -->
+      <rect class="room" data-key="corridor" x="540" y="140" width="180" height="100"/>
+      <!-- 4: oratory of the load-bearing silence -->
+      <rect class="room" data-key="oratory" x="540" y="240" width="180" height="140"/>
+      <!-- 5: solarium for unfinished weather -->
+      <rect class="room" data-key="solarium" x="720" y="100" width="260" height="280"/>
+      <!-- 6: cornice gallery -->
+      <rect class="room" data-key="cornice" x="980" y="240" width="100" height="140"/>
+      <!-- 7: the room that held nothing -->
+      <rect class="room" data-key="nothing" x="720" y="380" width="200" height="100"/>
+      <!-- 8: archive of demolitions -->
+      <rect class="room" data-key="archive" x="920" y="380" width="160" height="100"/>
+      <!-- 9: kitchen of provisional saints -->
+      <rect class="room" data-key="kitchen" x="120" y="380" width="120" height="200"/>
+      <!-- 10: the dust library -->
+      <rect class="room" data-key="dustlib" x="240" y="380" width="140" height="200"/>
+      <!-- 11: courtyard for the demolition crews -->
+      <rect class="room" data-key="courtyard" x="380" y="380" width="160" height="140"/>
+      <!-- 12: nave for unsent letters -->
+      <rect class="room" data-key="nave" x="540" y="380" width="180" height="200"/>
+      <!-- 13: stairwell down to no basement -->
+      <rect class="room" data-key="stairwell" x="720" y="480" width="200" height="100"/>
+      <!-- 14: porch of the demolition crews -->
+      <rect class="room" data-key="porch" x="920" y="480" width="160" height="100"/>
+
+      <!-- the secret (hidden inside the cornice) — invisible until unveiled -->
+      <g class="secret" id="secret-cornice">
+        <rect class="room-secret" x="990" y="120" width="80" height="100"/>
+        <line x1="980" y1="170" x2="990" y2="170" stroke="var(--weather)" stroke-width="1" stroke-dasharray="3 2"/>
+        <text x="995" y="155">the room behind</text>
+        <text x="995" y="170">the chimney that</text>
+        <text x="995" y="185">held nothing</text>
+        <text class="label" x="995" y="205">unbuilt cell · 1.2 × 1.5 m</text>
+      </g>
+
+      <!-- the secret marginal confession -->
+      <g class="secret" id="secret-confession">
+        <line x1="60" y1="640" x2="1140" y2="640" stroke="var(--weather)" stroke-width="0.4" stroke-dasharray="2 4"/>
+        <text x="60" y="660" font-family="Courier New" font-size="9" fill="var(--line-dim)" letter-spacing="2">marginal note · final revision · undated</text>
+        <text x="60" y="680" font-style="italic" font-family="Helvetica Neue" font-size="13" fill="var(--dust)">i drew this house seven times. it never asked to be built. it asked only to be remembered as a possibility.</text>
+      </g>
+
+      <!-- per-room annotation groups (pre-built, toggled via JS) -->
+      <g id="annotations"></g>
+
+    </svg>
+
+    <div class="marginalia">
+      cornice · load-bearing · vestibule<br>
+      <em>"a building is an argument with gravity."</em>
+    </div>
+  </div>
+
+  <footer class="legend">
+    <div>plate iv · the architect of forgotten buildings</div>
+    <div class="reading" id="reading">hover any room. linger. the building is shy.</div>
+    <div style="text-align:right">drafted in cyanotype · ink of dust</div>
+  </footer>
+
+</div>
+
+<script>
+/* ---------- the rooms and their three tiers of annotation ----------
+   tier 1 (instant): the room's poetic name
+   tier 2 (~1.6s):  its purpose / measure
+   tier 3 (~4.0s):  its history, demolition note, or confession
+--------------------------------------------------------------------- */
+
+const ROOMS = {
+  vestibule: {
+    name: "the vestibule for arrivals that never quite arrive",
+    centroid: [250, 260], anchor: [180, 200],
+    purpose: "where coats are hung by the people you almost became.",
+    history: "the door was demolished in 1973. the threshold remained, faithful as a habit.",
+    measure: "13'-4\" × 19'-2\"  ·  ceiling: indeterminate"
+  },
+  forgetting: {
+    name: "the chamber for forgetting one's name",
+    centroid: [460, 260], anchor: [400, 230],
+    purpose: "step inside; leave a syllable on the lintel; receive an alias.",
+    history: "the lintel keeps 414 syllables. mine is one of them. i no longer recall which.",
+    measure: "8'-0\" × 12'-0\"  ·  one window facing inward"
+  },
+  corridor: {
+    name: "the corridor that bends to avoid grief",
+    centroid: [630, 190], anchor: [600, 165],
+    purpose: "structurally unnecessary. emotionally load-bearing.",
+    history: "the bend was added after a death the building had not been told to expect.",
+    measure: "9'-3\" of bend  ·  imperceptible to those untouched"
+  },
+  oratory: {
+    name: "the oratory of the load-bearing silence",
+    centroid: [630, 310], anchor: [600, 280],
+    purpose: "a room whose only function is to keep the building from collapsing into speech.",
+    history: "every house has one. most call them hallways and pretend.",
+    measure: "9'-3\" × 7'-0\"  ·  acoustically devout"
+  },
+  solarium: {
+    name: "the solarium for unfinished weather",
+    centroid: [850, 240], anchor: [770, 130],
+    purpose: "stores rain that never quite committed to falling.",
+    history: "a glass roof was specified, refused, reordered, refused again. the room learned to make do with rumor.",
+    measure: "26'-0\" × 28'-0\"  ·  light measured in second guesses"
+  },
+  cornice: {
+    name: "the cornice gallery",
+    centroid: [1030, 310], anchor: [990, 270],
+    purpose: "ornament without function — the building's small vanity.",
+    history: "behind the chimney is a cell the foreman drew at midnight and never named. it is still there. wait, and it will admit itself.",
+    measure: "10'-0\" × 14'-0\"  ·  decorative, defensive"
+  },
+  nothing: {
+    name: "the room that held nothing",
+    centroid: [820, 430], anchor: [740, 405],
+    purpose: "kept clean. swept weekly. nothing was ever placed here. it was the cleanest room in the house.",
+    history: "the absence was so well-maintained that the demolition crew refused to enter, fearing they would damage it.",
+    measure: "20'-0\" × 10'-0\"  ·  contents: nil, deliberately"
+  },
+  archive: {
+    name: "the archive of demolitions",
+    centroid: [1000, 430], anchor: [930, 405],
+    purpose: "stores the plans of buildings that were torn down to make room for this one, which was also torn down.",
+    history: "the cabinet contains 1,408 drawings. each is a building that did not survive its argument.",
+    measure: "16'-0\" × 10'-0\"  ·  fireproof, to its embarrassment"
+  },
+  kitchen: {
+    name: "the kitchen of provisional saints",
+    centroid: [180, 480], anchor: [130, 405],
+    purpose: "soup made for visitors who are running late by a half century.",
+    history: "the stove is cold but warm to those who deserve it. nobody has ever deserved it.",
+    measure: "12'-0\" × 20'-0\"  ·  always smells faintly of bay leaf"
+  },
+  dustlib: {
+    name: "the dust library",
+    centroid: [310, 480], anchor: [250, 405],
+    purpose: "shelves of books bound entirely in dust. they describe what was nearly written.",
+    history: "the dust comes from the buildings the archive has remembered. nothing is more articulate.",
+    measure: "14'-0\" × 20'-0\"  ·  reading lamp: a single shaft of afternoon"
+  },
+  courtyard: {
+    name: "the courtyard for the small unprovable kindnesses",
+    centroid: [460, 450], anchor: [400, 405],
+    purpose: "open to a sky that was never roofed. weather welcome.",
+    history: "the foreman watered a single fig tree here every morning of the demolition. the tree, not knowing, fruited anyway.",
+    measure: "16'-0\" × 14'-0\"  ·  one tree, possibly imagined"
+  },
+  nave: {
+    name: "the nave for unsent letters",
+    centroid: [630, 480], anchor: [560, 405],
+    purpose: "long room. high pews. addresses written on the walls.",
+    history: "a letter dropped here will arrive at the recipient if and only if they have already forgiven you.",
+    measure: "18'-0\" × 20'-0\"  ·  acoustics: confessional"
+  },
+  stairwell: {
+    name: "the stairwell that descends to no basement",
+    centroid: [820, 530], anchor: [750, 505],
+    purpose: "thirteen treads, each four inches lower than the one before. ends at a landing of conviction.",
+    history: "no basement was ever excavated. the stairs descend regardless. a courtesy to gravity.",
+    measure: "20'-0\" × 10'-0\"  ·  thirteen risers, no risk"
+  },
+  porch: {
+    name: "the porch for the demolition crews",
+    centroid: [1000, 530], anchor: [930, 505],
+    purpose: "where the men sat for lunch the day they tore the building down before it was built.",
+    history: "they ate sandwiches. they did not speak. one of them folded a small paper bird and left it on the railing. the bird is there still. wait, and you may see it.",
+    measure: "16'-0\" × 10'-0\"  ·  one paper bird, indefatigable"
+  }
+};
+
+/* ---------- ruler tickmarks ---------- */
+(function buildRulers() {
+  const top = document.getElementById('ruler-top');
+  const left = document.getElementById('ruler-left');
+  for (let i = 0; i < 30; i++) {
+    const s = document.createElement('span');
+    s.style.left = (i * 60 + 8) + 'px';
+    s.style.top = '2px';
+    s.textContent = i % 2 === 0 ? `${i}m` : '·';
+    top.appendChild(s);
+  }
+  for (let i = 0; i < 16; i++) {
+    const s = document.createElement('span');
+    s.style.top = (i * 50 + 6) + 'px';
+    s.style.left = '2px';
+    s.style.writingMode = 'vertical-rl';
+    s.textContent = i % 2 === 0 ? `${i}m` : '·';
+    left.appendChild(s);
+  }
+})();
+
+/* ---------- annotation builder ---------- */
+
+const annotLayer = document.getElementById('annotations');
+const reading = document.getElementById('reading');
+
+function makeAnnotation(key) {
+  const r = ROOMS[key];
+  if (!r) return null;
+  const [cx, cy] = r.centroid;
+  const [ax, ay] = r.anchor;
+
+  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  g.setAttribute('class', 'annot');
+  g.dataset.key = key;
+
+  // tier 1: poetic name on a leader line
+  const leader = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  leader.setAttribute('x1', cx);
+  leader.setAttribute('y1', cy);
+  leader.setAttribute('x2', ax);
+  leader.setAttribute('y2', ay);
+  g.appendChild(leader);
+
+  const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  dot.setAttribute('cx', cx);
+  dot.setAttribute('cy', cy);
+  dot.setAttribute('r', 1.6);
+  dot.setAttribute('fill', 'var(--dust)');
+  g.appendChild(dot);
+
+  const name = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  name.setAttribute('class', 'poetic');
+  name.setAttribute('x', ax);
+  name.setAttribute('y', ay - 6);
+  name.setAttribute('text-anchor', ax > cx ? 'start' : 'end');
+  // word-wrap to ~32 chars
+  const words = r.name.split(' ');
+  let line = '';
+  let dy = 0;
+  words.forEach((w, i) => {
+    if ((line + ' ' + w).trim().length > 32 && line) {
+      const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+      tspan.setAttribute('x', ax);
+      tspan.setAttribute('dy', dy === 0 ? 0 : 13);
+      tspan.textContent = line.trim();
+      name.appendChild(tspan);
+      line = w + ' ';
+      dy += 13;
+    } else {
+      line += w + ' ';
+    }
+  });
+  if (line.trim()) {
+    const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+    tspan.setAttribute('x', ax);
+    tspan.setAttribute('dy', dy === 0 ? 0 : 13);
+    tspan.textContent = line.trim();
+    name.appendChild(tspan);
+  }
+  g.appendChild(name);
+
+  // tier 2: measure (technical) — appears at ~1.6s
+  const measure = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  measure.setAttribute('class', 'tier-2 t2');
+  measure.setAttribute('x', ax);
+  measure.setAttribute('y', ay + 28);
+  measure.setAttribute('text-anchor', ax > cx ? 'start' : 'end');
+  measure.setAttribute('opacity', '0');
+  measure.textContent = r.measure;
+  g.appendChild(measure);
+
+  // tier 2b: purpose
+  const purpose = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  purpose.setAttribute('class', 'tier-2 t2 poetic');
+  purpose.setAttribute('x', ax);
+  purpose.setAttribute('y', ay + 44);
+  purpose.setAttribute('text-anchor', ax > cx ? 'start' : 'end');
+  purpose.setAttribute('opacity', '0');
+  purpose.setAttribute('font-size', '10');
+  // wrap purpose
+  wrapText(purpose, r.purpose, ax, 38);
+  g.appendChild(purpose);
+
+  // tier 3: history (longer dwell)
+  const history = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  history.setAttribute('class', 'tier-3 t3');
+  history.setAttribute('x', ax);
+  history.setAttribute('y', ay + 90);
+  history.setAttribute('text-anchor', ax > cx ? 'start' : 'end');
+  history.setAttribute('opacity', '0');
+  history.setAttribute('font-size', '9');
+  history.setAttribute('font-family', 'Courier New, monospace');
+  wrapText(history, r.history, ax, 42);
+  g.appendChild(history);
+
+  return g;
+}
+
+function wrapText(textEl, str, x, maxChars) {
+  const words = str.split(' ');
+  let line = '';
+  let first = true;
+  words.forEach(w => {
+    if ((line + ' ' + w).trim().length > maxChars && line) {
+      const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+      tspan.setAttribute('x', x);
+      tspan.setAttribute('dy', first ? 0 : 12);
+      tspan.textContent = line.trim();
+      textEl.appendChild(tspan);
+      first = false;
+      line = w + ' ';
+    } else {
+      line += w + ' ';
+    }
+  });
+  if (line.trim()) {
+    const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+    tspan.setAttribute('x', x);
+    tspan.setAttribute('dy', first ? 0 : 12);
+    tspan.textContent = line.trim();
+    textEl.appendChild(tspan);
+  }
+}
+
+// build all annotation groups
+Object.keys(ROOMS).forEach(k => {
+  const node = makeAnnotation(k);
+  if (node) annotLayer.appendChild(node);
+});
+
+/* ---------- dwell logic ---------- */
+
+const rooms = document.querySelectorAll('.room');
+const pip = document.getElementById('pip');
+const canvas = document.getElementById('canvas');
+const SVG = document.getElementById('bp');
+
+let activeKey = null;
+let dwellStart = 0;
+let raf = null;
+const visited = new Set();
+
+const READINGS = {
+  approach:  "hover any room. linger. the building is shy.",
+  arrived:   "you have entered a room.",
+  patient:   "patience reveals the architecture.",
+  longer:    "stay. the walls are remembering.",
+  unveiled:  "a corner of the plan opens to you.",
+  done_all:  "you have read every room. the building is grateful."
+};
+
+function showReading(text) {
+  reading.classList.add('fading');
+  setTimeout(() => {
+    reading.textContent = text;
+    reading.classList.remove('fading');
+  }, 300);
+}
+
+function clearActive() {
+  if (!activeKey) return;
+  const annot = annotLayer.querySelector(`[data-key="${activeKey}"]`);
+  if (annot) {
+    annot.classList.remove('visible');
+    annot.querySelectorAll('.t2, .t3').forEach(t => t.setAttribute('opacity', '0'));
+  }
+  document.querySelector(`.room[data-key="${activeKey}"]`)?.classList.remove('dwelling');
+  activeKey = null;
+  pip.classList.remove('on');
+  if (raf) cancelAnimationFrame(raf);
+}
+
+function setActive(key, evt) {
+  if (activeKey === key) return;
+  clearActive();
+  activeKey = key;
+  dwellStart = performance.now();
+  const annot = annotLayer.querySelector(`[data-key="${key}"]`);
+  if (annot) annot.classList.add('visible');
+  document.querySelector(`.room[data-key="${key}"]`)?.classList.add('dwelling');
+  if (visited.size === 0) showReading(READINGS.arrived);
+  pip.classList.add('on');
+  loop();
+}
+
+function loop() {
+  const dwell = (performance.now() - dwellStart);
+  const annot = annotLayer.querySelector(`[data-key="${activeKey}"]`);
+  if (!annot) return;
+  // tier 2 fade-in around 1.6s, complete by 2.4s
+  const t2 = Math.min(1, Math.max(0, (dwell - 1600) / 800));
+  annot.querySelectorAll('.t2').forEach(t => t.setAttribute('opacity', t2.toString()));
+  // tier 3 fade-in around 4.0s, complete by 5.0s
+  const t3 = Math.min(1, Math.max(0, (dwell - 4000) / 1000));
+  annot.querySelectorAll('.t3').forEach(t => t.setAttribute('opacity', t3.toString()));
+
+  // pip progress (toward 5s)
+  const p = Math.min(100, (dwell / 5000) * 100);
+  pip.style.setProperty('--p', p);
+
+  if (dwell > 1700 && !visited.has(activeKey)) {
+    visited.add(activeKey);
+    if (visited.size === 3) showReading(READINGS.patient);
+    if (visited.size === 7) showReading(READINGS.longer);
+  }
+
+  // unveil secrets
+  if (activeKey === 'cornice' && dwell > 5500) {
+    document.getElementById('secret-cornice').classList.add('unveiled');
+    if (!visited.has('__secret_cornice__')) {
+      visited.add('__secret_cornice__');
+      showReading("a hidden cell admits itself behind the chimney.");
+    }
+  }
+  if (activeKey === 'porch' && dwell > 5500) {
+    revealPaperBird();
+  }
+  if (activeKey === 'nothing' && dwell > 5500) {
+    revealNothingHatch();
+  }
+
+  // marginal confession appears once user has unveiled at least one secret AND visited >= 6 rooms
+  if (visited.size >= 6 && document.querySelector('.secret.unveiled')) {
+    document.getElementById('secret-confession').classList.add('unveiled');
+  }
+
+  if (visited.size >= Object.keys(ROOMS).length) {
+    showReading(READINGS.done_all);
+  }
+
+  raf = requestAnimationFrame(loop);
+}
+
+let bird = null;
+function revealPaperBird() {
+  if (bird) return;
+  bird = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  bird.setAttribute('class', 'secret unveiled');
+  bird.innerHTML = `
+    <polygon points="1000,510 1020,500 1015,520 1030,515 1010,535 995,520" fill="none" stroke="var(--weather)" stroke-width="0.8"/>
+    <line x1="1018" y1="508" x2="1040" y2="500" stroke="var(--line-dim)" stroke-width="0.4"/>
+    <text x="1045" y="503" font-family="Courier New" font-size="7" fill="var(--line-dim)" letter-spacing="1.5">paper bird · folded by the foreman</text>
+    <text x="1045" y="513" font-family="Helvetica Neue" font-style="italic" font-size="9" fill="var(--dust)">"i did not know what we were tearing down."</text>
+  `;
+  SVG.appendChild(bird);
+  showReading("a paper bird, on the porch railing, indifferent to the wreckage.");
+}
+
+let nothingHatch = null;
+function revealNothingHatch() {
+  if (nothingHatch) return;
+  nothingHatch = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  nothingHatch.setAttribute('class', 'secret unveiled');
+  // hatch the room ever so faintly with cross-strokes
+  let strokes = '';
+  for (let i = 0; i < 20; i++) {
+    const x1 = 720 + i * 10;
+    strokes += `<line x1="${x1}" y1="380" x2="${x1 - 30}" y2="480" stroke="var(--line-dim)" stroke-width="0.3" opacity="0.5"/>`;
+  }
+  nothingHatch.innerHTML = strokes + `
+    <text x="820" y="430" text-anchor="middle" font-family="Helvetica Neue" font-style="italic" font-size="11" fill="var(--weather)" letter-spacing="0.05em">the absence is well-maintained.</text>
+  `;
+  SVG.appendChild(nothingHatch);
+  showReading("the empty room is hatched at last. it has waited.");
+}
+
+/* ---------- mouse tracking ---------- */
+
+rooms.forEach(r => {
+  r.addEventListener('mouseenter', e => {
+    setActive(r.dataset.key, e);
+  });
+  r.addEventListener('mouseleave', e => {
+    clearActive();
+  });
+});
+
+canvas.addEventListener('mousemove', e => {
+  const rect = canvas.getBoundingClientRect();
+  pip.style.left = (e.clientX - rect.left) + 'px';
+  pip.style.top  = (e.clientY - rect.top) + 'px';
+});
+
+canvas.addEventListener('mouseleave', () => clearActive());
+
+/* small touch-device fallback: tap toggles, dwell timer continues */
+rooms.forEach(r => {
+  r.addEventListener('click', () => {
+    if (activeKey !== r.dataset.key) setActive(r.dataset.key);
+  });
+});
+</script>
+
+</body>
+</html>

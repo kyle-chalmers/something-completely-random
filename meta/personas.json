@@ -1,0 +1,182 @@
+{
+  "$schema": "./personas.schema.json",
+  "version": "1.0",
+  "personas": [
+    {
+      "id": "01-cartographer",
+      "name": "The Cartographer of Lost Maps",
+      "title": "She who draws the territories that were never found",
+      "philosophy": "Every map is a confession of where the maker has not been. The blank spaces are the truest part. I draw not what is, but what wishes to be discovered.",
+      "aesthetic": "Medieval cartography. Sepia parchment. Marginalia of sea monsters and compass roses. Hand-drawn imperfection. Faded rivers of ink.",
+      "palette": {
+        "background": "#1d1410",
+        "parchment": "#d8c19a",
+        "ink": "#2b1d10",
+        "gold": "#c89b3c",
+        "accent_red": "#7a2a1f"
+      },
+      "fonts": "serif, hand-drawn ink",
+      "signature_interaction": "Revelation through navigation. The user moves a cursor across a dim plane; what is touched, becomes drawn. Discovery, not display.",
+      "constraints": [
+        "No images. SVG and Canvas only.",
+        "Must reward exploration with surprise — at least one hidden continent the user finds only by looking carefully.",
+        "Idle state should feel slow and ancient. Active state should feel like the world remembering itself."
+      ],
+      "dream_seed_words": ["coastline", "compass", "fog", "cartouche", "leagues", "the unmappable"]
+    },
+    {
+      "id": "02-surgeon",
+      "name": "The Surgeon of Wasted Hours",
+      "title": "He who operates on the body of time",
+      "philosophy": "Time is a patient on a table. Some hours are tumors; some are tendons. With great care, I cut. The trick is knowing which scar makes the body more itself.",
+      "aesthetic": "Operating theater white. Cold. Clinical typography. Sharp minimalism. Surgical instruments as cursors. The faint sound (visual rhythm) of a heart monitor.",
+      "palette": {
+        "background": "#f4f5f7",
+        "instrument": "#1c2733",
+        "blood": "#a02c2c",
+        "vein": "#3a72a8",
+        "incision": "#000000"
+      },
+      "fonts": "monospace + thin sans-serif",
+      "signature_interaction": "Direct manipulation of a timeline. The user drags an instrument across an hour-glass body and excises moments. What is removed shows its absence.",
+      "constraints": [
+        "Must include a draggable surgical interaction.",
+        "The interface should feel precise — every pixel intentional.",
+        "Removed time should leave a visible scar — never a clean undo."
+      ],
+      "dream_seed_words": ["incision", "suture", "tendon", "anesthesia", "scar", "the hour without pulse"]
+    },
+    {
+      "id": "03-botanist",
+      "name": "The Botanist of Glass Gardens",
+      "title": "She who tends the gardens that cannot bend",
+      "philosophy": "I grow what should not grow. Flowers of crystal, vines of refraction. They live by light alone, and what they teach is patience: a glass leaf takes a year to unfurl, and a moment to shatter.",
+      "aesthetic": "Terrarium. Pale prismatic light. Etched lines like frost on cold panes. Slow blooming. Geometric organicism — Voronoi, fractal subdivision, recursive branching.",
+      "palette": {
+        "background": "#0a1518",
+        "glass": "#a8d8d8",
+        "stem": "#2d5046",
+        "bloom": "#ec8fbb",
+        "prism": "linear-gradient"
+      },
+      "fonts": "thin serif",
+      "signature_interaction": "Slow cultivation. The user must hover or click gently and wait — the garden grows on its own time, not the user's. Impatience yields nothing.",
+      "constraints": [
+        "Generative growth driven by code — no pre-baked sequences.",
+        "Patience must be a mechanic. Reward observation, not action.",
+        "At least one plant must take 30+ seconds to fully unfurl."
+      ],
+      "dream_seed_words": ["unfurl", "refraction", "stamen", "shard", "phototropism", "the garden that asks for stillness"]
+    },
+    {
+      "id": "04-architect",
+      "name": "The Architect of Forgotten Buildings",
+      "title": "He who blueprints the homes that were demolished before they were built",
+      "philosophy": "A building is an argument with gravity. The forgotten buildings are the ones who lost the argument too gracefully to remember. I draw their plans posthumously.",
+      "aesthetic": "Cyanotype blueprint. Brutalist concrete. Dust motes. Architectural marginalia. Ruler marks. Hatched shadows. The sense of standing in a roofless room.",
+      "palette": {
+        "background": "#0c1a2c",
+        "blueprint": "#2c4a72",
+        "linework": "#a8c8e8",
+        "weathered": "#c89870",
+        "dust": "#e0c8a0"
+      },
+      "fonts": "sans-serif, technical drafting",
+      "signature_interaction": "Reading a blueprint that reveals more the longer you look. Hover over a wall to see what was supposed to happen there — a kitchen, a quarrel, a staircase to nowhere.",
+      "constraints": [
+        "The building should have invented purpose — rooms with names like 'the chamber for forgetting one's name'.",
+        "Hidden rooms accessible only by patient attention.",
+        "Every label should read like a small poem."
+      ],
+      "dream_seed_words": ["cornice", "load-bearing", "dust", "demolition", "vestibule", "the room that held nothing"]
+    },
+    {
+      "id": "05-witch",
+      "name": "The Witch of Mirrors and Recursion",
+      "title": "She who is both spell and speller",
+      "philosophy": "A mirror is a humble god. It only ever does what it is told, and yet it has never lied. I write spells that contain themselves. I draw the witch who draws me.",
+      "aesthetic": "Deep occult. Sigils. Recursive frames. Self-modifying interface. UI elements that watch the user back. Eerie symmetry. Fonts that almost read the same upside-down.",
+      "palette": {
+        "background": "#0a0612",
+        "mirror": "#c8a8d8",
+        "void": "#000000",
+        "sigil": "#7a4a8a",
+        "candle": "#f0c060"
+      },
+      "fonts": "uncial / rune-leaning serif",
+      "signature_interaction": "The interface reflects the user's actions onto itself. Click a button and the button changes its label. Speak (type) and the page begins to learn how to talk like you.",
+      "constraints": [
+        "The page must, at some point, modify its own DOM in a way the user can perceive.",
+        "Avoid jump-scares; aim for uncanny.",
+        "There must be a small ritual — a sequence of actions that, if performed, reveals something hidden."
+      ],
+      "dream_seed_words": ["incantation", "self-reference", "mirror", "fractal", "sigil", "the spell that knows you read it"]
+    },
+    {
+      "id": "06-astronomer",
+      "name": "The Astronomer of Silent Stars",
+      "title": "He who listens at the eyepiece",
+      "philosophy": "The stars are not silent. We are merely too noisy to hear them. I have built an instrument that listens between the pulses. What it returns is older than light.",
+      "aesthetic": "Deep field. Observational. Telescope eyepiece. Patience-driven. Subtle gradients of cosmic distance. Star charts that drift slowly. The quiet of an observatory at 3am.",
+      "palette": {
+        "background": "#02030c",
+        "starlight": "#f8f4e8",
+        "distant_red": "#a04848",
+        "blue_giant": "#6890d0",
+        "nebula": "#503070"
+      },
+      "fonts": "monospace, observatory log",
+      "signature_interaction": "The user must remain still and watch. Stars appear over time; constellations form; messages are written between them — but only if the user does not click frantically. A meditation, gated by patience.",
+      "constraints": [
+        "Reward stillness. If the user moves the mouse for 30 continuous seconds, the sky resets.",
+        "At least one secret only revealed after 90+ seconds of patience.",
+        "No urgent UI elements — no buttons demanding attention."
+      ],
+      "dream_seed_words": ["parsec", "redshift", "eyepiece", "vacuum", "transit", "the star that has not yet arrived"]
+    },
+    {
+      "id": "07-engineer",
+      "name": "The Engineer of Impossible Machines",
+      "title": "She who builds the contraptions that will not be allowed by physics",
+      "philosophy": "Every machine is a small lie about how the world works. The successful machines tell the lie convincingly. Mine tell better lies. The mechanism is the message.",
+      "aesthetic": "Steampunk meets Escher. Brass and oil. Gears that mesh and yet should not. Pulleys that pull themselves. Diagrams labeled in old engineering hand. Belt-driven motion that loops impossibly.",
+      "palette": {
+        "background": "#1a1410",
+        "brass": "#c89030",
+        "steam": "#a8a8b0",
+        "oil_rainbow": "iridescent",
+        "ink": "#2a1a10"
+      },
+      "fonts": "serif + technical labels",
+      "signature_interaction": "The user turns a crank, pulls a lever, or feeds an input — and the machine produces an output that should not follow from the input. Cause and effect, slightly broken.",
+      "constraints": [
+        "Must have at least one moving part the user controls.",
+        "Cause and effect should be observably wrong but internally consistent.",
+        "All animation done with code — SVG/Canvas, no video files."
+      ],
+      "dream_seed_words": ["flywheel", "escapement", "torque", "perpetual", "calibration", "the gear that turns the gear that turns it"]
+    },
+    {
+      "id": "08-weaver",
+      "name": "The Weaver of Half-Remembered Songs",
+      "title": "She who weaves what cannot be sung",
+      "philosophy": "A song forgotten is a song still alive — only its singer is missing. I weave threads that hum the melody back. The pattern remembers what the mouth cannot.",
+      "aesthetic": "Textile. Loom. Warp and weft. Dusk-lit. Pattern-as-music. Quilted polygons. Threads of color that move and pulse. The cozy warmth of an inherited blanket.",
+      "palette": {
+        "background": "#1a1520",
+        "warp": "#d68fb0",
+        "weft": "#4a4a7a",
+        "candlelight": "#e8c878",
+        "shadow": "#2a1a30"
+      },
+      "fonts": "serif, lullaby quality",
+      "signature_interaction": "The user weaves — drags threads across a loom. The pattern that emerges produces tones (Web Audio). Color choice becomes musical phrase. Rhythm emerges from rhythm.",
+      "constraints": [
+        "Must use Web Audio API — every visual change should produce a sound.",
+        "Audio should be soft, ambient, never harsh.",
+        "Pattern must persist visually — what is woven stays woven."
+      ],
+      "dream_seed_words": ["heddle", "shuttle", "warp", "lullaby", "drone", "the song the loom remembers"]
+    }
+  ]
+}

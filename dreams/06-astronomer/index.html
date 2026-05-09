@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>between the pulses · the astronomer of silent stars</title>
+<link rel="stylesheet" href="../../style.css" />
+<style>
+  :root {
+    --void:        #02030c;
+    --starlight:   #f8f4e8;
+    --redshift:    #a04848;
+    --bluegiant:   #6890d0;
+    --nebula:      #503070;
+  }
+
+  html, body {
+    background: var(--void);
+    color: var(--starlight);
+    overflow: hidden;
+    height: 100vh;
+    cursor: none;
+  }
+
+  /* faint vignette — eyepiece */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse at 50% 50%,
+      transparent 30%,
+      rgba(0,0,0,0.4) 65%,
+      rgba(0,0,0,0.92) 100%);
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  canvas#sky {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    display: block;
+  }
+
+  /* the red flashlight cursor */
+  .lamp {
+    position: fixed;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--redshift);
+    box-shadow:
+      0 0 6px rgba(160,72,72,0.7),
+      0 0 22px rgba(160,72,72,0.3);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    z-index: 50;
+    mix-blend-mode: screen;
+    transition: opacity 600ms ease;
+  }
+
+  .log {
+    position: fixed;
+    bottom: 1.2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--type-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.25em;
+    color: rgba(248,244,232,0.42);
+    z-index: 20;
+    text-align: center;
+    pointer-events: none;
+    user-select: none;
+  }
+  .log .row { margin-top: 0.4rem; }
+  .log .stillness {
+    color: var(--bluegiant);
+    transition: color 400ms ease;
+  }
+  .log .stillness.warn { color: var(--redshift); }
+
+  .narration {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, calc(-50% + 18rem));
+    width: min(34rem, 80vw);
+    text-align: center;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: rgba(248,244,232,0.85);
+    z-index: 20;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 2400ms ease;
+  }
+  .narration.show { opacity: 1; }
+
+  .preface {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(30rem, 80vw);
+    text-align: center;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-weight: 300;
+    color: rgba(248,244,232,0.78);
+    z-index: 30;
+    pointer-events: none;
+    transition: opacity 4000ms ease;
+  }
+  .preface .small {
+    margin-top: 1.2rem;
+    font-family: var(--type-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: rgba(160,72,72,0.7);
+    text-transform: uppercase;
+  }
+  .preface.fade { opacity: 0; }
+
+  .reset {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--redshift);
+    font-family: var(--type-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    z-index: 40;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1200ms ease;
+    text-align: center;
+  }
+  .reset.show { opacity: 0.85; }
+  .reset .sub {
+    display: block;
+    margin-top: 0.8rem;
+    color: rgba(248,244,232,0.4);
+    letter-spacing: 0.2em;
+    font-size: 0.7rem;
+  }
+
+  .return-ribbon, .wake-log-toggle {
+    color: rgba(248,244,232,0.55);
+    border-color: rgba(248,244,232,0.12);
+  }
+  .return-ribbon:hover { color: var(--starlight); }
+
+  .wake-log {
+    background: rgba(2,3,12,0.96);
+    border-color: rgba(248,244,232,0.12);
+    color: rgba(248,244,232,0.65);
+  }
+  .wake-log h3 { color: var(--starlight); }
+  .wake-log dt { color: var(--bluegiant); }
+</style>
+</head>
+<body>
+
+<a class="return-ribbon" href="../../">← Hall of Reverie</a>
+
+<button class="wake-log-toggle" onclick="document.querySelector('.wake-log').classList.toggle('open')">📜 wake log</button>
+
+<aside class="wake-log">
+  <h3>The Astronomer of Silent Stars</h3>
+  <p style="font-style:italic;color:var(--hall-ink-dim)">"the stars are not silent — we are merely too noisy"</p>
+  <dl>
+    <dt>title</dt><dd>between the pulses</dd>
+    <dt>made</dt><dd>9 may 2026 · the small hours</dd>
+    <dt>essence</dt><dd>a sky that develops only for the still — constellations name themselves to those who do not look away.</dd>
+    <dt>secrets</dt><dd>the constellation that names itself at 90 seconds; a transit at 150 seconds tracing a poem; the star that has not yet arrived</dd>
+    <dt>instrument</dt><dd>procedural starfield, no images. coordinates seeded by night.</dd>
+    <dt>note</dt><dd>move the mouse continuously and the eyepiece fogs. remain still and the field deepens.</dd>
+  </dl>
+</aside>
+
+<canvas id="sky"></canvas>
+
+<div class="lamp" id="lamp"></div>
+
+<div class="preface" id="preface">
+  <div>be still.</div>
+  <div class="small">the eyepiece is listening</div>
+</div>
+
+<div class="narration" id="narration"></div>
+
+<div class="reset" id="reset">
+  the field has clouded
+  <span class="sub">be still — the stars will return</span>
+</div>
+
+<div class="log" id="log">
+  <div class="row" id="logTime">— · 00m 00s of stillness</div>
+  <div class="row" id="logStatus"><span class="stillness" id="stillness">listening</span></div>
+</div>
+
+<script>
+(() => {
+  // ---------------------------------------------------------------
+  //  the eyepiece
+  // ---------------------------------------------------------------
+  const canvas = document.getElementById("sky");
+  const ctx = canvas.getContext("2d");
+
+  let W = 0, H = 0, cx = 0, cy = 0;
+  function resize() {
+    W = canvas.width = window.innerWidth * devicePixelRatio;
+    H = canvas.height = window.innerHeight * devicePixelRatio;
+    canvas.style.width = window.innerWidth + "px";
+    canvas.style.height = window.innerHeight + "px";
+    cx = W / 2; cy = H / 2;
+  }
+  resize();
+  window.addEventListener("resize", resize);
+
+  // seeded random — same sky for everyone tonight
+  function mulberry32(seed) {
+    return function() {
+      let t = (seed += 0x6d2b79f5);
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  // a fixed seed so the sky is the same field every visit — like a real constellation
+  const rand = mulberry32(20260509);
+
+  // ---------------------------------------------------------------
+  //  starfield
+  // ---------------------------------------------------------------
+  const STARS = [];
+  const STAR_COUNT = 520;
+  for (let i = 0; i < STAR_COUNT; i++) {
+    // distribute across a unit square; we'll scale to viewport at draw
+    const u = rand();
+    const v = rand();
+    // magnitude — bias to dim. brightness via luminance later.
+    const m = Math.pow(rand(), 2.6);
+    // color temperature
+    const t = rand();
+    let color;
+    if (t < 0.05) color = [104, 144, 208];      // blue giant, rare
+    else if (t < 0.85) color = [248, 244, 232]; // starlight, common
+    else color = [200, 160, 130];               // amber dwarf
+    // delay before first arrival — distance in parsecs (metaphorical)
+    const delay = 1500 + rand() * 35000;
+    STARS.push({
+      u, v,
+      mag: m,
+      color,
+      delay,
+      twinkle: 0.4 + rand() * 0.6,
+      phase: rand() * Math.PI * 2,
+      arrived: 0,   // 0..1 — emergence
+      pulseSeed: rand() * 1000,
+    });
+  }
+
+  // constellation lines — chosen by index of nearby stars, defined statically
+  // we'll pick clusters by simple proximity at first frame
+  let CONSTELLATIONS = [];
+  function buildConstellations() {
+    // pick a handful of bright stars and link to their nearest neighbors
+    const bright = STARS
+      .map((s, i) => ({ s, i }))
+      .sort((a, b) => b.s.mag - a.s.mag)
+      .slice(0, 14);
+
+    const groups = [];
+    const used = new Set();
+    for (let k = 0; k < 5; k++) {
+      const seed = bright[k * 2 + 1];
+      if (!seed || used.has(seed.i)) continue;
+      const group = [seed.i];
+      used.add(seed.i);
+      // find 3-5 nearest stars
+      const dists = STARS.map((s, i) => ({
+        i,
+        d: (s.u - seed.s.u) ** 2 + (s.v - seed.s.v) ** 2
+      })).filter(o => o.i !== seed.i && !used.has(o.i))
+         .sort((a, b) => a.d - b.d)
+         .slice(0, 3 + Math.floor(rand() * 3));
+      for (const o of dists) {
+        group.push(o.i);
+        used.add(o.i);
+      }
+      groups.push(group);
+    }
+    return groups;
+  }
+  CONSTELLATIONS = buildConstellations();
+
+  // a special constellation revealed at 90s — the one that names itself
+  const NAMED_CONSTELLATION = {
+    name: "the listener",
+    revealAt: 90, // seconds
+    revealed: false,
+    nameOpacity: 0,
+    indices: CONSTELLATIONS[0] || [0,1,2,3]
+  };
+
+  // ---------------------------------------------------------------
+  //  the transit poem (the secret at ~150s)
+  // ---------------------------------------------------------------
+  // an exoplanet transits — its shadow traces letters of a poem, slowly
+  const POEM = [
+    "the star that has not yet arrived",
+    "is older than the one we name.",
+    "what is patience, but a parsec",
+    "folded into the eye?"
+  ];
+  let transitStartedAt = null;
+  const TRANSIT_REVEAL = 150; // seconds of total elapsed witnessing
+
+  // ---------------------------------------------------------------
+  //  stillness tracking
+  // ---------------------------------------------------------------
+  let lastMoveTs = performance.now();
+  let mouseX = window.innerWidth / 2;
+  let mouseY = window.innerHeight / 2;
+  let stillSeconds = 0;
+  let totalWitnessed = 0;
+  let movementBudget = 0;        // 0..1 — when 1, sky resets
+  let recentMoveDecay = 0;
+  let started = false;
+  let resetCooldown = 0;
+  let totalStillEver = 0;        // cumulative across resets, for narration progression
+
+  const lamp = document.getElementById("lamp");
+  const preface = document.getElementById("preface");
+  const narrationEl = document.getElementById("narration");
+  const resetEl = document.getElementById("reset");
+  const logTime = document.getElementById("logTime");
+  const stillnessEl = document.getElementById("stillness");
+
+  document.addEventListener("mousemove", (e) => {
+    const now = performance.now();
+    const dx = e.clientX - mouseX;
+    const dy = e.clientY - mouseY;
+    const dist = Math.hypot(dx, dy);
+    mouseX = e.clientX; mouseY = e.clientY;
+    lamp.style.left = mouseX + "px";
+    lamp.style.top = mouseY + "px";
+    // count meaningful motion only
+    if (dist > 1.5) {
+      lastMoveTs = now;
+      recentMoveDecay = Math.min(1, recentMoveDecay + dist * 0.0015);
+      if (!started) {
+        started = true;
+        preface.classList.add("fade");
+      }
+    }
+  });
+
+  // hide preface after a while regardless
+  setTimeout(() => preface.classList.add("fade"), 8000);
+
+  // narration cues, by total witnessed seconds
+  const NARRATIONS = [
+    { at: 8,   text: "the field is darker than it appears." },
+    { at: 22,  text: "what arrives first is rarely what is closest." },
+    { at: 45,  text: "between the pulses — listen — there is more than absence." },
+    { at: 70,  text: "you have remained. the sky is beginning to trust you." },
+    { at: 92,  text: "a constellation has named itself." },
+    { at: 120, text: "vacuum is not empty. it is patient." },
+    { at: 152, text: "a transit. read what its shadow writes." },
+    { at: 240, text: "you are now part of the instrument." },
+  ];
+  let narrationIdx = 0;
+  let narrationShownUntil = 0;
+
+  function showNarration(text) {
+    narrationEl.textContent = text;
+    narrationEl.classList.add("show");
+    narrationShownUntil = performance.now() + 7000;
+  }
+
+  // ---------------------------------------------------------------
+  //  drawing
+  // ---------------------------------------------------------------
+  let lastFrame = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - lastFrame) / 1000);
+    lastFrame = now;
+
+    // decay recent movement
+    recentMoveDecay = Math.max(0, recentMoveDecay - dt * 0.35);
+
+    // stillness — seconds since last movement
+    const sinceMove = (now - lastMoveTs) / 1000;
+    if (sinceMove > 0.6) {
+      stillSeconds += dt;
+      totalStillEver += dt;
+    } else {
+      stillSeconds = Math.max(0, stillSeconds - dt * 0.5);
+    }
+    totalWitnessed += dt;
+
+    // movement budget — fills with continuous mousemove; drains with stillness
+    if (sinceMove < 0.3) {
+      movementBudget = Math.min(1.05, movementBudget + dt * 0.034); // ~30s of constant motion fills it
+    } else {
+      movementBudget = Math.max(0, movementBudget - dt * 0.08);
+    }
+
+    // reset?
+    if (movementBudget >= 1.0 && resetCooldown <= 0) {
+      // fade all stars
+      for (const s of STARS) s.arrived *= 0.0;
+      stillSeconds = 0;
+      totalWitnessed = 0;
+      transitStartedAt = null;
+      narrationIdx = 0;
+      NAMED_CONSTELLATION.revealed = false;
+      NAMED_CONSTELLATION.nameOpacity = 0;
+      resetEl.classList.add("show");
+      resetCooldown = 4.5;
+      // re-randomize delays for fresh emergence
+      for (const s of STARS) s.delay = 800 + Math.random() * 18000;
+    }
+    if (resetCooldown > 0) {
+      resetCooldown -= dt;
+      if (resetCooldown <= 0) {
+        resetEl.classList.remove("show");
+        movementBudget = 0;
+      }
+    }
+
+    // ---- background void with subtle nebula breathing ----
+    ctx.fillStyle = "#02030c";
+    ctx.fillRect(0, 0, W, H);
+
+    // nebula wash
+    const nebulaPulse = 0.5 + 0.5 * Math.sin(now * 0.00012);
+    const grad1 = ctx.createRadialGradient(
+      cx + Math.cos(now * 0.00005) * W * 0.12,
+      cy + Math.sin(now * 0.00007) * H * 0.10,
+      0,
+      cx, cy, Math.max(W, H) * 0.7
+    );
+    grad1.addColorStop(0, `rgba(80, 48, 112, ${0.04 + nebulaPulse * 0.025})`);
+    grad1.addColorStop(0.4, `rgba(40, 30, 70, 0.02)`);
+    grad1.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = grad1;
+    ctx.fillRect(0, 0, W, H);
+
+    // a second deeper nebula bloom — distant
+    const grad2 = ctx.createRadialGradient(
+      cx - W * 0.25, cy + H * 0.18, 0,
+      cx - W * 0.25, cy + H * 0.18, W * 0.5
+    );
+    grad2.addColorStop(0, `rgba(104, 144, 208, ${0.03 + nebulaPulse * 0.015})`);
+    grad2.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = grad2;
+    ctx.fillRect(0, 0, W, H);
+
+    // very slow drift — celestial rotation
+    const rot = now * 0.0000045;
+    const cosR = Math.cos(rot), sinR = Math.sin(rot);
+
+    // ---- stars ----
+    const reachable = totalWitnessed * 1000; // ms of patience
+    for (const s of STARS) {
+      // emergence
+      if (reachable > s.delay && resetCooldown <= 0) {
+        s.arrived = Math.min(1, s.arrived + dt * (0.18 + s.mag * 0.3));
+      }
+      if (s.arrived <= 0.01) continue;
+
+      // position with subtle rotation around center
+      const ux = (s.u - 0.5);
+      const vy = (s.v - 0.5);
+      const rx = ux * cosR - vy * sinR;
+      const ry = ux * sinR + vy * cosR;
+      const x = cx + rx * W * 0.92;
+      const y = cy + ry * H * 0.92;
+
+      // twinkle (subtle — not noisy)
+      const twk = 0.85 + 0.15 * Math.sin(now * 0.0006 * s.twinkle + s.phase);
+      const radius = (0.5 + s.mag * 2.4) * devicePixelRatio * twk * s.arrived;
+
+      // halo for bright stars
+      if (s.mag > 0.55) {
+        const haloR = radius * 5;
+        const halo = ctx.createRadialGradient(x, y, 0, x, y, haloR);
+        halo.addColorStop(0, `rgba(${s.color[0]},${s.color[1]},${s.color[2]},${0.18 * s.arrived})`);
+        halo.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = halo;
+        ctx.beginPath();
+        ctx.arc(x, y, haloR, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = `rgba(${s.color[0]},${s.color[1]},${s.color[2]},${s.arrived})`;
+      ctx.beginPath();
+      ctx.arc(x, y, Math.max(0.4, radius), 0, Math.PI * 2);
+      ctx.fill();
+
+      s._x = x; s._y = y;
+    }
+
+    // ---- constellations form gradually after ~40s of stillness ----
+    if (totalWitnessed > 20 && resetCooldown <= 0) {
+      const lineFade = Math.min(1, (totalWitnessed - 20) / 30);
+      ctx.lineWidth = 1 * devicePixelRatio;
+      for (let g = 0; g < CONSTELLATIONS.length; g++) {
+        const grp = CONSTELLATIONS[g];
+        const alpha = 0.10 * lineFade * (0.7 + 0.3 * Math.sin(now * 0.0004 + g));
+        ctx.strokeStyle = `rgba(104,144,208,${alpha})`;
+        ctx.beginPath();
+        for (let i = 0; i < grp.length - 1; i++) {
+          const a = STARS[grp[i]];
+          const b = STARS[grp[i + 1]];
+          if (!a._x || !b._x) continue;
+          if (a.arrived < 0.6 || b.arrived < 0.6) continue;
+          ctx.moveTo(a._x, a._y);
+          ctx.lineTo(b._x, b._y);
+        }
+        ctx.stroke();
+      }
+    }
+
+    // ---- the named constellation (90s secret) ----
+    if (totalWitnessed >= NAMED_CONSTELLATION.revealAt && stillSeconds > 4 && resetCooldown <= 0) {
+      NAMED_CONSTELLATION.revealed = true;
+      NAMED_CONSTELLATION.nameOpacity = Math.min(1, NAMED_CONSTELLATION.nameOpacity + dt * 0.25);
+    } else if (resetCooldown > 0) {
+      NAMED_CONSTELLATION.nameOpacity = Math.max(0, NAMED_CONSTELLATION.nameOpacity - dt * 1.2);
+    }
+    if (NAMED_CONSTELLATION.nameOpacity > 0.02) {
+      // brighten its lines
+      const grp = NAMED_CONSTELLATION.indices;
+      ctx.strokeStyle = `rgba(248,244,232,${0.45 * NAMED_CONSTELLATION.nameOpacity})`;
+      ctx.lineWidth = 1.2 * devicePixelRatio;
+      ctx.beginPath();
+      for (let i = 0; i < grp.length - 1; i++) {
+        const a = STARS[grp[i]];
+        const b = STARS[grp[i + 1]];
+        if (!a._x || !b._x) continue;
+        ctx.moveTo(a._x, a._y);
+        ctx.lineTo(b._x, b._y);
+      }
+      ctx.stroke();
+      // place its name beside the seed star
+      const seed = STARS[grp[0]];
+      if (seed && seed._x) {
+        ctx.font = `${12 * devicePixelRatio}px "Cormorant Garamond", Georgia, serif`;
+        ctx.fillStyle = `rgba(248,244,232,${0.7 * NAMED_CONSTELLATION.nameOpacity})`;
+        ctx.fillStyle = `rgba(248,244,232,${0.7 * NAMED_CONSTELLATION.nameOpacity})`;
+        ctx.fillText(NAMED_CONSTELLATION.name, seed._x + 14 * devicePixelRatio, seed._y - 8 * devicePixelRatio);
+      }
+    }
+
+    // ---- the transit (poem secret) at TRANSIT_REVEAL seconds ----
+    if (totalWitnessed >= TRANSIT_REVEAL && resetCooldown <= 0) {
+      if (transitStartedAt === null) transitStartedAt = totalWitnessed;
+      const elapsed = totalWitnessed - transitStartedAt;
+      // a faint horizontal track across the sky — the planet
+      const trackY = cy - H * 0.05;
+      const px = (W * 0.05) + ((elapsed / 50) % 1) * W * 0.9;
+      // shadow disc
+      const shadowR = 18 * devicePixelRatio;
+      const sg = ctx.createRadialGradient(px, trackY, 0, px, trackY, shadowR);
+      sg.addColorStop(0, "rgba(2,3,12,0.85)");
+      sg.addColorStop(1, "rgba(2,3,12,0)");
+      ctx.fillStyle = sg;
+      ctx.beginPath();
+      ctx.arc(px, trackY, shadowR, 0, Math.PI * 2);
+      ctx.fill();
+
+      // the trail spells out the poem letter by letter as it transits
+      const lineIdx = Math.min(POEM.length - 1, Math.floor(elapsed / 22));
+      const lineProgress = Math.min(1, (elapsed % 22) / 18);
+      const line = POEM[lineIdx] || "";
+      const shown = line.slice(0, Math.floor(line.length * lineProgress));
+      ctx.font = `300 ${15 * devicePixelRatio}px "Cormorant Garamond", Georgia, serif`;
+      ctx.textAlign = "center";
+      ctx.fillStyle = "rgba(248,244,232,0.78)";
+      ctx.fillText(shown, cx, trackY + 50 * devicePixelRatio);
+      ctx.textAlign = "start";
+    }
+
+    // ---- the cursor lamp dims a slow region around it (red flashlight)
+    if (started) {
+      const r = 90 * devicePixelRatio;
+      const lampGrad = ctx.createRadialGradient(
+        mouseX * devicePixelRatio, mouseY * devicePixelRatio, 0,
+        mouseX * devicePixelRatio, mouseY * devicePixelRatio, r
+      );
+      lampGrad.addColorStop(0, "rgba(160,72,72,0.10)");
+      lampGrad.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = lampGrad;
+      ctx.beginPath();
+      ctx.arc(mouseX * devicePixelRatio, mouseY * devicePixelRatio, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // ---- noise haze when the user is moving too much (eyepiece fog) ----
+    if (recentMoveDecay > 0.2) {
+      ctx.fillStyle = `rgba(160,72,72,${0.04 * recentMoveDecay})`;
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    // ---- narrations ----
+    if (narrationIdx < NARRATIONS.length && totalWitnessed >= NARRATIONS[narrationIdx].at && resetCooldown <= 0) {
+      showNarration(NARRATIONS[narrationIdx].text);
+      narrationIdx++;
+    }
+    if (now > narrationShownUntil) {
+      narrationEl.classList.remove("show");
+    }
+
+    // ---- log ----
+    const totalSec = Math.floor(totalWitnessed);
+    const stillSec = Math.floor(stillSeconds);
+    const mm = String(Math.floor(totalSec / 60)).padStart(2, "0");
+    const ss = String(totalSec % 60).padStart(2, "0");
+    logTime.textContent = `witnessed ${mm}m ${ss}s · ${stillSec}s of stillness`;
+
+    if (movementBudget > 0.7) {
+      stillnessEl.textContent = "the eyepiece is fogging";
+      stillnessEl.classList.add("warn");
+    } else if (recentMoveDecay > 0.4) {
+      stillnessEl.textContent = "too much motion";
+      stillnessEl.classList.add("warn");
+    } else if (sinceMove > 2) {
+      stillnessEl.textContent = "listening";
+      stillnessEl.classList.remove("warn");
+    } else {
+      stillnessEl.textContent = "watching";
+      stillnessEl.classList.remove("warn");
+    }
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  // accessibility — touch users get the same field, just no lamp
+  document.addEventListener("touchstart", () => {
+    started = true;
+    preface.classList.add("fade");
+  }, { passive: true });
+})();
+</script>
+
+</body>
+</html>

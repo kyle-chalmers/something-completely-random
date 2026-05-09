@@ -1,0 +1,23 @@
+{
+  "id": "03-botanist",
+  "persona": "The Botanist of Glass Gardens",
+  "persona_short": "botanist",
+  "title": "the garden that asks for stillness",
+  "essence": "A crystalline terrarium of six glass plants that grow only when the visitor stops moving — patience is the seed, stillness is the only water.",
+  "description": "Six pale aquamarine seeds sit along the horizon line of an etched-pane greenhouse. Click one and a plant begins to consider growing — but only in the space between your gestures. Hold your hand still and the glass fern unfurls leaflet by leaflet; the refraction lily opens hexagonal petals one by one; the stillness orchid takes a full minute to reach its fourth blossom. Move too quickly and every plant pauses, dimming as if frosted. When all six bloom and you have been still for long enough, their Latin names appear in the soil — and a seventh seed reveals itself at the center of the garden, blooming slowest of all.",
+  "novelty_score": 8,
+  "buildability_score": 9,
+  "interaction_summary": "Plant seeds, then practice stillness — generative crystalline growth that punishes impatience and rewards minutes of attention.",
+  "secrets": [
+    "perfect stillness for 4+ seconds reveals each plant's Latin name in the soil",
+    "the stillness orchid takes 62 seconds to fully bloom",
+    "frantic mouse motion wilts every plant simultaneously and dims the seeds",
+    "a seventh hidden seed (Corona patientiae) sprouts only after all six original plants have bloomed",
+    "the breath-line at the bottom rotates through eight different invitations every 11 seconds"
+  ],
+  "wake_log": [
+    {"hour": "01:14", "event": "the first inkling: what if the user's impatience were the antagonist? a plant that refuses frantic clicks."},
+    {"hour": "02:33", "event": "the recursive fractal branch kept exploding off-canvas — clamped depth to a function of growth, and now it spreads only as patience permits."},
+    {"hour": "03:50", "event": "kept: the six-plant terrarium and the secret seventh. abandoned: a soundtrack of windchimes. silence is more honest. greenhouses do not chime."}
+  ]
+}

@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>the garden that asks for stillness</title>
+<link rel="stylesheet" href="../../style.css" />
+<style>
+  :root {
+    --bg: #0a1518;
+    --glass: #a8d8d8;
+    --stem: #2d5046;
+    --bloom: #ec8fbb;
+    --pane: rgba(168, 216, 216, 0.06);
+    --frost: rgba(168, 216, 216, 0.18);
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--glass);
+    font-family: 'Cormorant Garamond', 'EB Garamond', Garamond, 'Times New Roman', serif;
+    min-height: 100vh;
+    overflow: hidden;
+    cursor: crosshair;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 30% 20%, rgba(236, 143, 187, 0.05) 0%, transparent 50%),
+      radial-gradient(ellipse at 75% 80%, rgba(168, 216, 216, 0.06) 0%, transparent 55%),
+      linear-gradient(180deg, #0a1518 0%, #0d1c20 60%, #081012 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .greenhouse {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+  }
+
+  svg.terrarium {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .panes {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    background-image:
+      linear-gradient(90deg, var(--frost) 0 1px, transparent 1px 100%),
+      linear-gradient(0deg, var(--frost) 0 1px, transparent 1px 100%);
+    background-size: 220px 220px, 220px 220px;
+    opacity: 0.18;
+    mix-blend-mode: screen;
+  }
+
+  .vignette {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(8, 16, 18, 0.7) 100%);
+  }
+
+  .label {
+    position: fixed;
+    top: 2.4rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    text-align: center;
+    font-style: italic;
+    letter-spacing: 0.18em;
+    font-size: 0.82rem;
+    color: rgba(168, 216, 216, 0.55);
+    text-transform: lowercase;
+  }
+  .label .latin {
+    display: block;
+    font-size: 0.7rem;
+    color: rgba(168, 216, 216, 0.32);
+    margin-top: 0.35rem;
+    letter-spacing: 0.32em;
+  }
+
+  .breath {
+    position: fixed;
+    bottom: 2.6rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    font-style: italic;
+    color: rgba(168, 216, 216, 0.45);
+    font-size: 0.78rem;
+    letter-spacing: 0.16em;
+    text-transform: lowercase;
+    transition: opacity 1.6s ease;
+    text-align: center;
+    max-width: 80vw;
+  }
+  .breath.fading { opacity: 0.15; }
+
+  .stillness-meter {
+    position: fixed;
+    bottom: 1.2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    width: 220px;
+    height: 1px;
+    background: rgba(168, 216, 216, 0.12);
+    overflow: visible;
+  }
+  .stillness-meter .fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg,
+      rgba(168, 216, 216, 0.3),
+      rgba(236, 143, 187, 0.7),
+      rgba(168, 216, 216, 0.3));
+    transition: width 0.6s ease;
+    box-shadow: 0 0 10px rgba(236, 143, 187, 0.3);
+  }
+
+  .return-ribbon {
+    z-index: 10;
+  }
+
+  .wake-log-toggle {
+    z-index: 10;
+  }
+
+  .wake-log h3 {
+    font-family: 'Cormorant Garamond', Garamond, serif;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+  }
+
+  /* Plant SVG element styles */
+  .plant-stem {
+    fill: none;
+    stroke: var(--stem);
+    stroke-width: 1.2;
+    stroke-linecap: round;
+    opacity: 0.85;
+    filter: drop-shadow(0 0 2px rgba(45, 80, 70, 0.4));
+  }
+
+  .plant-glass {
+    fill: var(--pane);
+    stroke: var(--glass);
+    stroke-width: 0.5;
+    stroke-linejoin: round;
+    opacity: 0.75;
+  }
+
+  .plant-prism {
+    fill: url(#prismGrad);
+    stroke: var(--glass);
+    stroke-width: 0.4;
+    opacity: 0.4;
+    mix-blend-mode: screen;
+  }
+
+  .plant-stamen {
+    fill: var(--bloom);
+    opacity: 0;
+    filter: drop-shadow(0 0 4px rgba(236, 143, 187, 0.6));
+  }
+
+  .plant-shard {
+    fill: rgba(168, 216, 216, 0.08);
+    stroke: var(--glass);
+    stroke-width: 0.35;
+  }
+
+  .plant-veins {
+    fill: none;
+    stroke: rgba(168, 216, 216, 0.4);
+    stroke-width: 0.3;
+  }
+
+  .seed-marker {
+    fill: rgba(168, 216, 216, 0.3);
+    stroke: rgba(168, 216, 216, 0.5);
+    stroke-width: 0.4;
+    cursor: pointer;
+    transition: fill 0.8s ease, r 1.2s ease;
+  }
+  .seed-marker:hover {
+    fill: rgba(236, 143, 187, 0.4);
+  }
+  .seed-marker.spent {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Latin labels that fade in upon full bloom */
+  .latin-tag {
+    font-family: 'Cormorant Garamond', Garamond, serif;
+    font-style: italic;
+    font-size: 9px;
+    fill: rgba(168, 216, 216, 0.5);
+    letter-spacing: 0.12em;
+    opacity: 0;
+    transition: opacity 4s ease;
+    pointer-events: none;
+  }
+  .latin-tag.revealed { opacity: 1; }
+
+  @keyframes shimmer {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.7; }
+  }
+
+  .plant-prism { animation: shimmer 14s ease-in-out infinite; }
+</style>
+</head>
+<body>
+
+<a class="return-ribbon" href="../../">← Hall of Reverie</a>
+
+<button class="wake-log-toggle" onclick="document.querySelector('.wake-log').classList.toggle('open')">📜 wake log</button>
+<aside class="wake-log">
+  <h3>The Botanist of Glass Gardens</h3>
+  <p style="font-style:italic;color:var(--hall-ink-dim)">"a glass leaf takes a year to unfurl"</p>
+  <dl>
+    <dt>title</dt><dd>the garden that asks for stillness</dd>
+    <dt>made</dt><dd>9 may 2026 · the small hours</dd>
+    <dt>essence</dt><dd>A crystalline terrarium where six glass plants grow only when you stop moving — patience is the seed, stillness is the water.</dd>
+    <dt>secrets</dt><dd>perfect stillness reveals Latin names, the longest bloom takes a full minute, frantic gestures wilt every plant at once, the seventh seed only appears after all others have flowered</dd>
+  </dl>
+</aside>
+
+<div class="label">
+  hortus vitreus
+  <span class="latin">— the glass garden —</span>
+</div>
+
+<div class="breath" id="breath">be still. the garden grows when you do not.</div>
+
+<div class="stillness-meter"><div class="fill" id="stillFill"></div></div>
+
+<div class="greenhouse">
+  <svg class="terrarium" id="terrarium" preserveAspectRatio="xMidYMid slice" viewBox="0 0 1600 900">
+    <defs>
+      <linearGradient id="prismGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%"   stop-color="#ffd9e6" stop-opacity="0.5"/>
+        <stop offset="22%"  stop-color="#ffe9c2" stop-opacity="0.45"/>
+        <stop offset="45%"  stop-color="#d6f4c2" stop-opacity="0.45"/>
+        <stop offset="68%"  stop-color="#bfe9f5" stop-opacity="0.5"/>
+        <stop offset="100%" stop-color="#d8c8f0" stop-opacity="0.55"/>
+      </linearGradient>
+      <radialGradient id="paneGlow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%"  stop-color="#a8d8d8" stop-opacity="0.18"/>
+        <stop offset="100%" stop-color="#a8d8d8" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="frost" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="0.4"/>
+      </filter>
+    </defs>
+
+    <!-- horizon ground line -->
+    <line x1="0" y1="780" x2="1600" y2="780" stroke="rgba(168,216,216,0.18)" stroke-width="0.6" stroke-dasharray="2 6"/>
+    <line x1="0" y1="800" x2="1600" y2="800" stroke="rgba(168,216,216,0.08)" stroke-width="0.4"/>
+
+    <g id="plantsLayer"></g>
+    <g id="seedsLayer"></g>
+  </svg>
+</div>
+
+<div class="panes"></div>
+<div class="vignette"></div>
+
+<script>
+/* ------------------------------------------------------------------
+   the garden that asks for stillness
+   — a generative crystalline terrarium —
+   plants grow on stillness alone. their seeds take time.
+------------------------------------------------------------------ */
+
+(() => {
+  const NS = 'http://www.w3.org/2000/svg';
+  const plantsLayer = document.getElementById('plantsLayer');
+  const seedsLayer  = document.getElementById('seedsLayer');
+  const stillFill   = document.getElementById('stillFill');
+  const breath      = document.getElementById('breath');
+
+  const SEED_DEFS = [
+    { x: 220,  y: 780, kind: 'fern',     duration: 38000, latin: 'Filix vitrea',         common: 'glass fern'        },
+    { x: 460,  y: 780, kind: 'lily',     duration: 46000, latin: 'Lilium refractum',     common: 'refraction lily'   },
+    { x: 760,  y: 780, kind: 'thistle',  duration: 31000, latin: 'Carduus prismaticus',  common: 'prism thistle'     },
+    { x: 1020, y: 780, kind: 'orchid',   duration: 62000, latin: 'Orchis stillitiae',    common: 'stillness orchid'  },
+    { x: 1240, y: 780, kind: 'fractal',  duration: 41000, latin: 'Dendron specularis',   common: 'mirror branch'     },
+    { x: 1430, y: 780, kind: 'bulb',     duration: 34000, latin: 'Bulbus crystallinus',  common: 'crystal bulb'      }
+  ];
+
+  const HIDDEN_SEVENTH = {
+    x: 800, y: 780, kind: 'crown', duration: 75000,
+    latin: 'Corona patientiae', common: 'the patience crown'
+  };
+
+  /* -------------- stillness tracking -------------- */
+  let stillness = 0;          // 0..1, slow rising while still
+  let lastMoveAt = performance.now();
+  let frantic = 0;            // accumulator of recent rapid motion
+  let lastPos = { x: -1, y: -1 };
+  let lastMoveTimestamp = 0;
+  let recentMoves = [];
+
+  window.addEventListener('mousemove', (e) => {
+    const now = performance.now();
+    if (lastPos.x >= 0) {
+      const d = Math.hypot(e.clientX - lastPos.x, e.clientY - lastPos.y);
+      const dt = now - lastMoveTimestamp;
+      const speed = dt > 0 ? d / dt : 0;          // px/ms
+      // keep last 1.5s of motion
+      recentMoves.push({ t: now, speed });
+      recentMoves = recentMoves.filter(m => now - m.t < 1500);
+      const avgSpeed = recentMoves.reduce((s,m)=>s+m.speed,0) / Math.max(1, recentMoves.length);
+      if (avgSpeed > 0.45) frantic = Math.min(1, frantic + 0.06);
+      else if (avgSpeed > 0.12) frantic = Math.max(0, frantic - 0.005);
+      lastMoveAt = now;
+    }
+    lastPos = { x: e.clientX, y: e.clientY };
+    lastMoveTimestamp = now;
+  }, { passive: true });
+
+  window.addEventListener('click', () => {
+    // a single click is fine. spam is not.
+    const now = performance.now();
+    recentMoves.push({ t: now, speed: 0.6 });
+  });
+
+  /* -------------- plant model -------------- */
+  // each plant has a "growth" 0..1 that advances only while the user is still
+  const plants = [];
+
+  function makePlant(seed) {
+    const g = document.createElementNS(NS, 'g');
+    g.setAttribute('class', 'plant');
+    plantsLayer.appendChild(g);
+
+    // Latin label — appears at full bloom only
+    const label = document.createElementNS(NS, 'text');
+    label.setAttribute('class', 'latin-tag');
+    label.setAttribute('x', seed.x);
+    label.setAttribute('y', 798);
+    label.setAttribute('text-anchor', 'middle');
+    label.textContent = seed.latin;
+    plantsLayer.appendChild(label);
+
+    return {
+      ...seed,
+      growth: 0,
+      el: g,
+      labelEl: label,
+      sprouted: false,
+      bloomed: false,
+      lastWilt: 0
+    };
+  }
+
+  /* -------------- generative drawing per kind -------------- */
+
+  // small deterministic RNG so each plant is consistent across redraws
+  function mulberry32(a) {
+    return function() {
+      var t = a += 0x6D2B79F5;
+      t = Math.imul(t ^ t >>> 15, t | 1);
+      t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  function clearChildren(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+  function drawPlant(p) {
+    clearChildren(p.el);
+    const g = p.growth;
+    if (g <= 0) return;
+    const rng = mulberry32(p.x * 7919 + p.kind.length);
+
+    switch(p.kind) {
+      case 'fern':     drawFern(p, g, rng); break;
+      case 'lily':     drawLily(p, g, rng); break;
+      case 'thistle':  drawThistle(p, g, rng); break;
+      case 'orchid':   drawOrchid(p, g, rng); break;
+      case 'fractal':  drawFractal(p, g, rng); break;
+      case 'bulb':     drawBulb(p, g, rng); break;
+      case 'crown':    drawCrown(p, g, rng); break;
+    }
+  }
+
+  function svgEl(name, attrs, parent) {
+    const e = document.createElementNS(NS, name);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+
+  /* --- glass fern: recursive frond, etched leaflets along stem --- */
+  function drawFern(p, g, rng) {
+    const stages = [
+      { t: 0.0, h: 0,   leaves: 0 },
+      { t: 1.0, h: 220, leaves: 22 }
+    ];
+    const h = stages[1].h * easeOutCubic(g);
+    const leafCount = Math.floor(stages[1].leaves * g);
+    // central frond (slight sway)
+    let d = `M ${p.x} ${p.y}`;
+    const segs = 14;
+    for (let i = 1; i <= segs; i++) {
+      const f = i / segs;
+      const sway = Math.sin(f * 3 + p.x) * 8 * f;
+      d += ` L ${p.x + sway} ${p.y - h * f}`;
+    }
+    svgEl('path', { d, class: 'plant-stem' }, p.el);
+
+    // leaflets
+    for (let i = 0; i < leafCount; i++) {
+      const f = (i + 1) / stages[1].leaves;
+      const ly = p.y - h * f;
+      const sway = Math.sin(f * 3 + p.x) * 8 * f;
+      const lx = p.x + sway;
+      const side = i % 2 === 0 ? 1 : -1;
+      const leafLen = 22 * (1 - f * 0.6) * easeOutCubic(Math.min(1, g * 1.4 - f));
+      if (leafLen <= 0) continue;
+      // leaflet = thin diamond shape, etched
+      const tipX = lx + side * leafLen;
+      const tipY = ly - leafLen * 0.18;
+      const midX = lx + side * leafLen * 0.55;
+      const midY = ly - leafLen * 0.42;
+      svgEl('path', {
+        d: `M ${lx} ${ly} Q ${midX} ${midY - 4} ${tipX} ${tipY} Q ${midX} ${midY + 2} ${lx} ${ly} Z`,
+        class: 'plant-glass'
+      }, p.el);
+      // central vein
+      svgEl('line', {
+        x1: lx, y1: ly, x2: tipX, y2: tipY, class: 'plant-veins'
+      }, p.el);
+    }
+    // tiny stamen at apex when nearly bloomed
+    if (g > 0.9) {
+      const apex = svgEl('circle', {
+        cx: p.x + Math.sin(3 + p.x) * 8,
+        cy: p.y - h, r: 1.6 + (g-0.9)*8, class: 'plant-stamen'
+      }, p.el);
+      apex.style.opacity = (g - 0.9) * 10;
+    }
+  }
+
+  /* --- refraction lily: hexagonal petals unfolding from a stem --- */
+  function drawLily(p, g, rng) {
+    const stemH = 200 * easeOutCubic(g);
+    svgEl('path', {
+      d: `M ${p.x} ${p.y} Q ${p.x + 6} ${p.y - stemH/2} ${p.x} ${p.y - stemH}`,
+      class: 'plant-stem'
+    }, p.el);
+
+    // bulb base
+    if (g > 0.05) {
+      svgEl('ellipse', {
+        cx: p.x, cy: p.y - 4, rx: 8 * g, ry: 4 * g, class: 'plant-glass'
+      }, p.el);
+    }
+
+    // petals open as g progresses past 0.5
+    const open = Math.max(0, (g - 0.45) / 0.55);
+    if (open > 0) {
+      const cx = p.x;
+      const cy = p.y - stemH;
+      const petals = 6;
+      const petalR = 36 * easeOutCubic(open);
+      for (let i = 0; i < petals; i++) {
+        const a = (i / petals) * Math.PI * 2 + Math.PI / 2;
+        const spread = open * 1.0;
+        const tipX = cx + Math.cos(a) * petalR * spread;
+        const tipY = cy + Math.sin(a) * petalR * spread;
+        const ax = cx + Math.cos(a + 0.3) * petalR * 0.5 * spread;
+        const ay = cy + Math.sin(a + 0.3) * petalR * 0.5 * spread;
+        const bx = cx + Math.cos(a - 0.3) * petalR * 0.5 * spread;
+        const by = cy + Math.sin(a - 0.3) * petalR * 0.5 * spread;
+        svgEl('path', {
+          d: `M ${cx} ${cy} L ${ax} ${ay} L ${tipX} ${tipY} L ${bx} ${by} Z`,
+          class: 'plant-prism'
+        }, p.el);
+        svgEl('path', {
+          d: `M ${cx} ${cy} L ${tipX} ${tipY}`,
+          class: 'plant-veins'
+        }, p.el);
+      }
+      // central stamen — the hot pink heart
+      const heart = svgEl('circle', {
+        cx, cy, r: 1.4 + open * 4, class: 'plant-stamen'
+      }, p.el);
+      heart.style.opacity = open;
+      // anthers
+      for (let i = 0; i < 6; i++) {
+        const a = (i / 6) * Math.PI * 2;
+        const ar = 8 * open;
+        const x = cx + Math.cos(a) * ar;
+        const y = cy + Math.sin(a) * ar;
+        const dot = svgEl('circle', { cx: x, cy: y, r: 0.9, class: 'plant-stamen' }, p.el);
+        dot.style.opacity = open * 0.85;
+      }
+    }
+  }
+
+  /* --- prism thistle: branching radial spikes --- */
+  function drawThistle(p, g, rng) {
+    const stemH = 150 * easeOutCubic(g);
+    svgEl('line', { x1: p.x, y1: p.y, x2: p.x, y2: p.y - stemH, class: 'plant-stem' }, p.el);
+
+    if (g > 0.3) {
+      const cx = p.x;
+      const cy = p.y - stemH;
+      const headR = 26 * easeOutCubic((g - 0.3) / 0.7);
+      // dense spikes
+      const spikes = 36;
+      for (let i = 0; i < spikes; i++) {
+        const a = (i / spikes) * Math.PI * 2;
+        const len = headR * (0.7 + rng() * 0.5);
+        svgEl('line', {
+          x1: cx, y1: cy,
+          x2: cx + Math.cos(a) * len,
+          y2: cy + Math.sin(a) * len,
+          class: 'plant-veins'
+        }, p.el);
+      }
+      // hexagonal central body
+      let hex = '';
+      for (let i = 0; i < 6; i++) {
+        const a = i / 6 * Math.PI * 2;
+        const x = cx + Math.cos(a) * headR * 0.45;
+        const y = cy + Math.sin(a) * headR * 0.45;
+        hex += (i ? 'L ' : 'M ') + x + ' ' + y + ' ';
+      }
+      hex += 'Z';
+      svgEl('path', { d: hex, class: 'plant-prism' }, p.el);
+
+      if (g > 0.85) {
+        const op = (g - 0.85) / 0.15;
+        const stm = svgEl('circle', { cx, cy, r: 2 + op * 3, class: 'plant-stamen' }, p.el);
+        stm.style.opacity = op;
+      }
+    }
+  }
+
+  /* --- stillness orchid: long, slow, bilateral wings --- */
+  function drawOrchid(p, g, rng) {
+    const stemH = 240 * easeOutCubic(g);
+    svgEl('path', {
+      d: `M ${p.x} ${p.y} Q ${p.x - 14} ${p.y - stemH * 0.55} ${p.x} ${p.y - stemH}`,
+      class: 'plant-stem'
+    }, p.el);
+
+    // multiple blossoms along stem, each opens at a different threshold
+    const blossomCount = 4;
+    for (let b = 0; b < blossomCount; b++) {
+      const f = (b + 1) / (blossomCount + 0.6);
+      const threshold = 0.35 + b * 0.16;
+      const open = Math.max(0, Math.min(1, (g - threshold) / 0.25));
+      if (open <= 0) continue;
+      const px = p.x + Math.sin(f * 3) * 8;
+      const py = p.y - stemH * f;
+      const r = 14 * easeOutCubic(open);
+      // 4 wings + 1 lip
+      const wings = [
+        [-1, -0.4], [1, -0.4], [-0.6, 0.6], [0.6, 0.6]
+      ];
+      wings.forEach(([wx, wy]) => {
+        const tipX = px + wx * r * 1.3;
+        const tipY = py + wy * r * 1.3;
+        svgEl('path', {
+          d: `M ${px} ${py} Q ${px + wx * r * 0.5} ${py + wy * r * 0.2} ${tipX} ${tipY} Q ${px + wx * r * 0.4} ${py + wy * r * 0.7} ${px} ${py} Z`,
+          class: 'plant-glass'
+        }, p.el);
+      });
+      // central labellum (pink lip)
+      const lip = svgEl('ellipse', {
+        cx: px, cy: py + r * 0.45, rx: r * 0.35, ry: r * 0.55,
+        class: 'plant-stamen'
+      }, p.el);
+      lip.style.opacity = open * 0.85;
+    }
+  }
+
+  /* --- fractal mirror branch: recursive subdivision --- */
+  function drawFractal(p, g, rng) {
+    const maxDepth = Math.floor(1 + g * 5.5);   // depth grows with stillness
+    function branch(x, y, angle, length, depth) {
+      if (depth <= 0 || length < 2) return;
+      const ex = x + Math.cos(angle) * length;
+      const ey = y + Math.sin(angle) * length;
+      svgEl('line', {
+        x1: x, y1: y, x2: ex, y2: ey,
+        stroke: 'rgba(168, 216, 216, ' + (0.25 + depth * 0.08) + ')',
+        'stroke-width': Math.max(0.3, depth * 0.4),
+        'stroke-linecap': 'round'
+      }, p.el);
+      // little glass diamond at endpoints when deep
+      if (depth <= 2) {
+        const r = 2.2;
+        svgEl('path', {
+          d: `M ${ex} ${ey - r} L ${ex + r} ${ey} L ${ex} ${ey + r} L ${ex - r} ${ey} Z`,
+          class: 'plant-glass'
+        }, p.el);
+      }
+      const spread = 0.5 + (1 - g) * 0.15;
+      branch(ex, ey, angle - spread, length * 0.72, depth - 1);
+      branch(ex, ey, angle + spread, length * 0.72, depth - 1);
+    }
+    branch(p.x, p.y, -Math.PI / 2, 80 + 30 * g, maxDepth);
+
+    if (g > 0.95) {
+      const op = (g - 0.95) / 0.05;
+      const stm = svgEl('circle', {
+        cx: p.x, cy: p.y - 80 - 30 * g, r: 2 + op * 2, class: 'plant-stamen'
+      }, p.el);
+      stm.style.opacity = op;
+    }
+  }
+
+  /* --- crystal bulb: voronoi-ish faceted bulb opening --- */
+  function drawBulb(p, g, rng) {
+    const stemH = 110 * easeOutCubic(g);
+    svgEl('line', { x1: p.x, y1: p.y, x2: p.x, y2: p.y - stemH, class: 'plant-stem' }, p.el);
+    const cx = p.x;
+    const cy = p.y - stemH - 30;
+    const r  = 30 * easeOutCubic(g);
+    if (r < 1) return;
+
+    // generate facet points around bulb
+    const facets = 12;
+    const pts = [];
+    for (let i = 0; i < facets; i++) {
+      const a = (i / facets) * Math.PI * 2;
+      const radius = r * (0.85 + rng() * 0.25);
+      pts.push([cx + Math.cos(a) * radius, cy + Math.sin(a) * radius]);
+    }
+
+    // outer hull
+    let d = '';
+    pts.forEach((pt, i) => { d += (i ? 'L ' : 'M ') + pt[0] + ' ' + pt[1] + ' '; });
+    d += 'Z';
+    svgEl('path', { d, class: 'plant-prism' }, p.el);
+
+    // internal facet lines (from center to each vertex)
+    pts.forEach(pt => {
+      svgEl('line', { x1: cx, y1: cy, x2: pt[0], y2: pt[1], class: 'plant-veins' }, p.el);
+    });
+
+    // splits open at top when fully grown
+    if (g > 0.8) {
+      const op = (g - 0.8) / 0.2;
+      const split = 8 * op;
+      svgEl('line', {
+        x1: cx - split, y1: cy - r, x2: cx - split * 2, y2: cy - r * 1.4,
+        class: 'plant-stem'
+      }, p.el);
+      svgEl('line', {
+        x1: cx + split, y1: cy - r, x2: cx + split * 2, y2: cy - r * 1.4,
+        class: 'plant-stem'
+      }, p.el);
+      // inner stamen
+      const stm = svgEl('circle', { cx, cy: cy - r * 0.2, r: 2 + op * 4, class: 'plant-stamen' }, p.el);
+      stm.style.opacity = op;
+    }
+  }
+
+  /* --- patience crown: the secret seventh, central, slow, regal --- */
+  function drawCrown(p, g, rng) {
+    const stemH = 280 * easeOutCubic(g);
+    svgEl('path', {
+      d: `M ${p.x} ${p.y} Q ${p.x + 5} ${p.y - stemH * 0.5} ${p.x} ${p.y - stemH}`,
+      class: 'plant-stem'
+    }, p.el);
+    const cx = p.x;
+    const cy = p.y - stemH;
+    if (g < 0.2) return;
+
+    const open = (g - 0.2) / 0.8;
+    const layers = 3;
+    for (let L = 0; L < layers; L++) {
+      const lf = (L + 1) / layers;
+      const r  = 40 + L * 22;
+      const spikes = 8 + L * 2;
+      for (let i = 0; i < spikes; i++) {
+        const a = (i / spikes) * Math.PI * 2 + L * 0.2;
+        const tipR = r * easeOutCubic(open);
+        const x = cx + Math.cos(a) * tipR;
+        const y = cy + Math.sin(a) * tipR * 0.6;
+        svgEl('path', {
+          d: `M ${cx} ${cy} L ${x - 4} ${y + 4} L ${x} ${y} L ${x + 4} ${y + 4} Z`,
+          class: 'plant-prism'
+        }, p.el);
+        svgEl('line', { x1: cx, y1: cy, x2: x, y2: y, class: 'plant-veins' }, p.el);
+      }
+    }
+    // grand stamen
+    if (g > 0.6) {
+      const op = (g - 0.6) / 0.4;
+      const stm = svgEl('circle', { cx, cy, r: 4 + op * 6, class: 'plant-stamen' }, p.el);
+      stm.style.opacity = op;
+    }
+  }
+
+  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
+  /* -------------- seeds: clickable starting points -------------- */
+  function makeSeed(s, idx) {
+    const c = svgEl('circle', {
+      cx: s.x, cy: s.y, r: 5,
+      class: 'seed-marker'
+    }, seedsLayer);
+    // pulsing ring
+    const ring = svgEl('circle', {
+      cx: s.x, cy: s.y, r: 8,
+      fill: 'none',
+      stroke: 'rgba(168,216,216,0.18)',
+      'stroke-width': 0.4
+    }, seedsLayer);
+    let phase = idx * 0.7;
+    setInterval(() => {
+      phase += 0.04;
+      const r = 8 + Math.sin(phase) * 3;
+      ring.setAttribute('r', r);
+      ring.setAttribute('stroke-opacity', 0.1 + (Math.sin(phase) + 1) * 0.06);
+    }, 60);
+
+    c.addEventListener('click', () => {
+      if (s.sprouted) return;
+      s.sprouted = true;
+      c.classList.add('spent');
+      ring.style.transition = 'opacity 1.6s ease';
+      ring.style.opacity = '0';
+      plants.push(makePlant(s));
+    });
+    s.seedEl = c;
+    s.ringEl = ring;
+  }
+
+  SEED_DEFS.forEach((s, i) => makeSeed(s, i));
+
+  /* -------------- the seventh seed (crown), revealed only after others bloom -------------- */
+  let seventhPlanted = false;
+  function tryRevealSeventh() {
+    if (seventhPlanted) return;
+    const allBloomed = plants.length >= 6 && plants.every(pl => pl.growth >= 0.95);
+    if (allBloomed) {
+      seventhPlanted = true;
+      const seed = { ...HIDDEN_SEVENTH, sprouted: true };
+      // gentle reveal
+      setTimeout(() => {
+        plants.push(makePlant(seed));
+      }, 1200);
+    }
+  }
+
+  /* -------------- main loop -------------- */
+  let last = performance.now();
+  let breathPhase = 0;
+  const breathLines = [
+    'be still. the garden grows when you do not.',
+    'a glass leaf takes a year to unfurl.',
+    'the stamen waits for stillness, not touch.',
+    'phototropism: the plants lean toward attention itself.',
+    'shards remember every motion. forgive them slowly.',
+    'rest your hand. the orchid is listening.',
+    'patience is the only water here.',
+    'click a seed. then do nothing.'
+  ];
+  function nextBreath() {
+    breath.classList.add('fading');
+    setTimeout(() => {
+      breathPhase = (breathPhase + 1) % breathLines.length;
+      breath.textContent = breathLines[breathPhase];
+      breath.classList.remove('fading');
+    }, 1700);
+  }
+  setInterval(nextBreath, 11000);
+
+  function tick(now) {
+    const dt = now - last;
+    last = now;
+
+    const sinceMove = now - lastMoveAt;
+    // stillness rises slowly when not moving, decays when moving
+    if (sinceMove > 600) {
+      stillness = Math.min(1, stillness + dt / 4500);
+    } else {
+      stillness = Math.max(0, stillness - dt / 1200);
+    }
+    // frantic decays naturally
+    frantic = Math.max(0, frantic - dt / 6000);
+
+    stillFill.style.width = (stillness * 100) + '%';
+
+    // each plant grows only proportional to stillness; wilts when frantic
+    for (const pl of plants) {
+      // base growth speed: 1 / duration ms = full growth per duration
+      // scaled by stillness (0..1) and dampened by frantic
+      const growSpeed = (dt / pl.duration) * (0.25 + stillness * 0.95);
+      const wiltAmount = frantic > 0.45 ? (frantic - 0.45) * (dt / 1500) : 0;
+      pl.growth = Math.max(0, Math.min(1, pl.growth + growSpeed - wiltAmount));
+      drawPlant(pl);
+
+      // reveal Latin name once fully bloomed AND the user has been still for 4s+
+      if (pl.growth >= 0.985 && sinceMove > 4000) {
+        pl.labelEl.classList.add('revealed');
+      } else if (sinceMove < 1000 && pl.growth < 0.999) {
+        pl.labelEl.classList.remove('revealed');
+      }
+    }
+
+    // visual feedback on seeds when frantic — they dim
+    SEED_DEFS.forEach(s => {
+      if (s.seedEl && !s.sprouted) {
+        s.seedEl.style.opacity = (1 - frantic * 0.7).toFixed(2);
+      }
+    });
+
+    tryRevealSeventh();
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  /* -------------- gentle pre-bloom: a drifting prismatic light -------------- */
+  // a slow sweeping pane of refraction across the greenhouse
+  const sweep = svgEl('rect', {
+    x: -400, y: 0, width: 400, height: 900,
+    fill: 'url(#paneGlow)',
+    opacity: '0.25'
+  }, plantsLayer);
+  let sweepX = -400;
+  setInterval(() => {
+    sweepX += 1.2;
+    if (sweepX > 1700) sweepX = -400;
+    sweep.setAttribute('x', sweepX);
+  }, 80);
+
+})();
+</script>
+</body>
+</html>

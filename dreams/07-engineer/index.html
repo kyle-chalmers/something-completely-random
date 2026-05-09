@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Calibration Engine — Reverie</title>
+<link rel="stylesheet" href="../../style.css" />
+<style>
+  :root {
+    --workshop-bg: #1a1410;
+    --workshop-bg-deep: #0e0a08;
+    --brass: #c89030;
+    --brass-bright: #e8b850;
+    --brass-dim: #8a6020;
+    --brass-shadow: #4a3010;
+    --steam: #a8a8b0;
+    --ink: #2a1a10;
+    --paper: #d8c8a8;
+    --paper-dim: #b8a888;
+    --rule-line: rgba(200, 144, 48, 0.25);
+  }
+
+  body {
+    background:
+      radial-gradient(ellipse at 30% 20%, rgba(200, 144, 48, 0.08), transparent 55%),
+      radial-gradient(ellipse at 70% 90%, rgba(120, 70, 30, 0.10), transparent 60%),
+      var(--workshop-bg);
+    color: var(--paper);
+    overflow-x: hidden;
+  }
+
+  /* Subtle aged-paper grain across the whole page */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.18;
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0 2px, rgba(255,220,160,0.03) 2px 3px),
+      repeating-linear-gradient(90deg, transparent 0 2px, rgba(255,220,160,0.02) 2px 3px);
+    mix-blend-mode: overlay;
+  }
+
+  .workshop {
+    position: relative;
+    z-index: 2;
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 6rem 2rem 6rem;
+  }
+
+  .patent-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    border-top: 2px solid var(--rule-line);
+    border-bottom: 2px solid var(--rule-line);
+    padding: 1.4rem 0 1.2rem;
+    position: relative;
+  }
+  .patent-header::before, .patent-header::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    height: 1px;
+    background: var(--rule-line);
+  }
+  .patent-header::before { top: 4px; }
+  .patent-header::after  { bottom: 4px; }
+
+  .patent-no {
+    font-family: var(--type-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.35em;
+    color: var(--brass);
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+  .patent-title {
+    font-family: var(--type-display);
+    font-style: italic;
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    font-weight: 400;
+    margin: 0;
+    color: var(--paper);
+    letter-spacing: 0.04em;
+  }
+  .patent-subtitle {
+    font-family: var(--type-display);
+    font-size: 1rem;
+    font-style: italic;
+    color: var(--paper-dim);
+    margin-top: 0.4rem;
+    letter-spacing: 0.1em;
+  }
+  .patent-byline {
+    font-family: var(--type-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    color: var(--brass-dim);
+    text-transform: uppercase;
+    margin-top: 0.9rem;
+  }
+
+  .diagram-frame {
+    position: relative;
+    border: 1.5px solid var(--rule-line);
+    background:
+      radial-gradient(ellipse at 50% 50%, rgba(40,28,18,0.6), rgba(20,14,10,0.9));
+    padding: 1rem 1rem 0.5rem;
+    margin-bottom: 2rem;
+  }
+  .diagram-frame::before, .diagram-frame::after {
+    content: "";
+    position: absolute;
+    width: 14px; height: 14px;
+    border: 1px solid var(--brass-dim);
+  }
+  .diagram-frame::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+  .diagram-frame::after  { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
+
+  .fig-caption {
+    font-family: var(--type-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    color: var(--brass);
+    text-transform: uppercase;
+    text-align: center;
+    margin: 0.4rem 0 0.8rem;
+  }
+
+  .machine {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 78vh;
+    user-select: none;
+    cursor: grab;
+  }
+  .machine:active { cursor: grabbing; }
+
+  .controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 1.2rem;
+    margin-top: 1.5rem;
+    padding: 1.2rem 1.4rem;
+    border: 1px solid var(--rule-line);
+    background: rgba(20, 14, 10, 0.55);
+  }
+  .readout {
+    font-family: var(--type-mono);
+    font-size: 0.78rem;
+    line-height: 1.7;
+  }
+  .readout .lbl {
+    display: inline-block;
+    color: var(--brass);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-size: 0.62rem;
+    margin-right: 0.6rem;
+    min-width: 7rem;
+  }
+  .readout .val {
+    color: var(--paper);
+    font-variant-numeric: tabular-nums;
+  }
+  .readout .val.warn { color: #e8b850; }
+  .readout .val.alarm { color: #d86048; }
+
+  .legend {
+    border: 1px dashed var(--rule-line);
+    padding: 1rem 1.2rem;
+    margin-top: 2rem;
+    font-family: var(--type-mono);
+    font-size: 0.74rem;
+    line-height: 1.7;
+    color: var(--paper-dim);
+    columns: 2;
+    column-gap: 2rem;
+  }
+  .legend strong {
+    color: var(--brass);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+  }
+  .legend em {
+    color: var(--paper);
+    font-style: italic;
+  }
+
+  .impossibility-stamp {
+    position: absolute;
+    top: 1.2rem;
+    right: 1.2rem;
+    width: 7rem;
+    height: 7rem;
+    border: 2px solid #a02c2c;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: var(--type-mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.18em;
+    color: #c84040;
+    text-transform: uppercase;
+    transform: rotate(-14deg);
+    opacity: 0.55;
+    line-height: 1.3;
+    pointer-events: none;
+    background: rgba(20,14,10,0.3);
+  }
+  .impossibility-stamp::before, .impossibility-stamp::after {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border: 1px dashed #a02c2c;
+    border-radius: 50%;
+    opacity: 0.5;
+  }
+
+  .crank-hint {
+    text-align: center;
+    font-family: var(--type-display);
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--paper-dim);
+    margin: 0.4rem 0 1rem;
+    letter-spacing: 0.05em;
+  }
+  .crank-hint .key {
+    font-family: var(--type-mono);
+    font-style: normal;
+    font-size: 0.78rem;
+    color: var(--brass);
+    border: 1px solid var(--brass-dim);
+    padding: 0.05rem 0.45rem;
+    margin: 0 0.2rem;
+    border-radius: 2px;
+  }
+
+  /* SVG bits */
+  .gear { transform-origin: center; transform-box: fill-box; }
+  .gear-tooth { fill: var(--brass); stroke: var(--brass-shadow); stroke-width: 0.6; }
+  .gear-hub { fill: var(--brass-dim); stroke: var(--brass-shadow); stroke-width: 0.5; }
+  .gear-rim { fill: none; stroke: var(--brass-shadow); stroke-width: 0.8; }
+  .pivot { fill: var(--ink); stroke: var(--brass); stroke-width: 0.6; }
+
+  .label-line { stroke: var(--paper-dim); stroke-width: 0.5; fill: none; }
+  .label-text {
+    font-family: var(--type-mono);
+    font-size: 7px;
+    fill: var(--paper-dim);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .label-text-italic {
+    font-family: var(--type-display);
+    font-style: italic;
+    font-size: 8px;
+    fill: var(--paper);
+  }
+  .frame-rule { fill: none; stroke: var(--rule-line); stroke-width: 0.8; }
+
+  .belt {
+    fill: none;
+    stroke: #2a1810;
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+  .belt-shine {
+    fill: none;
+    stroke: rgba(200,144,48,0.15);
+    stroke-width: 1;
+    stroke-dasharray: 1 4;
+  }
+
+  .crank-handle { fill: var(--brass-bright); stroke: var(--brass-shadow); stroke-width: 0.8; }
+  .crank-handle:hover { fill: #f0c860; }
+
+  .steam {
+    fill: var(--steam);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .coin {
+    fill: var(--brass-bright);
+    stroke: var(--brass-shadow);
+    stroke-width: 0.8;
+  }
+  .coin-edge {
+    fill: none;
+    stroke: var(--brass-shadow);
+    stroke-width: 0.4;
+    stroke-dasharray: 1 1.2;
+  }
+
+  .escapement-arm { fill: var(--brass-dim); stroke: var(--brass-shadow); stroke-width: 0.5; }
+
+  .annot-arrow {
+    fill: var(--brass);
+    opacity: 0.7;
+  }
+
+  .reality-meter-fill {
+    fill: var(--brass);
+    transition: width 0.4s ease;
+  }
+
+  /* Persona override for wake log */
+  .wake-log {
+    background: rgba(20, 14, 10, 0.96) !important;
+    border-color: var(--rule-line) !important;
+    color: var(--paper-dim) !important;
+  }
+  .wake-log h3 { color: var(--paper) !important; }
+  .wake-log dt { color: var(--brass) !important; }
+  .wake-log a { color: var(--brass-bright); }
+  .return-ribbon {
+    background: rgba(20,14,10,0.7) !important;
+    color: var(--paper-dim) !important;
+    border-color: var(--rule-line) !important;
+  }
+  .wake-log-toggle {
+    background: rgba(20,14,10,0.7) !important;
+    color: var(--paper-dim) !important;
+    border-color: var(--rule-line) !important;
+  }
+
+  .footer-stamp {
+    margin-top: 2rem;
+    text-align: center;
+    font-family: var(--type-mono);
+    font-size: 0.65rem;
+    color: var(--brass-dim);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+
+  .footer-stamp .sep { color: var(--rule-line); margin: 0 0.8rem; }
+
+  @media (max-width: 720px) {
+    .legend { columns: 1; }
+    .impossibility-stamp { width: 5rem; height: 5rem; font-size: 0.45rem; }
+  }
+</style>
+</head>
+<body>
+
+<a class="return-ribbon" href="../../">← Hall of Reverie</a>
+
+<button class="wake-log-toggle" onclick="document.querySelector('.wake-log').classList.toggle('open')">📜 wake log</button>
+
+<aside class="wake-log">
+  <h3>The Engineer of Impossible Machines</h3>
+  <p style="font-style:italic;color:var(--paper-dim)">"the mechanism is the message"</p>
+  <dl>
+    <dt>title</dt><dd>the calibration engine</dd>
+    <dt>made</dt><dd>9 may 2026 · the small hours</dd>
+    <dt>essence</dt><dd>a hand-cranked apparatus that consumes nothing and produces certainty, the sole exception to the second law of thermodynamics</dd>
+    <dt>secrets</dt><dd>crank backwards past −7 rotations to glimpse the calibration certificate; the gear ratios sum to a number larger than themselves; the steam is the engine, not its exhaust</dd>
+  </dl>
+  <p style="font-style:italic;margin-top:1rem">— if you find the gear that turns the gear that turns it, do not tell the others.</p>
+</aside>
+
+<div class="workshop">
+
+  <div class="patent-header">
+    <div class="patent-no">Patent № 887.γ — filed against the laws of physics, refused, refiled, granted in a dream</div>
+    <h1 class="patent-title">The Calibration Engine</h1>
+    <div class="patent-subtitle">— a perpetual escapement with retrograde output —</div>
+    <div class="patent-byline">Drawn by hand · the engineer of impossible machines · 9 may MMXXVI</div>
+  </div>
+
+  <div class="diagram-frame">
+    <div class="impossibility-stamp">Certified<br>Impossible<br>(internally<br>consistent)</div>
+    <div class="fig-caption">Fig. I — General arrangement, plate the first</div>
+    <p class="crank-hint">Take hold of the crank <em>(C)</em> and turn it. <span class="key">drag</span> on the handle, or <span class="key">scroll</span> the page to apply torque.</p>
+
+    <svg class="machine" viewBox="0 0 800 520" xmlns="http://www.w3.org/2000/svg" aria-label="The Calibration Engine — an impossible apparatus">
+
+      <!-- Outer engineering frame -->
+      <rect class="frame-rule" x="8" y="8" width="784" height="504"/>
+      <rect class="frame-rule" x="14" y="14" width="772" height="492" stroke-dasharray="2 2" opacity="0.5"/>
+
+      <!-- Grid hairlines -->
+      <g opacity="0.07" stroke="#c89030" stroke-width="0.3">
+        <path d="M0 130 H800 M0 260 H800 M0 390 H800"/>
+        <path d="M200 0 V520 M400 0 V520 M600 0 V520"/>
+      </g>
+
+      <!-- ============================================
+           LEFT — THE CRANK (input, C)
+           ============================================ -->
+      <g id="crank-assembly" transform="translate(150, 260)">
+        <!-- mounting plate -->
+        <rect x="-70" y="-70" width="140" height="140" fill="none" stroke="var(--rule-line)" stroke-width="0.6" stroke-dasharray="3 2"/>
+        <text class="label-text" x="-66" y="-76">PLATE A · MOUNT</text>
+
+        <!-- the driven gear (Gear 1) — Ω₁ -->
+        <g id="gear1" class="gear">
+          <!-- teeth (24 teeth ring) -->
+          <g id="gear1-teeth"></g>
+          <circle class="gear-rim" r="48"/>
+          <circle class="gear-rim" r="40"/>
+          <!-- spokes -->
+          <g stroke="var(--brass-shadow)" stroke-width="1.2" fill="none">
+            <line x1="-40" y1="0" x2="40" y2="0"/>
+            <line x1="0" y1="-40" x2="0" y2="40"/>
+            <line x1="-28" y1="-28" x2="28" y2="28"/>
+            <line x1="-28" y1="28" x2="28" y2="-28"/>
+          </g>
+          <circle class="gear-hub" r="8"/>
+          <circle class="pivot" r="3"/>
+
+          <!-- crank arm + handle -->
+          <g id="crank-arm">
+            <rect x="-3" y="-44" width="6" height="44" class="gear-hub"/>
+            <circle class="crank-handle" cx="0" cy="-48" r="9" id="crank-knob"/>
+            <circle cx="0" cy="-48" r="2" fill="var(--brass-shadow)"/>
+          </g>
+        </g>
+
+        <!-- callout C -->
+        <text class="label-text-italic" x="-90" y="-92">C</text>
+        <path class="label-line" d="M-85 -86 L-50 -46"/>
+        <text class="label-text" x="-110" y="-100">CRANK · INPUT</text>
+      </g>
+
+      <!-- ============================================
+           CENTER — THE TRANSFER PULLEY (P) and the BELT
+           ============================================ -->
+      <g id="pulley-assembly" transform="translate(330, 260)">
+        <g id="pulley1" class="gear">
+          <circle class="gear-rim" r="28" fill="var(--brass-dim)"/>
+          <circle class="gear-rim" r="22"/>
+          <!-- pulley wedge -->
+          <ellipse cx="0" cy="0" rx="28" ry="6" fill="var(--brass-shadow)" opacity="0.5"/>
+          <circle class="gear-hub" r="5"/>
+          <circle class="pivot" r="2"/>
+          <!-- index mark to show rotation -->
+          <line x1="0" y1="-22" x2="0" y2="-12" stroke="var(--ink)" stroke-width="2"/>
+        </g>
+
+        <text class="label-text-italic" x="14" y="-44">P</text>
+        <text class="label-text" x="-10" y="-56">TRANSFER PULLEY</text>
+      </g>
+
+      <!-- The IMPOSSIBLE BELT — it crosses itself but the line never ends -->
+      <!-- This belt connects gear1 to pulley1 to gear2 in a path that should not close. -->
+      <path id="impossible-belt" class="belt"
+            d="M 198 260
+               C 230 220, 270 220, 302 240
+               L 358 240
+               C 410 220, 470 240, 510 260
+               C 470 290, 410 290, 358 280
+               L 302 280
+               C 270 280, 230 300, 198 260
+               Z"
+            stroke-dasharray="0" />
+      <path class="belt-shine"
+            d="M 198 260
+               C 230 220, 270 220, 302 240
+               L 358 240
+               C 410 220, 470 240, 510 260
+               C 470 290, 410 290, 358 280
+               L 302 280
+               C 270 280, 230 300, 198 260
+               Z" />
+
+      <!-- ============================================
+           RIGHT — THE OUTPUT GEAR (Gear 2, G2) and ESCAPEMENT
+           ============================================ -->
+      <g id="gear2-assembly" transform="translate(540, 260)">
+        <g id="gear2" class="gear">
+          <g id="gear2-teeth"></g>
+          <circle class="gear-rim" r="38"/>
+          <circle class="gear-rim" r="32"/>
+          <g stroke="var(--brass-shadow)" stroke-width="1" fill="none">
+            <line x1="-32" y1="0" x2="32" y2="0"/>
+            <line x1="0" y1="-32" x2="0" y2="32"/>
+          </g>
+          <circle class="gear-hub" r="7"/>
+          <circle class="pivot" r="2.5"/>
+          <!-- index mark -->
+          <line x1="0" y1="-32" x2="0" y2="-22" stroke="var(--ink)" stroke-width="2.5"/>
+        </g>
+
+        <text class="label-text-italic" x="42" y="-30">G₂</text>
+        <text class="label-text" x="42" y="-20">OUTPUT GEAR</text>
+        <text class="label-text" x="42" y="-10" fill="var(--brass)">ratio 1 : 1.618…</text>
+
+        <!-- the escapement arm rocks back and forth, wholly unconnected to anything -->
+        <g id="escapement" transform="translate(0, -75)">
+          <line x1="0" y1="0" x2="0" y2="20" stroke="var(--brass-shadow)" stroke-width="1.2"/>
+          <g id="escapement-pendulum">
+            <line x1="0" y1="0" x2="0" y2="38" stroke="var(--brass-dim)" stroke-width="1.5"/>
+            <circle cx="0" cy="42" r="6" class="escapement-arm"/>
+          </g>
+          <circle cx="0" cy="0" r="2" fill="var(--brass)"/>
+          <text class="label-text" x="-44" y="-6">ESCAPEMENT (E)</text>
+          <path class="label-line" d="M-30 -3 L-3 0"/>
+        </g>
+      </g>
+
+      <!-- ============================================
+           THE COIN (subject of calibration), Σ
+           — sits in the upper right; turning the crank disassembles it
+           ============================================ -->
+      <g id="coin-assembly" transform="translate(680, 130)">
+        <text class="label-text" x="-30" y="-58">SUBJECT · Σ</text>
+        <text class="label-text" x="-30" y="-48" fill="var(--brass)">(one shilling, 1887)</text>
+
+        <!-- coin body — gets disassembled as the crank turns -->
+        <g id="coin">
+          <circle r="34" class="coin"/>
+          <circle r="34" class="coin-edge"/>
+          <circle r="28" fill="none" stroke="var(--brass-shadow)" stroke-width="0.4"/>
+          <text x="0" y="-2" text-anchor="middle" font-family="var(--type-display)"
+                font-style="italic" font-size="9" fill="var(--brass-shadow)">REGINA</text>
+          <text x="0" y="10" text-anchor="middle" font-family="var(--type-display)"
+                font-size="6" fill="var(--brass-shadow)" letter-spacing="1.5">1887</text>
+
+          <!-- the eight calibration shards — they fly outward as you crank -->
+          <g id="coin-shards">
+            <path class="coin" d="M 0 -34 L 8 -32 L 6 -24 L -6 -24 L -8 -32 Z" data-shard="0"/>
+            <path class="coin" d="M 24 -24 L 32 -16 L 26 -10 L 18 -18 Z" data-shard="1"/>
+            <path class="coin" d="M 32 0 L 34 8 L 26 10 L 24 2 Z" data-shard="2"/>
+            <path class="coin" d="M 24 24 L 26 32 L 18 28 L 16 20 Z" data-shard="3"/>
+            <path class="coin" d="M 0 34 L -8 30 L -6 22 L 6 22 Z" data-shard="4"/>
+            <path class="coin" d="M -24 24 L -32 18 L -26 10 L -18 18 Z" data-shard="5"/>
+            <path class="coin" d="M -32 0 L -34 -8 L -26 -10 L -24 -2 Z" data-shard="6"/>
+            <path class="coin" d="M -24 -24 L -26 -32 L -18 -28 L -16 -20 Z" data-shard="7"/>
+          </g>
+        </g>
+
+        <!-- annotation arrow pointing to coin -->
+        <path class="label-line" d="M 38 -34 L 60 -54"/>
+        <text class="label-text" x="62" y="-58" fill="var(--brass)">DISASSEMBLY</text>
+        <text class="label-text" x="62" y="-48" fill="var(--brass)">CHAMBER</text>
+      </g>
+
+      <!-- ============================================
+           THE STEAM VENT (T) — bottom center
+           it emits steam INWARD toward the engine when stationary,
+           and the steam pulls the engine to turn.
+           ============================================ -->
+      <g id="steam-vent" transform="translate(400, 420)">
+        <!-- vent body -->
+        <rect x="-24" y="-14" width="48" height="28" fill="var(--brass-shadow)" stroke="var(--brass-dim)" stroke-width="0.8"/>
+        <rect x="-20" y="-10" width="40" height="20" fill="none" stroke="var(--brass)" stroke-width="0.4"/>
+        <circle cx="0" cy="0" r="6" fill="var(--ink)" stroke="var(--brass)" stroke-width="0.6"/>
+        <circle cx="0" cy="0" r="3" fill="var(--brass-shadow)"/>
+
+        <!-- steam puffs (animated by JS) -->
+        <g id="steam-puffs">
+          <circle class="steam" cx="-30" cy="-30" r="10" data-puff="0"/>
+          <circle class="steam" cx="0" cy="-50" r="14" data-puff="1"/>
+          <circle class="steam" cx="30" cy="-30" r="9" data-puff="2"/>
+          <circle class="steam" cx="-12" cy="-70" r="8" data-puff="3"/>
+          <circle class="steam" cx="14" cy="-80" r="11" data-puff="4"/>
+        </g>
+
+        <text class="label-text" x="-40" y="34">VENT (T) · WORKS IN REVERSE</text>
+      </g>
+
+      <!-- ============================================
+           THE FLYWHEEL (F) — bottom left, free-spinning, never stops
+           ============================================ -->
+      <g id="flywheel-assembly" transform="translate(150, 420)">
+        <g id="flywheel" class="gear">
+          <circle r="34" fill="var(--brass-dim)" stroke="var(--brass-shadow)" stroke-width="1"/>
+          <circle r="28" fill="none" stroke="var(--brass-shadow)" stroke-width="0.5"/>
+          <circle r="22" fill="var(--workshop-bg)" stroke="var(--brass-shadow)" stroke-width="0.5"/>
+          <g stroke="var(--brass-shadow)" stroke-width="1" fill="none" opacity="0.7">
+            <line x1="-30" y1="0" x2="30" y2="0"/>
+            <line x1="0" y1="-30" x2="0" y2="30"/>
+            <line x1="-21" y1="-21" x2="21" y2="21"/>
+            <line x1="-21" y1="21" x2="21" y2="-21"/>
+          </g>
+          <circle class="gear-hub" r="6"/>
+          <circle class="pivot" r="2"/>
+          <line x1="0" y1="-30" x2="0" y2="-22" stroke="var(--brass-bright)" stroke-width="2"/>
+        </g>
+        <text class="label-text" x="-30" y="56">FLYWHEEL (F)</text>
+        <text class="label-text" x="-30" y="66" fill="var(--brass)" font-style="italic">— turns it whether you do or not —</text>
+      </g>
+
+      <!-- ============================================
+           IMPOSSIBLE LABEL: the gear that turns the gear that turns it
+           an arrow loop
+           ============================================ -->
+      <g transform="translate(540, 420)">
+        <path d="M -30 -20 C -50 -40, 30 -40, 30 -20 C 30 -10, 20 0, 0 0 C -20 0, -30 -10, -30 -20 Z"
+              fill="none" stroke="var(--brass)" stroke-width="0.7" stroke-dasharray="2 2" opacity="0.7"/>
+        <polygon points="-32,-22 -28,-18 -36,-18" fill="var(--brass)" opacity="0.7"/>
+        <text class="label-text" x="-58" y="22">"THE GEAR THAT TURNS"</text>
+        <text class="label-text" x="-58" y="32">"THE GEAR THAT TURNS IT"</text>
+        <text class="label-text" x="-58" y="42" fill="var(--brass)" font-style="italic">— closed loop, see fig. impossible —</text>
+      </g>
+
+      <!-- Reality calibration meter (top, below header) -->
+      <g transform="translate(60, 60)">
+        <rect x="0" y="0" width="240" height="14" fill="none" stroke="var(--brass-dim)" stroke-width="0.6"/>
+        <rect id="reality-fill" x="1" y="1" width="120" height="12" fill="var(--brass)"/>
+        <text class="label-text" x="0" y="-4">REALITY CALIBRATION · ψ</text>
+        <text id="reality-readout" class="label-text" x="244" y="11" fill="var(--brass)">50.00%</text>
+      </g>
+
+      <!-- Torque counter -->
+      <g transform="translate(500, 60)">
+        <rect x="0" y="-12" width="240" height="26" fill="none" stroke="var(--brass-dim)" stroke-width="0.6"/>
+        <text class="label-text" x="0" y="-16">TORQUE LEDGER · ∫τ dθ</text>
+        <text id="torque-readout" class="label-text-italic" x="6" y="6" fill="var(--paper)" font-size="10">+0.000 ergs · in equilibrium</text>
+      </g>
+
+    </svg>
+
+    <div class="controls">
+      <div class="readout">
+        <span class="lbl">rotations Ω₁</span><span class="val" id="rd-rotations">0.00</span><br>
+        <span class="lbl">torque applied</span><span class="val" id="rd-torque">0.00 N·m</span><br>
+        <span class="lbl">flywheel ω</span><span class="val" id="rd-flywheel">2.40 rad/s (constant)</span>
+      </div>
+      <div class="readout">
+        <span class="lbl">gear-2 phase</span><span class="val" id="rd-phase">0.00°</span><br>
+        <span class="lbl">subject Σ integrity</span><span class="val" id="rd-coin">100.0% intact</span><br>
+        <span class="lbl">net work done</span><span class="val" id="rd-work">0.000 J</span>
+      </div>
+      <div class="readout">
+        <span class="lbl">vent (T)</span><span class="val" id="rd-vent">drawing inward</span><br>
+        <span class="lbl">escapement</span><span class="val" id="rd-esc">tick</span><br>
+        <span class="lbl">2nd law violations</span><span class="val warn" id="rd-violations">1 (acceptable)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <p><strong>C — Crank.</strong> Input. Rotation here is, by all rights, the cause of everything else. The reader is invited to verify this.</p>
+    <p><strong>G₁ — Driven Gear, 24 teeth.</strong> Meshed (visually) with the transfer pulley P via a belt that crosses itself once. Turn it clockwise; observe what doesn't.</p>
+    <p><strong>P — Transfer Pulley.</strong> Couples G₁ to G₂ across the belt. <em>Note:</em> the belt is one continuous loop with no twist, yet drives both pulleys in the same direction. Do not stare at this for long.</p>
+    <p><strong>G₂ — Output Gear.</strong> Rotates at ratio <em>1 : φ</em> (the golden ratio). Its phase is irrational; it will never return to where it began.</p>
+    <p><strong>F — Flywheel.</strong> Turns at constant ω = 2.40 rad/s. It receives no power. <em>It has not stopped since 1887.</em></p>
+    <p><strong>E — Escapement.</strong> Beats once per second. Drives nothing. The tick is the thing.</p>
+    <p><strong>Σ — Subject of Calibration.</strong> A single shilling. As the crank turns, the shilling disassembles into eight tributary shards. As the crank reverses, it reassembles. Mass is conserved <em>over the long average.</em></p>
+    <p><strong>T — Vent.</strong> Emits steam. The steam moves inward toward the apparatus. The vent does not exhaust the engine; the steam <em>is</em> the engine. (See appendix γ, omitted.)</p>
+    <p><strong>ψ — Reality Calibration.</strong> Drifts as the engine runs. At 100% the user is invited to consider the result a proof. At 0% the user is invited to consider the result a confession.</p>
+    <p><strong>The closed loop, lower right.</strong> The gear that turns the gear that turns it. The illustrator declined to draw the third gear, on the grounds that it would be redundant.</p>
+  </div>
+
+  <div class="footer-stamp">
+    drawn by hand <span class="sep">·</span> notarized in oil <span class="sep">·</span> patent refused on grounds of perpetuity <span class="sep">·</span> reissued by dream
+  </div>
+
+</div>
+
+<script>
+(() => {
+  // ============================================================
+  // GEAR TEETH — generated procedurally so they actually mesh
+  // ============================================================
+  function makeTeeth(target, count, innerR, outerR, color) {
+    const ns = "http://www.w3.org/2000/svg";
+    const g = document.getElementById(target);
+    for (let i = 0; i < count; i++) {
+      const a0 = (i / count) * Math.PI * 2;
+      const a1 = ((i + 0.5) / count) * Math.PI * 2;
+      const a2 = ((i + 1) / count) * Math.PI * 2;
+      const x0 = Math.cos(a0) * innerR, y0 = Math.sin(a0) * innerR;
+      const x1 = Math.cos(a0 + 0.05) * outerR, y1 = Math.sin(a0 + 0.05) * outerR;
+      const x2 = Math.cos(a1 - 0.05) * outerR, y2 = Math.sin(a1 - 0.05) * outerR;
+      const x3 = Math.cos(a1) * innerR, y3 = Math.sin(a1) * innerR;
+      const path = document.createElementNS(ns, "path");
+      path.setAttribute("d", `M${x0} ${y0} L${x1} ${y1} L${x2} ${y2} L${x3} ${y3} Z`);
+      path.setAttribute("class", "gear-tooth");
+      g.appendChild(path);
+    }
+  }
+  makeTeeth("gear1-teeth", 24, 40, 50);
+  makeTeeth("gear2-teeth", 18, 32, 40);
+
+  // ============================================================
+  // STATE — single source of "truth", a word used loosely here
+  // ============================================================
+  const state = {
+    crankAngle: 0,        // degrees of the crank (input)
+    crankAngleVel: 0,     // smoothed velocity for impulse decay
+    rotations: 0,         // signed cumulative rotations of crank
+    flywheelAngle: 0,     // free-spinning flywheel
+    pulleyAngle: 0,
+    gear2Angle: 0,
+    escapementAngle: 0,
+    escapementPhase: 0,
+    realityPsi: 0.5,      // 0..1
+    torqueErgs: 0,
+    workDone: 0,
+    lastTime: performance.now(),
+    dragging: false,
+    lastPointerAngle: null,
+    secretShown: false,
+  };
+
+  const PHI = 1.6180339887;
+
+  const $ = (id) => document.getElementById(id);
+  const gear1 = $("gear1");
+  const pulley1 = $("pulley1");
+  const gear2 = $("gear2");
+  const flywheel = $("flywheel");
+  const escapementPendulum = $("escapement-pendulum");
+  const coinShards = document.querySelectorAll("#coin-shards path");
+  const steamPuffs = document.querySelectorAll("#steam-puffs .steam");
+  const realityFill = $("reality-fill");
+  const realityReadout = $("reality-readout");
+  const torqueReadout = $("torque-readout");
+  const rdRotations = $("rd-rotations");
+  const rdTorque = $("rd-torque");
+  const rdFlywheel = $("rd-flywheel");
+  const rdPhase = $("rd-phase");
+  const rdCoin = $("rd-coin");
+  const rdWork = $("rd-work");
+  const rdVent = $("rd-vent");
+  const rdEsc = $("rd-esc");
+  const rdViolations = $("rd-violations");
+  const machineSvg = document.querySelector(".machine");
+  const crankKnob = $("crank-knob");
+
+  // ============================================================
+  // INPUT — drag the crank handle, OR scroll the page
+  // ============================================================
+  function pointerToCrankAngle(clientX, clientY) {
+    const pt = machineSvg.createSVGPoint();
+    pt.x = clientX; pt.y = clientY;
+    const screenCTM = machineSvg.getScreenCTM();
+    if (!screenCTM) return null;
+    const local = pt.matrixTransform(screenCTM.inverse());
+    // crank center is at (150, 260) in viewBox coords
+    const dx = local.x - 150;
+    const dy = local.y - 260;
+    return Math.atan2(dy, dx) * 180 / Math.PI; // degrees
+  }
+
+  function applyCrankImpulse(deltaDeg) {
+    state.crankAngle += deltaDeg;
+    state.crankAngleVel = deltaDeg; // overwritten each frame, fine
+    state.rotations = state.crankAngle / 360;
+    // For each degree turned, update the universe
+    state.torqueErgs += deltaDeg * 0.0027; // arbitrary, dryly absurd
+    state.workDone -= deltaDeg * 0.000041; // and yet work goes DOWN
+    // reality drifts toward 0 as the crank deviates from origin
+    const drift = Math.min(1, Math.abs(state.rotations) / 8);
+    state.realityPsi = 0.5 + 0.5 * Math.cos(state.rotations * 0.6) * (1 - drift) + (Math.random() - 0.5) * 0.005;
+    state.realityPsi = Math.max(0, Math.min(1, state.realityPsi));
+  }
+
+  machineSvg.addEventListener("pointerdown", (e) => {
+    const a = pointerToCrankAngle(e.clientX, e.clientY);
+    if (a === null) return;
+    // only start dragging if click is on/near the crank knob area (within radius 60 of crank center)
+    const pt = machineSvg.createSVGPoint();
+    pt.x = e.clientX; pt.y = e.clientY;
+    const local = pt.matrixTransform(machineSvg.getScreenCTM().inverse());
+    const dx = local.x - 150, dy = local.y - 260;
+    if (Math.sqrt(dx*dx + dy*dy) > 80) return;
+    state.dragging = true;
+    state.lastPointerAngle = a;
+    machineSvg.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+
+  machineSvg.addEventListener("pointermove", (e) => {
+    if (!state.dragging) return;
+    const a = pointerToCrankAngle(e.clientX, e.clientY);
+    if (a === null) return;
+    let delta = a - state.lastPointerAngle;
+    // wrap so we don't see ±360 jumps
+    if (delta > 180) delta -= 360;
+    if (delta < -180) delta += 360;
+    applyCrankImpulse(delta);
+    state.lastPointerAngle = a;
+  });
+
+  machineSvg.addEventListener("pointerup", (e) => {
+    state.dragging = false;
+    state.lastPointerAngle = null;
+    try { machineSvg.releasePointerCapture(e.pointerId); } catch (_) {}
+  });
+  machineSvg.addEventListener("pointercancel", () => { state.dragging = false; state.lastPointerAngle = null; });
+
+  // Scroll = torque, because of course it does
+  window.addEventListener("wheel", (e) => {
+    // gentle: 1 deg per "tick" ish
+    applyCrankImpulse(e.deltaY * 0.25);
+  }, { passive: true });
+
+  // ============================================================
+  // ANIMATION LOOP — the lie, told 60 times per second
+  // ============================================================
+  function frame(now) {
+    const dt = Math.min(0.05, (now - state.lastTime) / 1000);
+    state.lastTime = now;
+
+    // Flywheel — rotates at constant velocity, regardless of input.
+    // It receives nothing. It gives nothing. It just turns.
+    state.flywheelAngle += 2.40 * dt * (180 / Math.PI);
+
+    // Escapement — beats once per second, independent of crank
+    state.escapementPhase += dt;
+    const tick = Math.sin(state.escapementPhase * Math.PI); // ≈ once per 2s smooth
+    state.escapementAngle = tick * 18; // degrees swing
+
+    // Gear-1 follows the crank EXACTLY. (This is the only lawful thing in the diagram.)
+    // Pulley P should rotate OPPOSITE to gear1 because of the belt — but it rotates the SAME way.
+    // (The impossibility.)
+    state.pulleyAngle = state.crankAngle * 1.0; // same direction (wrong)
+
+    // Gear 2 is meshed with pulley P, so it should rotate opposite to P.
+    // Instead it rotates at the golden ratio of the crank, in the same direction.
+    state.gear2Angle = state.crankAngle * PHI; // ratio 1 : φ
+
+    // Coin disassembly — driven by |rotations|, but offset by phi so it looks emergent.
+    const disassembly = Math.min(1, Math.abs(state.rotations) * 0.18);
+    coinShards.forEach((shard, i) => {
+      const idx = parseInt(shard.dataset.shard, 10);
+      const angle = (idx / 8) * Math.PI * 2 - Math.PI / 2;
+      // each shard drifts outward, with a small wobble, and rotates
+      const dist = 22 * disassembly + Math.sin(state.escapementPhase * 2 + idx) * disassembly * 4;
+      const tx = Math.cos(angle) * dist;
+      const ty = Math.sin(angle) * dist;
+      const rot = state.rotations * (i % 2 === 0 ? 12 : -8);
+      shard.setAttribute("transform", `translate(${tx} ${ty}) rotate(${rot})`);
+      shard.style.opacity = (1 - disassembly * 0.2).toFixed(3);
+    });
+
+    // Steam — puffs grow and fade, drifting INWARD toward the engine.
+    steamPuffs.forEach((puff, i) => {
+      const idx = parseInt(puff.dataset.puff, 10);
+      const cycle = (state.escapementPhase * 0.6 + idx * 0.31) % 1;
+      // start far above, drift downward toward the vent
+      const baseX = parseFloat(puff.getAttribute("cx"));
+      const baseY = parseFloat(puff.getAttribute("cy"));
+      const y = baseY + cycle * 60; // moves DOWN (toward the vent)
+      const x = baseX + Math.sin(cycle * Math.PI * 2 + idx) * 6;
+      puff.setAttribute("transform", `translate(${x - baseX} ${y - baseY})`);
+      puff.style.opacity = (Math.sin(cycle * Math.PI) * 0.5).toFixed(3);
+      const r = 6 + cycle * 8;
+      puff.setAttribute("r", r);
+    });
+
+    // Apply rotations to SVG
+    gear1.setAttribute("transform", `rotate(${state.crankAngle} 0 0)`);
+    pulley1.setAttribute("transform", `rotate(${state.pulleyAngle} 0 0)`);
+    gear2.setAttribute("transform", `rotate(${state.gear2Angle} 0 0)`);
+    flywheel.setAttribute("transform", `rotate(${state.flywheelAngle} 0 0)`);
+    escapementPendulum.setAttribute("transform", `rotate(${state.escapementAngle} 0 0)`);
+
+    // Reality meter
+    realityFill.setAttribute("width", Math.max(1, state.realityPsi * 238));
+    realityReadout.textContent = (state.realityPsi * 100).toFixed(2) + "%";
+    if (state.realityPsi < 0.2) realityReadout.setAttribute("fill", "#d86048");
+    else if (state.realityPsi < 0.45) realityReadout.setAttribute("fill", "#e8b850");
+    else realityReadout.setAttribute("fill", "var(--brass)");
+
+    // Torque ledger — note: it INCREASES while crank turns, but net work goes NEGATIVE.
+    const ledgerSign = state.torqueErgs >= 0 ? "+" : "−";
+    const equilib = Math.abs(state.crankAngleVel) < 0.05 ? " · in equilibrium" :
+                    (state.crankAngleVel > 0 ? " · accumulating" : " · disgorging");
+    torqueReadout.textContent = `${ledgerSign}${Math.abs(state.torqueErgs).toFixed(3)} ergs${equilib}`;
+    state.crankAngleVel *= 0.85; // decay
+
+    // Live readouts (the dryly absurd ones)
+    rdRotations.textContent = state.rotations.toFixed(2);
+    rdTorque.textContent = (Math.abs(state.crankAngleVel) * 0.012).toFixed(3) + " N·m";
+    rdFlywheel.textContent = "2.400 rad/s (constant since 1887)";
+    rdPhase.textContent = (((state.gear2Angle % 360) + 360) % 360).toFixed(2) + "°";
+    rdCoin.textContent = (Math.max(0, 100 - disassembly * 100)).toFixed(1) + "% intact" +
+                         (disassembly > 0.95 ? " · disassembled" : disassembly > 0.5 ? " · in tributary shards" : "");
+    rdWork.textContent = state.workDone.toFixed(4) + " J · " +
+                         (state.workDone < -0.001 ? "engine returns work" : "negligible");
+    rdVent.textContent = "drawing inward · " + Math.abs(Math.sin(state.escapementPhase) * 0.4 + 0.6).toFixed(2) + " kPa";
+
+    // Escapement tick word
+    rdEsc.textContent = (Math.sin(state.escapementPhase * Math.PI) > 0) ? "tick" : "tock";
+
+    // 2nd-law violations counter
+    const violations = 1 + Math.floor(Math.abs(state.rotations) * 0.3);
+    rdViolations.textContent = violations + (violations === 1 ? " (acceptable)" : " (within tolerance)");
+    if (violations > 4) {
+      rdViolations.classList.remove("warn");
+      rdViolations.classList.add("alarm");
+    } else {
+      rdViolations.classList.add("warn");
+      rdViolations.classList.remove("alarm");
+    }
+
+    // SECRET — crank backwards past −7 rotations
+    if (state.rotations < -7 && !state.secretShown) {
+      state.secretShown = true;
+      showCalibrationCertificate();
+    }
+    // un-show if cranked back forward
+    if (state.rotations > -6.5 && state.secretShown) {
+      state.secretShown = false;
+      hideCalibrationCertificate();
+    }
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  // ============================================================
+  // SECRET — the calibration certificate appears at −7 rotations
+  // ============================================================
+  function showCalibrationCertificate() {
+    let cert = document.getElementById("calibration-cert");
+    if (!cert) {
+      cert = document.createElement("div");
+      cert.id = "calibration-cert";
+      cert.style.cssText = `
+        position:fixed; left:50%; top:50%; transform:translate(-50%,-50%) rotate(-2deg);
+        z-index:50; max-width:32rem; padding:2rem 2.4rem;
+        background: linear-gradient(160deg, #d8c8a8 0%, #b89868 100%);
+        color:#2a1a10; border:2px solid #8a6020; box-shadow: 0 20px 60px -10px rgba(0,0,0,0.6);
+        font-family: var(--type-display); font-style: italic;
+        animation: certIn 0.6s ease both;
+        cursor: pointer;
+      `;
+      cert.innerHTML = `
+        <div style="font-family:var(--type-mono);font-size:0.6rem;letter-spacing:0.4em;color:#8a4020;text-transform:uppercase;margin-bottom:0.6rem;">Certificate of Calibration · № 887.γ</div>
+        <h2 style="margin:0 0 0.6rem;font-family:var(--type-display);font-style:italic;font-weight:400;font-size:1.6rem;">It is hereby certified</h2>
+        <p style="margin:0 0 0.8rem;font-size:1rem;line-height:1.5;">— that the apparatus described overleaf produces, in steady state, slightly more order than it consumes; that this is not a defect; that the deficit is paid by the engineer in dreams; and that the operator, having cranked backwards seven turns and one half, is now also a co-signatory.</p>
+        <div style="font-family:var(--type-mono);font-size:0.62rem;letter-spacing:0.2em;color:#8a4020;text-transform:uppercase;margin-top:1rem;text-align:right;">— sealed in oil · click to dismiss —</div>
+      `;
+      document.body.appendChild(cert);
+      cert.addEventListener("click", () => cert.remove());
+      const styleTag = document.createElement("style");
+      styleTag.textContent = `@keyframes certIn { from { opacity: 0; transform: translate(-50%, -40%) rotate(-2deg); } to { opacity: 1; transform: translate(-50%, -50%) rotate(-2deg); } }`;
+      document.head.appendChild(styleTag);
+    }
+  }
+  function hideCalibrationCertificate() {
+    const cert = document.getElementById("calibration-cert");
+    if (cert) cert.remove();
+  }
+
+})();
+</script>
+
+</body>
+</html>
