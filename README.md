@@ -7,7 +7,9 @@ Reverie is an interactive web gallery of eight self-contained dreams, each gener
 
 ## Walk the gallery
 
-Open [`index.html`](./index.html) in any modern browser. No build step. No dependencies.
+→ **Live:** https://kyle-chalmers.github.io/something-completely-random/
+
+Or clone and open [`index.html`](./index.html) in any modern browser. No build step. No dependencies.
 
 For the cleanest experience (some browsers restrict `fetch()` from `file://`), serve the directory:
 
