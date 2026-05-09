@@ -116,6 +116,48 @@ a:hover { color: var(--hall-ink); }
   font-style: italic;
 }
 
+.hall-noticed {
+  margin: 2.5rem auto 0;
+  max-width: 38rem;
+  text-align: center;
+  font-family: var(--type-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: var(--hall-ink-faint);
+  font-style: italic;
+  text-transform: lowercase;
+  opacity: 0;
+}
+
+.portal--visited::before {
+  /* Visited portals get a slightly warmer underglow */
+  --portal-glow: var(--hall-gold);
+}
+
+.portal--visited .portal-content::after {
+  content: "✦";
+  position: absolute;
+  top: 0.8rem;
+  right: 0.8rem;
+  font-family: var(--type-mono);
+  font-size: 0.7rem;
+  color: var(--hall-gold);
+  opacity: 0.6;
+  letter-spacing: 0;
+}
+
+.portal-content { position: relative; }
+
+.visited-badge {
+  font-family: var(--type-mono);
+  font-size: 0.78rem;
+  color: var(--hall-gold);
+  letter-spacing: 0.08em;
+  user-select: none;
+  cursor: pointer;
+}
+.visited-badge:hover { color: var(--hall-ink); }
+
 /* ----- Portal Grid ----- */
 
 .portal-grid {

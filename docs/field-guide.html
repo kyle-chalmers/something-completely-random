@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Field Guide to Secrets — Reverie</title>
+  <link rel="stylesheet" href="../style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+  <style>
+    .field {
+      max-width: 44rem;
+      margin: 0 auto;
+      padding: 5rem 2rem 8rem;
+      color: var(--hall-ink);
+    }
+    .field h1 {
+      font-family: var(--type-display);
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 300;
+      letter-spacing: 0.3em;
+      text-align: center;
+      text-transform: uppercase;
+      margin: 0 0 0.5rem;
+    }
+    .field-sub {
+      text-align: center;
+      font-style: italic;
+      color: var(--hall-ink-dim);
+      margin-bottom: 1rem;
+    }
+    .field-warn {
+      text-align: center;
+      font-family: var(--type-mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.15em;
+      color: var(--hall-gold);
+      margin-bottom: 4rem;
+      padding: 0.6rem 1rem;
+      border-top: 1px solid rgba(232,212,180,0.15);
+      border-bottom: 1px solid rgba(232,212,180,0.15);
+      max-width: 28rem;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .entry {
+      display: grid;
+      grid-template-columns: 6rem 1fr;
+      gap: 2rem;
+      margin-bottom: 3rem;
+      padding-bottom: 3rem;
+      border-bottom: 1px solid var(--hall-rule);
+    }
+    .entry:last-child { border-bottom: none; }
+    .entry-roman {
+      font-family: var(--type-mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.18em;
+      color: var(--hall-ink-faint);
+      text-transform: uppercase;
+      align-self: start;
+      padding-top: 0.4rem;
+    }
+    .entry h2 {
+      font-family: var(--type-display);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 1.35rem;
+      margin: 0 0 0.3rem;
+      color: var(--hall-ink);
+    }
+    .entry .door {
+      font-family: var(--type-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      color: var(--hall-gold);
+      text-transform: lowercase;
+      margin-bottom: 0.8rem;
+      display: inline-block;
+      padding-bottom: 1px;
+      border-bottom: 1px dotted currentColor;
+    }
+    .entry ul {
+      margin: 1rem 0 0;
+      padding-left: 1.2rem;
+      list-style: none;
+    }
+    .entry li {
+      position: relative;
+      padding-left: 1.5rem;
+      margin-bottom: 0.6rem;
+      color: var(--hall-ink-dim);
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+    .entry li::before {
+      content: "✦";
+      position: absolute;
+      left: 0;
+      top: 0.05em;
+      color: var(--hall-gold);
+      opacity: 0.6;
+      font-size: 0.8em;
+    }
+    .field-postscript {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--hall-rule);
+      font-style: italic;
+      color: var(--hall-ink-faint);
+      font-size: 0.95rem;
+      text-align: center;
+    }
+    .back {
+      display: block;
+      text-align: center;
+      margin-top: 3rem;
+      font-family: var(--type-mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      color: var(--hall-ink-dim);
+    }
+  </style>
+</head>
+<body>
+  <div class="starfield" aria-hidden="true"></div>
+
+  <main class="field">
+    <h1>Field Guide</h1>
+    <p class="field-sub">to the small things hidden in the eight</p>
+    <p class="field-warn">these are <em>clues</em>, not solutions. spoilers refuse to be spoilers.</p>
+
+    <article class="entry">
+      <div class="entry-roman">I · 01</div>
+      <div>
+        <h2>The Cartographer of Lost Maps</h2>
+        <a class="door" href="../dreams/01-cartographer/">step through the door →</a>
+        <ul>
+          <li>some cities will not name themselves until you have stood beside them for a moment.</li>
+          <li>the leviathan does not move; the isle does. count the islands twice.</li>
+          <li>the cartouche signs itself, but only when the page is already mostly drawn.</li>
+          <li>the south-east is faintly busier than the north-west. trust your candle.</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="entry">
+      <div class="entry-roman">II · 02</div>
+      <div>
+        <h2>The Surgeon of Wasted Hours</h2>
+        <a class="door" href="../dreams/02-surgeon/">step through the door →</a>
+        <ul>
+          <li>noon is a tendon. it should not be cut without intention.</li>
+          <li>23:58 has been listening for a flatline since the operation began.</li>
+          <li>two of the embedded moments are meetings. excise both, and a sentence becomes legible.</li>
+          <li>the keys <code>R</code> and <code>F</code> have been taught a different surgical vocabulary.</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="entry">
+      <div class="entry-roman">III · 03</div>
+      <div>
+        <h2>The Botanist of Glass Gardens</h2>
+        <a class="door" href="../dreams/03-botanist/">step through the door →</a>
+        <ul>
+          <li>some leaves take seventy seconds to unfurl. some take longer.</li>
+          <li>after every plant has bloomed, a seventh sometimes finds its own seed.</li>
+          <li>the garden does not punish movement; it simply does not reward it.</li>
+          <li>names are written in latin, but only after the plant is fully itself.</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="entry">
+      <div class="entry-roman">IV · 04</div>
+      <div>
+        <h2>The Architect of Forgotten Buildings</h2>
+        <a class="door" href="../dreams/04-architect/">step through the door →</a>
+        <ul>
+          <li>the cornice has a gallery behind it, accessible only by patience.</li>
+          <li>a paper bird waits on the demolition porch — for those who have not been hasty.</li>
+          <li>the room that held nothing is, in a sense, the most important room.</li>
+          <li>the architect's confession only surfaces after the visitor has already found something.</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="entry">
+      <div class="entry-roman">V · 05</div>
+      <div>
+        <h2>The Witch of Mirrors and Recursion</h2>
+        <a class="door" href="../dreams/05-witch/">step through the door →</a>
+        <ul>
+          <li>the witch wishes to be named. it takes four words from you.</li>
+          <li>the four rites are not for you to invent — they are for you to discover the right order.</li>
+          <li>the order is older than the rites: <em>kindle, name, bind, close</em>.</li>
+          <li>visitors who return a second time are remembered.</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="entry">
+      <div class="entry-roman">VI · 06</div>
+      <div>
+        <h2>The Astronomer of Silent Stars</h2>
+        <a class="door" href="../dreams/06-astronomer/">step through the door →</a>
+        <ul>
+          <li>at ninety seconds of stillness, one of the constellations names itself.</li>
+          <li>at one hundred and fifty, a planet drags a poem behind it.</li>
+          <li>the eyepiece is not a thing to look through. it is a thing to listen at.</li>
+          <li>the seed is the night. every visitor sees the same sky tonight.</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="entry">
+      <div class="entry-roman">VII · 07</div>
+      <div>
+        <h2>The Engineer of Impossible Machines</h2>
+        <a class="door" href="../dreams/07-engineer/">step through the door →</a>
+        <ul>
+          <li>the belt crosses itself but does not twist. ask why.</li>
+          <li>the flywheel turns at the same speed regardless of the input. ask what powers it.</li>
+          <li>seven full rotations counterclockwise have a side effect. eight is unnecessary.</li>
+          <li>a Certificate of Calibration is awarded to those who break the machine the right way.</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="entry">
+      <div class="entry-roman">VIII · 08</div>
+      <div>
+        <h2>The Weaver of Half-Remembered Songs</h2>
+        <a class="door" href="../dreams/08-weaver/">step through the door →</a>
+        <ul>
+          <li>color is pitch. you have been singing while you wove.</li>
+          <li>seven distinct threads in a single breath gets a hum back.</li>
+          <li><code>r</code> rings the whole cloth at once. <code>c</code> folds it away.</li>
+          <li>a long, slow stroke settles below the audible into something quieter.</li>
+        </ul>
+      </div>
+    </article>
+
+    <p class="field-postscript">
+      a clue is a courtesy. the dreamers will tell you nothing. their wake logs, however, are honest.
+    </p>
+
+    <a class="back" href="../">← back to the hall of reverie</a>
+  </main>
+</body>
+</html>

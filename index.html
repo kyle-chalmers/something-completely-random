@@ -24,6 +24,7 @@
         <br /><br />
         Step through any door. They have not slept since.
       </p>
+      <p class="hall-noticed" id="hall-noticed" aria-live="polite"></p>
     </header>
 
     <section class="portal-grid" aria-label="Eight dream portals">
@@ -162,6 +163,7 @@
       <span>
         <a href="./docs/manifesto.html">manifesto</a> ·
         <a href="./docs/personas.html">the eight</a> ·
+        <a href="./docs/field-guide.html">field guide</a> ·
         <a href="./docs/wake-log.html">wake log</a> ·
         <a href="./docs/how-this-was-made.html">how this was made</a> ·
         <a href="https://github.com/kyle-chalmers/something-completely-random">source</a>
@@ -428,6 +430,107 @@
       if (document.hidden) audioCtx?.suspend();
       else audioCtx?.resume();
     });
+
+    // ============ Visited tracking ============
+    // localStorage stores which dreams the visitor has stepped into. The
+    // hall draws a small mark on visited portals — and a small count of
+    // dreams seen. Cleared by the user via long-press on the count.
+    const STORAGE_KEY = "reverie:visited";
+    function loadVisited() {
+      try { return new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]")); }
+      catch { return new Set(); }
+    }
+    function saveVisited(set) {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...set])); } catch {}
+    }
+    function markVisited() {
+      const visited = loadVisited();
+      PORTALS.forEach(portal => {
+        const id = (portal.getAttribute("href") || "").match(/dreams\/([^/]+)/)?.[1];
+        if (!id) return;
+        if (visited.has(id)) {
+          portal.classList.add("portal--visited");
+        }
+      });
+      // Small count badge in the footer
+      const footer = document.querySelector(".hall-footer");
+      if (footer && visited.size > 0) {
+        let badge = footer.querySelector(".visited-badge");
+        if (!badge) {
+          badge = document.createElement("span");
+          badge.className = "visited-badge";
+          badge.title = "long-press to forget what you have seen";
+          footer.querySelector("span").appendChild(badge);
+        }
+        badge.textContent = ` · ${visited.size} of 8 dreams visited`;
+        // Long-press to clear
+        let pressTimer = null;
+        const startPress = () => { pressTimer = setTimeout(() => {
+          if (confirm("Forget the dreams you have seen?")) {
+            localStorage.removeItem(STORAGE_KEY);
+            location.reload();
+          }
+        }, 800); };
+        const cancelPress = () => { clearTimeout(pressTimer); };
+        badge.addEventListener("mousedown", startPress);
+        badge.addEventListener("touchstart", startPress);
+        badge.addEventListener("mouseup", cancelPress);
+        badge.addEventListener("mouseleave", cancelPress);
+        badge.addEventListener("touchend", cancelPress);
+      }
+    }
+    // Mark a portal as visited when the visitor clicks into it (so the
+    // mark survives the back-button trip)
+    PORTALS.forEach(portal => {
+      portal.addEventListener("click", () => {
+        const id = (portal.getAttribute("href") || "").match(/dreams\/([^/]+)/)?.[1];
+        if (!id) return;
+        const visited = loadVisited();
+        visited.add(id);
+        saveVisited(visited);
+      });
+    });
+    markVisited();
+
+    // ============ "What the gallery noticed tonight" ============
+    // A rotating, lightly-varying line shown beneath the prelude — a small
+    // sense that the gallery is awake. Picks a deterministic line based on
+    // the day, so a visitor sees the same line all day but a new one
+    // tomorrow.
+    (function noticed() {
+      const lines = [
+        "the cartographer's candle is unattended.",
+        "the surgeon has finished his rounds.",
+        "the botanist's fern was three leaves taller this morning.",
+        "the architect left a measurement in pencil on the wall behind the chimney.",
+        "the witch has rearranged the mirrors again.",
+        "the astronomer is patient. she has been patient for some time.",
+        "the engineer's flywheel has not stopped since 1887.",
+        "the loom hums faintly. nobody has touched it.",
+        "tonight the gallery dreamed of being a library, and lost interest.",
+        "tonight the gallery counted its visitors and sighed contentedly.",
+        "one of the dreams is missing a number. the others have not noticed.",
+        "the marginalia in room IV has shifted by one centimetre, west.",
+        "the prelude was written by the orchestrator, who is also asleep now.",
+        "all eight doors are real. you have been told this before.",
+      ];
+      const today = new Date();
+      const seed = today.getFullYear() * 1000 + today.getMonth() * 32 + today.getDate();
+      const visited = loadVisited();
+      // After visiting all 8: special line
+      const line = visited.size >= 8
+        ? "the dreamers know you have walked the gallery. they have left a small mark in the corner."
+        : lines[seed % lines.length];
+      const el = document.getElementById("hall-noticed");
+      if (el) {
+        el.textContent = `tonight: ${line}`;
+        el.style.opacity = "0";
+        setTimeout(() => {
+          el.style.transition = "opacity 1800ms cubic-bezier(0.22,1,0.36,1)";
+          el.style.opacity = "1";
+        }, 1200);
+      }
+    })();
   </script>
 </body>
 </html>
