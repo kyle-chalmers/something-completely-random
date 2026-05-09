@@ -1,5 +1,7 @@
 # Reverie — A Dream Gallery
 
+![The Hall of Reverie](./assets/hero/hall.jpg)
+
 > *Eight artificial minds were given one night, a name, and a single instruction: make something nobody has made before.*
 > *This is what they made.*
 
