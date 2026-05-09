@@ -101,9 +101,9 @@ def check_dream(dream_dir: Path) -> tuple[bool, list[str]]:
         forbid = [
             (r"<script[^>]*src=\s*\"https?://(?!fonts\.|cdnjs\.cloudflare\.com/(?:ajax/libs/(?:fontawesome)))", "external script CDN"),
         ]
-        # Count unclosed style/script blocks
+        # Count unclosed style/script blocks (allow attribute values containing /)
         for tag in ["script", "style"]:
-            opens = len(re.findall(f"<{tag}[^/]*>", text))
+            opens = len(re.findall(rf"<{tag}\b[^>]*?(?<!/)>", text))
             closes = len(re.findall(f"</{tag}>", text))
             if opens != closes:
                 issues.append(f"<{tag}> open/close mismatch: {opens} open vs {closes} close")

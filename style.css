@@ -379,6 +379,138 @@ a:hover { color: var(--hall-ink); }
   .portal-grid { gap: 1rem; }
 }
 
+/* ----- Hall affordances (help, drone) ----- */
+
+.hall-help-btn,
+.hall-drone-btn {
+  position: fixed;
+  bottom: 1.2rem;
+  z-index: 10001;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.5);
+  color: rgba(232,226,212,0.7);
+  border: 1px solid rgba(232,226,212,0.15);
+  font-family: var(--type-mono);
+  font-size: 1rem;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: color var(--t-fast) var(--ease),
+              border-color var(--t-fast) var(--ease),
+              transform var(--t-fast) var(--ease);
+}
+
+.hall-help-btn { right: 1.2rem; }
+.hall-drone-btn { right: 4.2rem; }
+
+.hall-help-btn:hover,
+.hall-drone-btn:hover {
+  color: var(--hall-ink);
+  border-color: var(--hall-gold);
+  transform: scale(1.08);
+}
+
+.hall-drone-btn.on {
+  color: var(--hall-gold);
+  border-color: var(--hall-gold);
+  box-shadow: 0 0 12px rgba(200,155,60,0.3);
+  animation: drone-pulse 4s ease-in-out infinite;
+}
+
+@keyframes drone-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(200,155,60,0.25); }
+  50%      { box-shadow: 0 0 16px rgba(200,155,60,0.5); }
+}
+
+.hall-help {
+  position: fixed;
+  right: 1.2rem;
+  bottom: 4.2rem;
+  z-index: 10000;
+  width: min(22rem, calc(100vw - 2.4rem));
+  background: rgba(7,8,13,0.95);
+  border: 1px solid rgba(232,226,212,0.15);
+  padding: 1.2rem 1.4rem 1.4rem;
+  font-family: var(--type-mono);
+  font-size: 0.78rem;
+  color: var(--hall-ink-dim);
+  backdrop-filter: blur(8px);
+  line-height: 1.6;
+  animation: fadeUp 320ms var(--ease);
+}
+
+.hall-help[hidden] { display: none; }
+
+.hall-help h3 {
+  font-family: var(--type-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+  color: var(--hall-ink);
+  margin: 0 0 0.6rem;
+}
+
+.hall-help dl {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  gap: 0.3rem 0.8rem;
+  margin: 0;
+}
+.hall-help dt {
+  color: var(--hall-gold);
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.hall-help dd { margin: 0; color: var(--hall-ink); }
+
+.hall-help-foot {
+  margin: 0.9rem 0 0;
+  padding-top: 0.7rem;
+  border-top: 1px solid rgba(232,226,212,0.1);
+  font-size: 0.72rem;
+  color: var(--hall-ink-faint);
+  letter-spacing: 0.05em;
+}
+.hall-help-foot code {
+  background: rgba(232,212,180,0.1);
+  padding: 0.05em 0.4em;
+  color: var(--hall-gold);
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(0.5rem); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Improve focus styles for keyboard nav */
+.portal:focus-visible {
+  outline: none;
+  border-color: var(--hall-gold);
+  box-shadow: 0 0 0 1px var(--hall-gold), 0 8px 40px -8px rgba(200,155,60,0.4);
+  transform: translateY(-4px);
+}
+.portal:focus-visible::after { opacity: 1; }
+.portal:focus-visible::before { opacity: 0.85; }
+
+/* ----- Mobile pass ----- */
+
+@media (max-width: 540px) {
+  .hall { padding: 2rem 1rem 5rem; }
+  .hall-header { padding: 2rem 0 3rem; }
+  .hall-title { letter-spacing: 0.12em; font-size: clamp(2rem, 14vw, 3rem); }
+  .hall-subtitle { font-size: 1rem; }
+  .hall-prelude { font-size: 1rem; padding: 0 0.5rem; }
+  :root { --portal-h: 18rem; }
+  .portal-grid { gap: 0.8rem; }
+  .hall-footer { font-size: 0.7rem; }
+  .hall-help-btn { right: 0.8rem; bottom: 4.5rem; }
+  .hall-drone-btn { right: 0.8rem; bottom: 1rem; }
+  .hall-help { right: 0.5rem; bottom: 8rem; }
+}
+
 /* ----- Reduced motion ----- */
 
 @media (prefers-reduced-motion: reduce) {

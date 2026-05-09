@@ -167,6 +167,23 @@
         <a href="https://github.com/kyle-chalmers/something-completely-random">source</a>
       </span>
     </footer>
+
+    <button class="hall-help-btn" type="button" aria-label="show keyboard shortcuts" title="keyboard shortcuts (?)">?</button>
+    <button class="hall-drone-btn" type="button" aria-label="toggle ambient drone" title="ambient · ⌘.">∿</button>
+
+    <aside class="hall-help" hidden>
+      <h3>shortcuts</h3>
+      <dl>
+        <dt>1–8</dt><dd>enter that dream</dd>
+        <dt>r</dt><dd>enter a random dream</dd>
+        <dt>← → ↑ ↓</dt><dd>move focus through portals</dd>
+        <dt>enter</dt><dd>step into the focused portal</dd>
+        <dt>m</dt><dd>toggle ambient drone</dd>
+        <dt>?</dt><dd>show this</dd>
+        <dt>esc</dt><dd>close this</dd>
+      </dl>
+      <p class="hall-help-foot">inside a dream: <code>[</code> previous · <code>]</code> next · <code>h</code> back to hall</p>
+    </aside>
   </main>
 
   <script>
@@ -215,6 +232,202 @@
         });
       })
       .catch(() => { /* fallback titles already applied */ });
+
+    // ============ Keyboard navigation ============
+    const PORTALS = Array.from(document.querySelectorAll(".portal"));
+    const helpAside = document.querySelector(".hall-help");
+    const helpBtn = document.querySelector(".hall-help-btn");
+
+    function focusPortal(idx) {
+      idx = ((idx % PORTALS.length) + PORTALS.length) % PORTALS.length;
+      PORTALS[idx]?.focus();
+    }
+
+    function enterPortalIndex(i) {
+      const p = PORTALS[i];
+      if (p) location.href = p.href;
+    }
+
+    function toggleHelp(force) {
+      const willOpen = force !== undefined ? force : helpAside.hasAttribute("hidden");
+      if (willOpen) helpAside.removeAttribute("hidden");
+      else helpAside.setAttribute("hidden", "");
+    }
+
+    helpBtn?.addEventListener("click", () => toggleHelp());
+
+    document.addEventListener("keydown", (e) => {
+      // Don't hijack typing
+      const t = e.target;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+      const k = e.key;
+      // 1-8: jump to that dream
+      if (/^[1-8]$/.test(k)) {
+        e.preventDefault();
+        enterPortalIndex(parseInt(k, 10) - 1);
+        return;
+      }
+      // R: random dream
+      if (k === "r" || k === "R") {
+        e.preventDefault();
+        enterPortalIndex(Math.floor(Math.random() * PORTALS.length));
+        return;
+      }
+      // ?: toggle shortcut help
+      if (k === "?") {
+        e.preventDefault();
+        toggleHelp();
+        return;
+      }
+      // Escape: close help
+      if (k === "Escape") {
+        toggleHelp(false);
+        return;
+      }
+      // M: toggle drone
+      if (k === "m" || k === "M") {
+        e.preventDefault();
+        toggleDrone();
+        return;
+      }
+      // Arrow keys: move focus through portals
+      const focused = document.activeElement;
+      const fi = PORTALS.indexOf(focused);
+      if (fi < 0 && (k === "ArrowRight" || k === "ArrowDown" || k === "ArrowLeft" || k === "ArrowUp")) {
+        e.preventDefault();
+        focusPortal(0);
+        return;
+      }
+      if (fi >= 0) {
+        if (k === "ArrowRight" || k === "ArrowDown") { e.preventDefault(); focusPortal(fi + 1); }
+        else if (k === "ArrowLeft" || k === "ArrowUp") { e.preventDefault(); focusPortal(fi - 1); }
+      }
+    });
+
+    // Make portals tabbable (they're <a> already, but reset focus styles)
+    PORTALS.forEach((p, i) => p.setAttribute("data-index", i));
+
+    // ============ Title reveal ============
+    (function revealTitle() {
+      const title = document.querySelector(".hall-title");
+      if (!title || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const text = title.textContent.trim();
+      title.textContent = "";
+      title.style.minHeight = "1.1em";
+      [...text].forEach((ch, i) => {
+        const span = document.createElement("span");
+        span.textContent = ch;
+        span.style.display = "inline-block";
+        span.style.opacity = "0";
+        span.style.transform = "translateY(0.2em)";
+        span.style.transition = `opacity 800ms ${i * 80}ms cubic-bezier(0.22,1,0.36,1), transform 800ms ${i * 80}ms cubic-bezier(0.22,1,0.36,1)`;
+        title.appendChild(span);
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          span.style.opacity = "1";
+          span.style.transform = "translateY(0)";
+        }));
+      });
+    })();
+
+    // ============ Ambient drone (Web Audio) ============
+    let audioCtx = null;
+    let droneNodes = null;
+    function startDrone() {
+      if (droneNodes) return;
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const ctx = audioCtx;
+      const master = ctx.createGain();
+      master.gain.value = 0;
+      master.connect(ctx.destination);
+
+      // Three slowly-detuning sine voices on a low chord (D2, A2, F3) — spacious open fifth + minor third
+      const freqs = [73.42, 110.00, 174.61];
+      const oscs = freqs.map((f, i) => {
+        const o = ctx.createOscillator();
+        o.type = "sine";
+        o.frequency.value = f;
+        const g = ctx.createGain();
+        g.gain.value = 0.16;
+        // Slow LFO on detune for breathing
+        const lfo = ctx.createOscillator();
+        lfo.frequency.value = 0.06 + i * 0.013;
+        const lfoGain = ctx.createGain();
+        lfoGain.gain.value = 4 + i * 2;
+        lfo.connect(lfoGain).connect(o.detune);
+        lfo.start();
+        o.connect(g).connect(master);
+        o.start();
+        return { o, g, lfo };
+      });
+
+      // High shimmer voice: triangle, very quiet, modulated
+      const shim = ctx.createOscillator();
+      shim.type = "triangle";
+      shim.frequency.value = 698.46; // F5
+      const shimG = ctx.createGain();
+      shimG.gain.value = 0.018;
+      const shimLFO = ctx.createOscillator();
+      shimLFO.frequency.value = 0.07;
+      const shimLFOG = ctx.createGain();
+      shimLFOG.gain.value = 0.014;
+      shimLFO.connect(shimLFOG).connect(shimG.gain);
+      shimLFO.start();
+      shim.connect(shimG).connect(master);
+      shim.start();
+
+      // Soft lowpass to mellow out
+      const lp = ctx.createBiquadFilter();
+      lp.type = "lowpass";
+      lp.frequency.value = 600;
+      lp.Q.value = 0.6;
+      master.disconnect();
+      master.connect(lp).connect(ctx.destination);
+
+      // Fade in
+      const t = ctx.currentTime;
+      master.gain.setValueAtTime(0, t);
+      master.gain.linearRampToValueAtTime(0.5, t + 4);
+
+      droneNodes = { master, oscs, shim, lp };
+    }
+    function stopDrone() {
+      if (!droneNodes) return;
+      const { master } = droneNodes;
+      const t = audioCtx.currentTime;
+      master.gain.cancelScheduledValues(t);
+      master.gain.setValueAtTime(master.gain.value, t);
+      master.gain.linearRampToValueAtTime(0, t + 1.5);
+      // Schedule actual stop after fade
+      setTimeout(() => {
+        try {
+          droneNodes.oscs.forEach(({ o, lfo }) => { o.stop(); lfo.stop(); });
+          droneNodes.shim.stop();
+        } catch {}
+        droneNodes = null;
+      }, 1700);
+    }
+    function toggleDrone() {
+      const btn = document.querySelector(".hall-drone-btn");
+      if (droneNodes) {
+        stopDrone();
+        btn?.classList.remove("on");
+      } else {
+        // Resume context if suspended (browser autoplay policy)
+        if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+        startDrone();
+        btn?.classList.add("on");
+      }
+    }
+    document.querySelector(".hall-drone-btn")?.addEventListener("click", toggleDrone);
+
+    // Pause drone when tab hidden, resume when visible
+    document.addEventListener("visibilitychange", () => {
+      if (!droneNodes) return;
+      if (document.hidden) audioCtx?.suspend();
+      else audioCtx?.resume();
+    });
   </script>
 </body>
 </html>
